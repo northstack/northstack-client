@@ -1,0 +1,24 @@
+{
+    "name": "pagely/northstack-client",
+    "description": "Commands for serverless environment management",
+    "type": "library",
+    "license": "GPL3",
+    "bin": [
+        "bin/northstack"
+    ],
+    "autoload": {
+        "psr-4": {
+            "Pagely\\NorthstackClient\\": "src/"
+        }
+    },
+    "require": {
+        "php": "^7.1",
+        "rdlowrey/auryn": "^1.4",
+        "duncan3dc/console": "^0.4.1",
+        "guzzlehttp/guzzle": "^6.3",
+        "vlucas/phpdotenv": "^2.4",
+        "monolog/monolog": "^1.21",
+        "namshi/cuzzle": "^2.0",
+        "ramsey/uuid": "^3.5"
+    }
+}
