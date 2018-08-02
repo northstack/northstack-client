@@ -1,5 +1,5 @@
 <?php
-namespace Pagely\NorthstackClient\Client;
+namespace NorthStack\NorthStackClient\Client;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\HandlerStack;
@@ -12,15 +12,15 @@ use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
 use Namshi\Cuzzle\Middleware\CurlFormatterMiddleware;
-use Pagely\NorthstackClient\OauthToken;
-use Pagely\NorthstackClient\RequestChain;
+use NorthStack\NorthStackClient\OauthToken;
+use NorthStack\NorthStackClient\RequestChain;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LoggerInterface;
 
 /**
  * Class GuzzleTrait
- * @package Pagely\NorthstackClient\Client
+ * @package NorthStack\NorthStackClient\Client
  * @property string apiName
  */
 trait GuzzleTrait

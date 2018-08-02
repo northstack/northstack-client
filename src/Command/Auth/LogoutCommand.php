@@ -1,10 +1,10 @@
 <?php
-namespace Pagely\NorthstackClient\Command\Auth;
+namespace NorthStack\NorthStackClient\Command\Auth;
 
-use Pagely\NorthstackClient\Command\Command;
+use NorthStack\NorthStackClient\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Pagely\NorthstackClient\OauthToken;
+use NorthStack\NorthStackClient\OauthToken;
 
 class LogoutCommand extends Command
 {

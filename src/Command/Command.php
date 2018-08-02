@@ -1,5 +1,5 @@
 <?php
-namespace Pagely\NorthstackClient\Command;
+namespace NorthStack\NorthStackClient\Command;
 
 class Command extends \duncan3dc\Console\Command
 {

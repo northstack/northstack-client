@@ -1,7 +1,7 @@
 <?php
-namespace Pagely\NorthstackClient;
+namespace NorthStack\NorthStackClient;
 
-use Pagely\NorthstackClient\API\AuthApi;
+use NorthStack\NorthStackClient\API\AuthApi;
 
 class OauthHelper
 {

@@ -1,11 +1,11 @@
 <?php
-namespace Pagely\NorthstackClient\Command;
+namespace NorthStack\NorthStackClient\Command;
 
-use Pagely\NorthstackClient\API\AuthApi;
+use NorthStack\NorthStackClient\API\AuthApi;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Pagely\NorthstackClient\OauthToken;
+use NorthStack\NorthStackClient\OauthToken;
 
 trait OauthCommandTrait
 {

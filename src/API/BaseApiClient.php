@@ -1,9 +1,9 @@
 <?php
 
-namespace Pagely\NorthstackClient\API;
+namespace NorthStack\NorthStackClient\API;
 
-use Pagely\NorthstackClient\Client\GuzzleTrait;
-use Pagely\NorthstackClient\RequestChain;
+use NorthStack\NorthStackClient\Client\GuzzleTrait;
+use NorthStack\NorthStackClient\RequestChain;
 use Psr\Log\LoggerInterface;
 
 class BaseApiClient

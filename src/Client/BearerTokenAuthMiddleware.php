@@ -1,7 +1,7 @@
 <?php
-namespace Pagely\NorthstackClient\Client;
+namespace NorthStack\NorthStackClient\Client;
 
-use Pagely\NorthstackClient\OauthToken;
+use NorthStack\NorthStackClient\OauthToken;
 use Psr\Http\Message\RequestInterface;
 
 class BearerTokenAuthMiddleware

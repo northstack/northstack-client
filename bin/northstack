@@ -10,8 +10,8 @@ if (file_exists(dirname(__DIR__).'/vendor/autoload.php')){
 
 use duncan3dc\Console\Application;
 use Auryn\Injector;
-use Pagely\NorthstackClient\Command\Loader;
-use Pagely\NorthstackClient\Helper;
+use NorthStack\NorthStackClient\Command\Loader;
+use NorthStack\NorthStackClient\Helper;
 
 $application = new Application();
 $injector = new Injector();
@@ -22,6 +22,6 @@ $helper->configureInjector($injector);
 
 
 $loader = new Loader($injector, $application);
-$loader->loadCommands(dirname(__DIR__).'/src/Command', 'Pagely\\NorthstackClient\\Command');
+$loader->loadCommands(dirname(__DIR__).'/src/Command', 'NorthStack\\NorthStackClient\\Command');
 
 $application->run();

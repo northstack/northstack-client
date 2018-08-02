@@ -1,5 +1,5 @@
 <?php
-namespace Pagely\NorthstackClient\Command;
+namespace NorthStack\NorthStackClient\Command;
 
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Console\Application;

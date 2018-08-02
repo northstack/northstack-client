@@ -1,5 +1,5 @@
 # northstack-client
-PHP Library to access the Pagely Northstack APIs
+PHP Library to access the NorthStack NorthStack APIs
 
 *Note that PHP 7.1+ is required*
 
@@ -22,7 +22,7 @@ composer install
 
 This will save a login token to `~/.northstacklogin`. The login will be good for 14 hours.  After that you will need to login again.
 This file will automatically be read by all other commands and used for authorization
-to the Pagely API.
+to the NorthStack API.
 
 You may also use your API keys to log in using the `auth:client-login` command.
 

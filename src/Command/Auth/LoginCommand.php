@@ -1,15 +1,15 @@
 <?php
-namespace Pagely\NorthstackClient\Command\Auth;
+namespace NorthStack\NorthStackClient\Command\Auth;
 
-use Pagely\NorthstackClient\Command\Command;
+use NorthStack\NorthStackClient\Command\Command;
 use GuzzleHttp\Exception\BadResponseException;
-use Pagely\NorthstackClient\API\AuthApi;
+use NorthStack\NorthStackClient\API\AuthApi;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use Pagely\NorthstackClient\OauthToken;
+use NorthStack\NorthStackClient\OauthToken;
 use Symfony\Component\Console\Question\Question;
 
 class LoginCommand extends Command

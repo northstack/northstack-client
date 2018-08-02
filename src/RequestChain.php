@@ -1,6 +1,6 @@
 <?php
 
-namespace Pagely\NorthstackClient;
+namespace NorthStack\NorthStackClient;
 
 class RequestChain
 {

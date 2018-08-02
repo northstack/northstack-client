@@ -1,5 +1,5 @@
 <?php
-namespace Pagely\NorthstackClient\API;
+namespace NorthStack\NorthStackClient\API;
 
 class AuthApi extends BaseApiClient
 {

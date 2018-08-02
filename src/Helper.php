@@ -1,12 +1,12 @@
 <?php
-namespace Pagely\NorthstackClient;
+namespace NorthStack\NorthStackClient;
 
 use Auryn\Injector;
 use Dotenv\Dotenv;
 use Dotenv\Exception\InvalidPathException;
 use Monolog\Logger;
 use Monolog\Handler\NullHandler;
-use Pagely\NorthstackClient\API\AuthApi;
+use NorthStack\NorthStackClient\API\AuthApi;
 
 
 class Helper
