@@ -13,6 +13,7 @@
     },
     "require": {
         "php": "^7.1",
+        "ext-json": "*",
         "rdlowrey/auryn": "^1.4",
         "duncan3dc/console": "^0.4.1",
         "guzzlehttp/guzzle": "^6.3",

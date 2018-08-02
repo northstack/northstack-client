@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "31b809635e2067e9df61b94b4a32396f",
+    "content-hash": "147a4d5f9ac4d75fa60af4e84ceffce6",
     "packages": [
         {
             "name": "duncan3dc/console",
@@ -1251,7 +1251,8 @@
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
-        "php": "^7.1"
+        "php": "^7.1",
+        "ext-json": "*"
     },
     "platform-dev": []
 }
