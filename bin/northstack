@@ -1,0 +1,27 @@
+#!/usr/bin/env php
+<?php
+if (file_exists(dirname(__DIR__).'/vendor/autoload.php')){
+    require dirname(__DIR__).'/vendor/autoload.php';
+} elseif (file_exists(dirname(__DIR__,3).'/autoload.php')){
+    require dirname(__DIR__,3).'/autoload.php';
+} else {
+    exit("Can't find autoload\n");
+}
+
+use duncan3dc\Console\Application;
+use Auryn\Injector;
+use NorthStack\NorthStackClient\Command\Loader;
+use NorthStack\NorthStackClient\Helper;
+
+$application = new Application();
+$injector = new Injector();
+$helper = new Helper();
+
+$helper->loadConfig(dirname(__DIR__));
+$helper->configureInjector($injector);
+
+
+$loader = new Loader($injector, $application);
+$loader->loadCommands(dirname(__DIR__).'/src/Command', 'NorthStack\\NorthStackClient\\Command');
+
+$application->run();
