@@ -50,10 +50,10 @@ class SignupCommand extends Command
         $question = (new Question('Password'))->setHidden(true);
         $password = $helper->ask($input, $output, $question);
 
-        $question = new Question('Name');
+        $question = new Question('Owner Name');
         $name = $helper->ask($input, $output, $question);
 
-        $question = new Question('Email');
+        $question = new Question('Owner Email');
         $email = $helper->ask($input, $output, $question);
 
         try {
