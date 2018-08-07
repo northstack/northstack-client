@@ -23,10 +23,10 @@ class OrgsClient extends BaseApiClient
             '/orgs/signup',
             [
                 'json' => [
-                    'organization' => $organizationName,
+                    'name' => $organizationName,
                     'username' => $username,
                     'password' => $password,
-                    'name' => $name,
+                    'personName' => $name,
                     'email' => $email
                 ],
             ]
