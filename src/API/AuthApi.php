@@ -5,11 +5,11 @@ class AuthApi extends BaseApiClient
 {
     protected $apiName = 'auth';
 
-    public function login($username, $password, $mfa = null, array $scope = [])
+    public function login($username, $password, $mfa = null, array $scope = [], $clientId = 'org')
     {
         $data = [
             'form_params' => [
-                'client_id' => 3,
+                'client_id' => $clientId,
                 'username' => $username,
                 'password' => $password,
                 'grant_type' => 'password',

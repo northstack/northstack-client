@@ -18,7 +18,7 @@ class LoginCommand extends Command
 
     public function __construct(AuthApi $api)
     {
-        parent::__construct('auth:login');
+        parent::__construct('org:login');
         $this->api = $api;
     }
 
@@ -46,13 +46,14 @@ class LoginCommand extends Command
         $helper = $this->getHelper('question');
         $password = $helper->ask($input, $output, $question);
 
-        $question = new Question('MFA: ');
-        $question->setHidden(true);
-
-        $mfa = $helper->ask($input, $output, $question);
-
         try {
-            $r = $this->api->login($input->getArgument('username'), $password, $mfa, $input->getOption('scope'));
+            $r = $this->api->login(
+                $input->getArgument('username'),
+                $password,
+                null,
+                $input->getOption('scope'),
+                'org'
+            );
         } catch (BadResponseException $e) {
             $output->writeln('<error>Invalid Login</error>');
             $output->writeln($e->getResponse()->getBody()->getContents());
