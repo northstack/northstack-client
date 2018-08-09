@@ -5,7 +5,6 @@ namespace NorthStack\NorthStackClient\Command\Sapp;
 
 use GuzzleHttp\Exception\ClientException;
 use NorthStack\NorthStackClient\API\AuthApi;
-use NorthStack\NorthStackClient\API\Orgs\OrgsClient;
 use NorthStack\NorthStackClient\API\Sapp\SappClient;
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
@@ -13,7 +12,6 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\Question;
 
 class CreateCommand extends Command
 {
@@ -46,6 +44,16 @@ class CreateCommand extends Command
         $this->addOauthOptions();
     }
 
+    protected function mkDirIfNotExists($path) {
+        if (
+            !file_exists($path) &&
+            !mkdir($concurrentDirectory = $path) && !is_dir($concurrentDirectory)
+        ) {
+            throw new \RuntimeException(sprintf('Directory "%s" was not created',
+                $concurrentDirectory));
+        }
+    }
+
     public function execute(InputInterface $input, OutputInterface $output)
     {
         if ($output->isDebug())
@@ -54,7 +62,7 @@ class CreateCommand extends Command
         }
 
         $args = $input->getArguments();
-        $domains = $input->getOption('domain') ?
+        $domains = $input->getOption('altdomain') ?
             json_encode($input->getOption('altdomain')) :
             null;
         $config = $input->getOption('config');
@@ -73,10 +81,32 @@ class CreateCommand extends Command
         } catch (ClientException $e) {
             $output->writeln('<error>App Create Failed</error>');
             $output->writeln($e->getResponse()->getBody()->getContents());
-            return;
         }
 
         $data = json_decode($r->getBody()->getContents());
         $output->writeln(json_encode($data, JSON_PRETTY_PRINT));
+
+        // create folder structure
+        $cwd = getcwd();
+        $this->mkDirIfNotExists("{$cwd}/northstack");
+
+        $nsdir = $cwd.'/northstack';
+        if (!file_exists("{$nsdir}/account.json")) {
+            touch("{$nsdir}/account.json");
+        }
+
+        $this->mkDirIfNotExists("{$nsdir}/apps");
+
+        $appPath = "{$nsdir}/apps/{$args['name']}";
+        if (file_exists($appPath)) {
+            $output->writeln("Folder for app {$args['name']} already exists at {$nsdir}/apps/{$args['name']}");
+        } else {
+            $this->mkDirIfNotExists($appPath);
+            $this->mkDirIfNotExists("{$appPath}/config");
+            $this->mkDirIfNotExists("{$appPath}/development");
+            $this->mkDirIfNotExists("{$appPath}/development/config");
+            $this->mkDirIfNotExists("{$appPath}/development/app");
+            $this->mkDirIfNotExists("{$appPath}/development/logs");
+        }
     }
 }
