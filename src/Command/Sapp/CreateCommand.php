@@ -38,6 +38,7 @@ class CreateCommand extends Command
             ->addArgument('environment', InputArgument::REQUIRED, 'Environment (prod, test, dev)')
             ->addArgument('cluster', InputArgument::REQUIRED, 'Cluster name')
             ->addArgument('primaryDomain', InputArgument::REQUIRED, 'Primary Domain')
+            ->addArgument('baseFolder', InputArgument::REQUIRED, 'Folder to create/install to', '.')
             ->addOption('altdomain', 'd', InputOption::VALUE_IS_ARRAY|InputOption::VALUE_REQUIRED, 'Extra domains')
             ->addOption('config', 'c', InputOption::VALUE_REQUIRED, 'JSON blob of configuration')
             ;
@@ -92,7 +93,7 @@ class CreateCommand extends Command
 
         $nsdir = $cwd.'/northstack';
         if (!file_exists("{$nsdir}/account.json")) {
-            touch("{$nsdir}/account.json");
+            file_put_contents("{$nsdir}/account.json", json_encode(['orgId' => $args['orgId']], JSON_PRETTY_PRINT));
         }
 
         $this->mkDirIfNotExists("{$nsdir}/apps");
@@ -103,10 +104,11 @@ class CreateCommand extends Command
         } else {
             $this->mkDirIfNotExists($appPath);
             $this->mkDirIfNotExists("{$appPath}/config");
-            $this->mkDirIfNotExists("{$appPath}/development");
-            $this->mkDirIfNotExists("{$appPath}/development/config");
-            $this->mkDirIfNotExists("{$appPath}/development/app");
-            $this->mkDirIfNotExists("{$appPath}/development/logs");
+            $this->mkDirIfNotExists("{$appPath}/config/dev");
+            $this->mkDirIfNotExists("{$appPath}/config/prod");
+            $this->mkDirIfNotExists("{$appPath}/config/test");
+            $this->mkDirIfNotExists("{$appPath}/app");
+            $this->mkDirIfNotExists("{$appPath}/logs");
         }
     }
 }
