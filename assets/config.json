@@ -1,0 +1,5 @@
+{
+  "app-type": "wordpress",
+  "layout": "standard",
+  "shared-paths": ["wp-content/uploads", "wp-content/cache"]
+}

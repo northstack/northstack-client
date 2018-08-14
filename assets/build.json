@@ -1,0 +1,5 @@
+{
+  "image": "wordpress-php",
+  "build-type": "builder",
+  "wordpress": "^4.8"
+}

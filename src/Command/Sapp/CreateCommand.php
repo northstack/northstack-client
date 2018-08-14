@@ -73,7 +73,6 @@ class CreateCommand extends Command
                 $this->token->token,
                 $args['name'],
                 $args['orgId'],
-                $args['environment'],
                 $args['cluster'],
                 $args['primaryDomain'],
                 $domains,
@@ -88,19 +87,21 @@ class CreateCommand extends Command
         $output->writeln(json_encode($data, JSON_PRETTY_PRINT));
 
         // create folder structure
-        $cwd = getcwd();
-        $this->mkDirIfNotExists("{$cwd}/northstack");
+        $baseFolder = $input->getArgument('baseFolder');
+        if ($baseFolder === '.') {
+            $baseFolder = getcwd();
+        } elseif (!file_exists($baseFolder)) {
+            $this->mkDirIfNotExists($baseFolder);
+        }
 
-        $nsdir = $cwd.'/northstack';
+        $nsdir = $baseFolder;
         if (!file_exists("{$nsdir}/account.json")) {
             file_put_contents("{$nsdir}/account.json", json_encode(['orgId' => $args['orgId']], JSON_PRETTY_PRINT));
         }
 
-        $this->mkDirIfNotExists("{$nsdir}/apps");
-
-        $appPath = "{$nsdir}/apps/{$args['name']}";
+        $appPath = "{$nsdir}/{$args['name']}";
         if (file_exists($appPath)) {
-            $output->writeln("Folder for app {$args['name']} already exists at {$nsdir}/apps/{$args['name']}");
+            $output->writeln("Folder for app {$args['name']} already exists at {$nsdir}/{$args['name']}");
         } else {
             $this->mkDirIfNotExists($appPath);
             $this->mkDirIfNotExists("{$appPath}/config");
@@ -109,6 +110,11 @@ class CreateCommand extends Command
             $this->mkDirIfNotExists("{$appPath}/config/test");
             $this->mkDirIfNotExists("{$appPath}/app");
             $this->mkDirIfNotExists("{$appPath}/logs");
+
+            $assetPath = dirname(__DIR__, 3).'/assets';
+            copy("{$assetPath}/config.json", "{$appPath}/config/config.json");
+            copy("{$assetPath}/build.json", "{$appPath}/config/build.json");
+            copy("{$assetPath}/domains.json", "{$appPath}/config/domains.json");
         }
     }
 }
