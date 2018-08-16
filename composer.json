@@ -22,6 +22,6 @@
         "namshi/cuzzle": "^2.0",
         "ramsey/uuid": "^3.5",
         "colinodell/json5": "^1.0",
-        "alchemy/zippy": "^0.4.9"
+        "eloquent/enumeration": "^5.1"
     }
 }

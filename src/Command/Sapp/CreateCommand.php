@@ -101,9 +101,9 @@ class CreateCommand extends Command
         $this->mkDirIfNotExists("{$appPath}/config/dev");
         file_put_contents("{$appPath}/config/dev/config.json", json_encode(['environment' => 'development', 'auth-type' => 'standard']));
         $this->mkDirIfNotExists("{$appPath}/config/prod");
-        file_put_contents("{$appPath}/config/dev/config.json", json_encode(['environment' => 'production']));
+        file_put_contents("{$appPath}/config/prod/config.json", json_encode(['environment' => 'production']));
         $this->mkDirIfNotExists("{$appPath}/config/test");
-        file_put_contents("{$appPath}/config/dev/config.json", json_encode(['environment' => 'testing', 'auth-type' => 'standard']));
+        file_put_contents("{$appPath}/config/test/config.json", json_encode(['environment' => 'testing', 'auth-type' => 'standard']));
         $this->mkDirIfNotExists("{$appPath}/app");
         $this->mkDirIfNotExists("{$appPath}/logs");
 

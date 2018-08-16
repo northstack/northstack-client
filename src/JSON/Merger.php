@@ -15,7 +15,7 @@ class Merger
         }
 
         /** @var \stdClass $new */
-        $new = Json5Decoder::decode($base, true);
+        $new = Json5Decoder::decode($base);
 
         foreach ($other as $mergeJson) {
             $merge = Json5Decoder::decode($mergeJson);
