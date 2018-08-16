@@ -14,11 +14,8 @@ class SappClient extends BaseApiClient
         $accessToken,
         $name,
         $orgId,
-        $environment,
         $cluster,
-        $primaryDomain,
-        $domains,
-        $config
+        $primaryDomain
     )
     {
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
@@ -26,11 +23,34 @@ class SappClient extends BaseApiClient
                 'json' => [
                     'name' => $name,
                     'orgId' => $orgId,
-                    'environment' => $environment,
                     'cluster' => $cluster,
                     'primaryDomain' => $primaryDomain,
-                    'domains' => $domains,
+                ],
+            ]);
+    }
+
+    public function requestDeploy(
+        $accessToken,
+        $sappId
+    )
+    {
+        return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
+            ->get("/sapps/{$sappId}/deploy");
+    }
+
+    public function deploy(
+        $accessToken,
+        $sappId,
+        $config,
+        $buildConfig,
+        $domains
+    ) {
+        return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
+            ->post("/sapps/{$sappId}/deploy", [
+                'json' => [
                     'config' => $config,
+                    'build' => $buildConfig,
+                    'domains' => $domains,
                 ],
             ]);
     }

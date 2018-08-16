@@ -10,10 +10,12 @@ class BaseApiClient
 {
     use GuzzleTrait;
 
-    public function __construct(RequestChain $requestChain, $baseUrl = 'https://mgmt.pagely.com/api/', LoggerInterface $logger)
+    public function __construct(RequestChain $requestChain, $baseUrl = null, LoggerInterface $logger = null)
     {
         $this->requestChain = $requestChain;
-        $this->baseUrl = $baseUrl;
+        $this->baseUrl = $baseUrl ?:
+            getenv('MGMT_API_URL')
+        ;
         $this->logger = $logger;
     }
 }

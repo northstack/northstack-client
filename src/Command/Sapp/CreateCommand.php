@@ -10,7 +10,6 @@ use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class CreateCommand extends Command
@@ -35,13 +34,10 @@ class CreateCommand extends Command
             ->setDescription('NorthStack App Create')
             ->addArgument('name', InputArgument::REQUIRED, 'App name')
             ->addArgument('orgId', InputArgument::REQUIRED, 'Org ID')
-            ->addArgument('environment', InputArgument::REQUIRED, 'Environment (prod, test, dev)')
-            ->addArgument('cluster', InputArgument::REQUIRED, 'Cluster name')
+            ->addArgument('cluster', InputArgument::REQUIRED, 'cluster')
             ->addArgument('primaryDomain', InputArgument::REQUIRED, 'Primary Domain')
-            ->addArgument('baseFolder', InputArgument::REQUIRED, 'Folder to create/install to', '.')
-            ->addOption('altdomain', 'd', InputOption::VALUE_IS_ARRAY|InputOption::VALUE_REQUIRED, 'Extra domains')
-            ->addOption('config', 'c', InputOption::VALUE_REQUIRED, 'JSON blob of configuration')
-            ;
+            ->addArgument('baseFolder', InputArgument::REQUIRED, 'Folder to create/install to (defaults to current directory)')
+        ;
         $this->addOauthOptions();
     }
 
@@ -63,10 +59,25 @@ class CreateCommand extends Command
         }
 
         $args = $input->getArguments();
-        $domains = $input->getOption('altdomain') ?
-            json_encode($input->getOption('altdomain')) :
-            null;
-        $config = $input->getOption('config');
+
+        // create folder structure
+        $nsdir = $input->getArgument('baseFolder');
+        if ($nsdir === '.') {
+            $nsdir = getcwd();
+        } elseif (!file_exists($nsdir)) {
+            $this->mkDirIfNotExists($nsdir);
+        }
+
+        if (!file_exists("{$nsdir}/account.json")) {
+            file_put_contents("{$nsdir}/account.json", json_encode(['orgId' => $args['orgId']], JSON_PRETTY_PRINT));
+        }
+
+        $appPath = "{$nsdir}/{$args['name']}";
+
+        if (file_exists($appPath)) {
+            $output->writeln("Folder for app {$args['name']} already exists at {$appPath}");
+            return;
+        }
 
         try {
             $r = $this->api->createApp(
@@ -74,47 +85,37 @@ class CreateCommand extends Command
                 $args['name'],
                 $args['orgId'],
                 $args['cluster'],
-                $args['primaryDomain'],
-                $domains,
-                $config
+                $args['primaryDomain']
             );
         } catch (ClientException $e) {
             $output->writeln('<error>App Create Failed</error>');
             $output->writeln($e->getResponse()->getBody()->getContents());
+            return;
         }
 
         $data = json_decode($r->getBody()->getContents());
         $output->writeln(json_encode($data, JSON_PRETTY_PRINT));
 
-        // create folder structure
-        $baseFolder = $input->getArgument('baseFolder');
-        if ($baseFolder === '.') {
-            $baseFolder = getcwd();
-        } elseif (!file_exists($baseFolder)) {
-            $this->mkDirIfNotExists($baseFolder);
-        }
+        $this->mkDirIfNotExists($appPath);
+        $this->mkDirIfNotExists("{$appPath}/config");
+        $this->mkDirIfNotExists("{$appPath}/config/dev");
+        file_put_contents("{$appPath}/config/dev/config.json", json_encode(['environment' => 'development', 'auth-type' => 'standard']));
+        $this->mkDirIfNotExists("{$appPath}/config/prod");
+        file_put_contents("{$appPath}/config/dev/config.json", json_encode(['environment' => 'production']));
+        $this->mkDirIfNotExists("{$appPath}/config/test");
+        file_put_contents("{$appPath}/config/dev/config.json", json_encode(['environment' => 'testing', 'auth-type' => 'standard']));
+        $this->mkDirIfNotExists("{$appPath}/app");
+        $this->mkDirIfNotExists("{$appPath}/logs");
 
-        $nsdir = $baseFolder;
-        if (!file_exists("{$nsdir}/account.json")) {
-            file_put_contents("{$nsdir}/account.json", json_encode(['orgId' => $args['orgId']], JSON_PRETTY_PRINT));
+        $env = [];
+        foreach ($data->data as $sapp) {
+            $env[$sapp->environment] = $sapp->id;
         }
+        file_put_contents("{$appPath}/config/environment.json", json_encode($env));
 
-        $appPath = "{$nsdir}/{$args['name']}";
-        if (file_exists($appPath)) {
-            $output->writeln("Folder for app {$args['name']} already exists at {$nsdir}/{$args['name']}");
-        } else {
-            $this->mkDirIfNotExists($appPath);
-            $this->mkDirIfNotExists("{$appPath}/config");
-            $this->mkDirIfNotExists("{$appPath}/config/dev");
-            $this->mkDirIfNotExists("{$appPath}/config/prod");
-            $this->mkDirIfNotExists("{$appPath}/config/test");
-            $this->mkDirIfNotExists("{$appPath}/app");
-            $this->mkDirIfNotExists("{$appPath}/logs");
-
-            $assetPath = dirname(__DIR__, 3).'/assets';
-            copy("{$assetPath}/config.json", "{$appPath}/config/config.json");
-            copy("{$assetPath}/build.json", "{$appPath}/config/build.json");
-            copy("{$assetPath}/domains.json", "{$appPath}/config/domains.json");
-        }
+        $assetPath = dirname(__DIR__, 3).'/assets';
+        copy("{$assetPath}/config.json", "{$appPath}/config/config.json");
+        copy("{$assetPath}/build.json", "{$appPath}/config/build.json");
+        copy("{$assetPath}/domains.json", "{$appPath}/config/domains.json");
     }
 }
