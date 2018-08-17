@@ -38,19 +38,19 @@ class SignupCommand extends Command
 
         $helper = $this->getHelper('question');
 
-        $question = new Question('Organization Name');
+        $question = new Question('Organization Name: ');
         $orgName = $helper->ask($input, $output, $question);
 
-        $question = new Question('Username');
+        $question = new Question('Username: ');
         $username = $helper->ask($input, $output, $question);
 
-        $question = (new Question('Password'))->setHidden(true);
+        $question = (new Question('Password: '))->setHidden(true);
         $password = $helper->ask($input, $output, $question);
 
-        $question = new Question('Owner Name');
+        $question = new Question('Owner Name: ');
         $name = $helper->ask($input, $output, $question);
 
-        $question = new Question('Owner Email');
+        $question = new Question('Owner Email: ');
         $email = $helper->ask($input, $output, $question);
 
         try {
