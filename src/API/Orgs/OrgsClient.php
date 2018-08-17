@@ -11,7 +11,6 @@ class OrgsClient extends BaseApiClient
     protected $apiName = 'orgs';
 
     public function signup(
-        $token,
         $organizationName,
         $username,
         $password,
@@ -19,7 +18,7 @@ class OrgsClient extends BaseApiClient
         $email
     )
     {
-        return $this->guzzle($this->getBearerTokenMiddleware($token))->post(
+        return $this->guzzle()->post(
             '/orgs/signup',
             [
                 'json' => [

@@ -22,7 +22,6 @@ class SignupCommand extends Command
     public function __construct(OrgsClient $api)
     {
         parent::__construct('signup');
-        $this->addOauthOptions();
         $this->api = $api;
     }
 
@@ -58,7 +57,6 @@ class SignupCommand extends Command
 
         try {
             $r = $this->api->signup(
-                $this->token->token,
                 $orgName,
                 $username,
                 $password,
