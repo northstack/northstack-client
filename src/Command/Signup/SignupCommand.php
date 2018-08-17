@@ -6,14 +6,12 @@ namespace NorthStack\NorthStackClient\Command\Signup;
 use GuzzleHttp\Exception\ClientException;
 use NorthStack\NorthStackClient\API\Orgs\OrgsClient;
 use NorthStack\NorthStackClient\Command\Command;
-use NorthStack\NorthStackClient\Command\OauthCommandTrait;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 
 class SignupCommand extends Command
 {
-    use OauthCommandTrait;
     /**
      * @var OrgsClient
      */
