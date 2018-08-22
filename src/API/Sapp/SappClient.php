@@ -18,14 +18,18 @@ class SappClient extends BaseApiClient
         $primaryDomain
     )
     {
+        $data = [
+            'name' => $name,
+            'cluster' => $cluster,
+            'primaryDomain' => $primaryDomain,
+        ];
+        if ($orgId) {
+            $data['orgId'] = $orgId;
+        }
+
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
             ->post('/sapps', [
-                'json' => [
-                    'name' => $name,
-                    'orgId' => $orgId,
-                    'cluster' => $cluster,
-                    'primaryDomain' => $primaryDomain,
-                ],
+                'json' => $data,
             ]);
     }
 
