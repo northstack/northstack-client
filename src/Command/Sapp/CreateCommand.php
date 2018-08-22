@@ -22,7 +22,7 @@ class CreateCommand extends Command
 
     public function __construct(SappClient $api, AuthApi $authApi)
     {
-        parent::__construct('sapp:create');
+        parent::__construct('app:create');
         $this->api = $api;
         $this->authClient = $authApi;
     }
@@ -33,10 +33,10 @@ class CreateCommand extends Command
         $this
             ->setDescription('NorthStack App Create')
             ->addArgument('name', InputArgument::REQUIRED, 'App name')
-            ->addArgument('orgId', InputArgument::REQUIRED, 'Org ID')
-            ->addArgument('cluster', InputArgument::REQUIRED, 'cluster')
             ->addArgument('primaryDomain', InputArgument::REQUIRED, 'Primary Domain')
-            ->addArgument('baseFolder', InputArgument::REQUIRED, 'Folder to create/install to (defaults to current directory)')
+            ->addArgument('baseFolder', InputArgument::OPTIONAL, 'Folder to create/install to (defaults to current directory)')
+            ->addArgument('orgId', InputArgument::OPTIONAL, 'Org ID (defaults to value in accounts.json in the current directory)')
+            ->addArgument('cluster', InputArgument::OPTIONAL, 'cluster', 'ns-dev-us-east-1')
         ;
         $this->addOauthOptions();
     }
@@ -62,14 +62,10 @@ class CreateCommand extends Command
 
         // create folder structure
         $nsdir = $input->getArgument('baseFolder');
-        if ($nsdir === '.') {
+        if ($nsdir === '.' || empty($nsdir)) {
             $nsdir = getcwd();
         } elseif (!file_exists($nsdir)) {
             $this->mkDirIfNotExists($nsdir);
-        }
-
-        if (!file_exists("{$nsdir}/account.json")) {
-            file_put_contents("{$nsdir}/account.json", json_encode(['orgId' => $args['orgId']], JSON_PRETTY_PRINT));
         }
 
         $appPath = "{$nsdir}/{$args['name']}";

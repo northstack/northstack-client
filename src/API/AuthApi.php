@@ -12,7 +12,7 @@ class AuthApi extends BaseApiClient
                 'client_id' => $clientId,
                 'username' => $username,
                 'password' => $password,
-                'grant_type' => 'password',
+                'grant_type' => 'org_password',
             ],
         ];
         if (!empty($scope)) {

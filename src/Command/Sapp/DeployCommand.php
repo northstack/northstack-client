@@ -35,7 +35,7 @@ class DeployCommand extends Command
         Client $guzzle
     )
     {
-        parent::__construct('sapp:deploy');
+        parent::__construct('app:deploy');
         $this->api = $api;
         $this->authClient = $authApi;
         $this->guzzle = $guzzle;
@@ -48,7 +48,7 @@ class DeployCommand extends Command
             ->setDescription('NorthStack App Create')
             ->addArgument('name', InputArgument::REQUIRED, 'App name')
             ->addArgument('environment', InputArgument::REQUIRED, 'Environment (prod, test, or dev)')
-            ->addArgument('baseFolder', InputArgument::REQUIRED, 'Path to root of NorthStack folder (contains folder named after app)')
+            ->addArgument('baseFolder', InputArgument::OPTIONAL, 'Path to root of NorthStack folder (contains folder named after app)')
         ;
         $this->addOauthOptions();
     }
@@ -61,6 +61,9 @@ class DeployCommand extends Command
         }
 
         $args = $input->getArguments();
+
+        if (empty($args['baseFolder']))
+            $args['baseFolder'] = getcwd();
 
         if (!file_exists($args['baseFolder'])) {
             $output->writeln("<error>Folder {$args['baseFolder']} not found</error>");
