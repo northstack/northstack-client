@@ -125,15 +125,18 @@ class DeployCommand extends Command
             if (file_exists($envFile)) {
                 $configs[$file] = Merger::merge($json, file_get_contents($envFile));
             }
+            else {
+                $configs[$file] = Merger::merge($json, '{}');
+            }
         }
 
         // trigger deploy
         $this->api->deploy(
             $this->token->token,
             $sappId,
-            $configs['config.json'],
-            $configs['build.json'],
-            $configs['domains.json']
+            ($configs['config.json']),
+            ($configs['build.json']),
+            ($configs['domains.json'])
         );
     }
 }
