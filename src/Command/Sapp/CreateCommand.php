@@ -36,7 +36,7 @@ class CreateCommand extends Command
             ->addArgument('primaryDomain', InputArgument::REQUIRED, 'Primary Domain')
             ->addArgument('baseFolder', InputArgument::OPTIONAL, 'Folder to create/install to (defaults to current directory)')
             ->addArgument('orgId', InputArgument::OPTIONAL, 'Org ID (defaults to value in accounts.json in the current directory)')
-            ->addArgument('cluster', InputArgument::OPTIONAL, 'cluster', 'ns-dev-us-east-1')
+            ->addArgument('cluster', InputArgument::OPTIONAL, 'cluster', 'dev-us-east-1')
         ;
         $this->addOauthOptions();
     }
