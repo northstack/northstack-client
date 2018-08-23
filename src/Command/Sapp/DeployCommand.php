@@ -100,10 +100,10 @@ class DeployCommand extends Command
 
         // tarball folder
         $zip = "{$args['baseFolder']}/{$sappId}.tar.gz";
-        exec("tar cvzf {$zip} {$appFolder}/app");
+        exec("cd $appFolder && tar cvzf {$zip} app");
 
         // upload to s3
-        $this->guzzle->post($uploadUrl, [
+        $this->guzzle->put($uploadUrl, [
             'multipart' => [
                 [
                     'name'     => 'file',
