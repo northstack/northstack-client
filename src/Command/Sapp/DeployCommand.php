@@ -106,7 +106,6 @@ class DeployCommand extends Command
                 $configs[$file] = Merger::merge($json, '{}');
             }
         }
-
         // trigger deploy
         $this->api->deploy(
             $this->token->token,
@@ -115,5 +114,7 @@ class DeployCommand extends Command
             ($configs['build.json']),
             ($configs['domains.json'])
         );
+
+        $output->writeln("Deploy of App has begun");
     }
 }
