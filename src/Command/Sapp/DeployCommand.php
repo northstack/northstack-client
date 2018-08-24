@@ -16,6 +16,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class DeployCommand extends Command
 {
     use OauthCommandTrait;
+    use SappEnvironmentTrait;
     /**
      * @var SappClient
      */
@@ -62,36 +63,12 @@ class DeployCommand extends Command
 
         $args = $input->getArguments();
 
-        if (empty($args['baseFolder']))
-            $args['baseFolder'] = getcwd();
 
-        if (!file_exists($args['baseFolder'])) {
-            $output->writeln("<error>Folder {$args['baseFolder']} not found</error>");
-            exit(1);
-        }
-
-        // calculate app folder
-        if (strpos($args['baseFolder'], './') === 0) {
-            $args['baseFolder'] = getcwd().substr($args['baseFolder'], 1);
-        } elseif ($args['baseFolder'] === '.') {
-            $args['baseFolder'] = getcwd();
-        } elseif (strpos($args['baseFolder'], '~/') === 0) {
-            $args['baseFolder'] = getenv('HOME').substr($args['baseFolder'], 1);
-        }
-        $args['baseFolder'] = rtrim($args['baseFolder'], '/');
-
-        $appFolder = $args['baseFolder'].'/'.$args['name'];
-
-        if (!file_exists($appFolder)) {
-            $output->writeln("<error>Folder {$appFolder} not found</error>");
-            exit(1);
-        }
-
-        // find sapp id based on environment/app from environment.json
-        $envConfig = json_decode(file_get_contents("{$appFolder}/config/environment.json"), true);
-        $env = $args['environment'];
-
-        $sappId = $envConfig[$env];
+        [$sappId, $appFolder] = $this->getSappIdAndFolderByOptions(
+            $args['name'],
+            $args['environment'],
+            $args['baseFolder']
+        );
 
         // request upload url
         $r = $this->api->requestDeploy($this->token->token, $sappId);
@@ -121,7 +98,7 @@ class DeployCommand extends Command
             'domains.json' => file_get_contents("{$appFolder}/config/domains.json"),
         ];
         foreach ($configs as $file => $json) {
-            $envFile = "{$appFolder}/config/{$env}/{$file}";
+            $envFile = "{$appFolder}/config/{$args['environment']}/{$file}";
             if (file_exists($envFile)) {
                 $configs[$file] = Merger::merge($json, file_get_contents($envFile));
             }
