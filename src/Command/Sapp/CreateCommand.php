@@ -56,7 +56,7 @@ class CreateCommand extends Command
     {
         if ($output->isDebug())
         {
-            $this->api->debug = true;
+            $this->api->setDebug(true);
         }
 
         $args = $input->getArguments();

@@ -37,7 +37,7 @@ class LoginCommand extends Command
     {
         if ($output->isDebug())
         {
-            $this->api->debug = true;
+            $this->api->setDebug(true);
         }
 
         $question = new Question('Password: ');

@@ -35,7 +35,7 @@ class ClientLoginCommand extends Command
     {
         if ($output->isDebug())
         {
-            $this->api->debug = true;
+            $this->api->setDebug(true);
         }
 
         try {
