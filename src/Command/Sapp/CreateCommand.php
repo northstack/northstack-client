@@ -86,8 +86,13 @@ class CreateCommand extends Command
                 $args['primaryDomain']
             );
         } catch (ClientException $e) {
-            $output->writeln('<error>App Create Failed</error>');
-            $output->writeln($e->getResponse()->getBody()->getContents());
+            $i = $e->getResponse()->getStatusCode();
+            if ($i === 401) {
+                $output->writeln('<error>Please Log in and try again</error>');
+            } else {
+                $output->writeln('<error>App Create Failed</error>');
+                $output->writeln($e->getResponse()->getBody()->getContents());
+            }
             return;
         }
 
