@@ -70,7 +70,6 @@ class SignupCommand extends Command
         }
 
         $data = json_decode($r->getBody()->getContents());
-        $output->writeln(json_encode($data, JSON_PRETTY_PRINT));
 
         $nsdir = $input->getArgument('baseFolder');
         if ($nsdir === '.' || empty($nsdir)) {
@@ -80,6 +79,11 @@ class SignupCommand extends Command
         }
 
         file_put_contents("$nsdir/account.json", json_encode($data));
+
+        $output->writeln([
+            "Success! Welcome to NorthStack, {$username}.",
+            "Your account details have been written to {$nsdir}/account.json for safekeeping."
+        ]);
     }
     protected function mkDirIfNotExists($path) {
         if (
