@@ -11,6 +11,7 @@ use NorthStack\NorthStackClient\Command\OauthCommandTrait;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 class CreateCommand extends Command
 {
@@ -59,6 +60,7 @@ class CreateCommand extends Command
         }
 
         $args = $input->getArguments();
+        $io = new SymfonyStyle($input, $output);
 
         // create folder structure
         $nsdir = $input->getArgument('baseFolder');
@@ -90,7 +92,7 @@ class CreateCommand extends Command
         }
 
         $data = json_decode($r->getBody()->getContents());
-        $output->writeln(json_encode($data, JSON_PRETTY_PRINT));
+        $this->printSuccess($io, $data, $appPath);
 
         $this->mkDirIfNotExists($appPath);
         $this->mkDirIfNotExists("{$appPath}/config");
@@ -113,5 +115,27 @@ class CreateCommand extends Command
         copy("{$assetPath}/config.json", "{$appPath}/config/config.json");
         copy("{$assetPath}/build.json", "{$appPath}/config/build.json");
         copy("{$assetPath}/domains.json", "{$appPath}/config/domains.json");
+    }
+
+    function printSuccess($io, $data, $appPath)
+    {
+        $sapps = $data->data;
+        $appName = $sapps[0]->name;
+        $io->writeln("Woohoo! Your NorthStack instance ({$appName}) was created successfully. Here are your prod, testing, and dev apps:");
+
+        $headers = ['id', 'environment', 'fqdn', 'config path'];
+        $rows = [];
+        foreach ($sapps as $sapp)
+        {
+            $rows[] = [
+                $sapp->id,
+                $sapp->environment,
+                ($sapp->parentSapp === null)
+                    ? $sapp->primaryDomain
+                    : "ns-{$sapp->id}.{$sapp->environment}.northstack.com",
+                "{$appPath}/config/{$sapp->environment}"
+            ];
+        }
+        $io->table($headers, $rows);
     }
 }
