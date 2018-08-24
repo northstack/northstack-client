@@ -63,6 +63,9 @@ class DeployCommand extends Command
 
         $args = $input->getArguments();
 
+        if (empty($args['baseFolder']))
+            $args['baseFolder'] = getcwd();
+
 
         [$sappId, $appFolder] = $this->getSappIdAndFolderByOptions(
             $args['name'],
