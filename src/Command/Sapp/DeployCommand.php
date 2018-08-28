@@ -4,6 +4,7 @@
 namespace NorthStack\NorthStackClient\Command\Sapp;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\ClientException;
 use NorthStack\NorthStackClient\API\AuthApi;
 use NorthStack\NorthStackClient\API\Sapp\SappClient;
 use NorthStack\NorthStackClient\Command\Command;
@@ -110,13 +111,20 @@ class DeployCommand extends Command
             }
         }
         // trigger deploy
-        $r = $this->api->deploy(
-            $this->token->token,
-            $sappId,
-            ($configs['config.json']),
-            ($configs['build.json']),
-            ($configs['domains.json'])
-        );
+        try
+        {
+            $r = $this->api->deploy(
+                $this->token->token,
+                $sappId,
+                ($configs['config.json']),
+                ($configs['build.json']),
+                ($configs['domains.json'])
+            );
+        }
+        catch(ClientException $e)
+        {
+            $r = $e->getResponse();
+        }
 
         $output->writeln("Deploy finished code: ".$r->getStatusCode());
         print_r(json_decode($r->getBody()->getContents()));
