@@ -110,7 +110,7 @@ class DeployCommand extends Command
             }
         }
         // trigger deploy
-        $this->api->deploy(
+        $r = $this->api->deploy(
             $this->token->token,
             $sappId,
             ($configs['config.json']),
@@ -118,6 +118,7 @@ class DeployCommand extends Command
             ($configs['domains.json'])
         );
 
-        $output->writeln("Deploy of App has begun");
+        $output->writeln("Deploy finished code: ".$r->getStatusCode());
+        print_r(json_decode($r->getBody()->getContents()));
     }
 }
