@@ -50,7 +50,7 @@ class ClientLoginCommand extends Command
             $output->writeln(json_encode($data, JSON_PRETTY_PRINT));
         } else {
             $token = new OauthToken();
-            $token->saveRaw($r->getBody()->getContents(), '.northstackclientlogin');
+            $token->saveRaw($r->getBody()->getContents(), 'client');
         }
     }
 
