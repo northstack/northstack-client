@@ -113,13 +113,23 @@ class CreateCommand extends Command
         $env = [];
         foreach ($data->data as $sapp) {
             $env[$sapp->environment] = $sapp->id;
+
+            if ($sapp->environment != 'prod')
+            {
+                file_put_contents("{$appPath}/config/{$sapp->environment}/domains.json", json_encode(
+                    ['domains' => ["ns-{$sapp->id}.{$sapp->environment}.northstack.com"]]
+                ));
+            }
         }
         file_put_contents("{$appPath}/config/environment.json", json_encode($env));
+
+        file_put_contents("{$appPath}/config/prod/domains.json", json_encode(
+            ['domains' => [$args['primaryDomain']]]
+        ));
 
         $assetPath = dirname(__DIR__, 3).'/assets';
         copy("{$assetPath}/config.json", "{$appPath}/config/config.json");
         copy("{$assetPath}/build.json", "{$appPath}/config/build.json");
-        copy("{$assetPath}/domains.json", "{$appPath}/config/domains.json");
     }
 
     function printSuccess($io, $data, $appPath)
@@ -140,7 +150,7 @@ class CreateCommand extends Command
                     : "ns-{$sapp->id}.{$sapp->environment}.northstack.com",
                 "{$appPath}/config/{$sapp->environment}"
             ];
-        }
+       }
         $io->table($headers, $rows);
     }
 }

@@ -99,7 +99,7 @@ class DeployCommand extends Command
         $configs = [
             'config.json' => file_get_contents("{$appFolder}/config/config.json"),
             'build.json' => file_get_contents("{$appFolder}/config/build.json"),
-            'domains.json' => file_get_contents("{$appFolder}/config/domains.json"),
+            'domains.json' => [],
         ];
         foreach ($configs as $file => $json) {
             $envFile = "{$appFolder}/config/{$args['environment']}/{$file}";
