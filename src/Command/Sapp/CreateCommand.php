@@ -117,7 +117,7 @@ class CreateCommand extends Command
             if ($sapp->environment != 'prod')
             {
                 file_put_contents("{$appPath}/config/{$sapp->environment}/domains.json", json_encode(
-                    ['domains' => ["ns-{$sapp->id}.{$sapp->environment}.northstack.com"]]
+                    ['domains' => ["ns-{$sapp->id}.{$sapp->cluster}-northstack.com"]]
                 ));
             }
         }
@@ -147,7 +147,7 @@ class CreateCommand extends Command
                 $sapp->environment,
                 ($sapp->parentSapp === null)
                     ? $sapp->primaryDomain
-                    : "ns-{$sapp->id}.{$sapp->environment}.northstack.com",
+                    : "ns-{$sapp->id}.{$sapp->cluster}-northstack.com",
                 "{$appPath}/config/{$sapp->environment}"
             ];
        }

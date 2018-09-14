@@ -74,6 +74,7 @@ class InfoCommand extends Command
         $headers = ['Field', 'Value'];
         $rows = [
             ['Name', $app->name],
+            ['Cluster', $app->cluster],
             ['Id', $app->id],
             ['OrgId', $app->orgId],
             ['Parent', $app->parentSapp],
