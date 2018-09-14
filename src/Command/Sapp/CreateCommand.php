@@ -9,6 +9,7 @@ use NorthStack\NorthStackClient\API\Sapp\SappClient;
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
 use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -21,11 +22,10 @@ class CreateCommand extends Command
      */
     protected $api;
 
-    public function __construct(SappClient $api, AuthApi $authApi)
+    public function __construct(SappClient $api)
     {
         parent::__construct('app:create');
         $this->api = $api;
-        $this->authClient = $authApi;
     }
 
     public function configure()
@@ -36,8 +36,14 @@ class CreateCommand extends Command
             ->addArgument('name', InputArgument::REQUIRED, 'App name')
             ->addArgument('primaryDomain', InputArgument::REQUIRED, 'Primary Domain')
             ->addArgument('baseFolder', InputArgument::OPTIONAL, 'Folder to create/install to (defaults to current directory)')
-            ->addArgument('orgId', InputArgument::OPTIONAL, 'Org ID (defaults to value in accounts.json in the current directory)')
-            ->addArgument('cluster', InputArgument::OPTIONAL, 'cluster', 'dev-us-east-1')
+            ->addOption('orgId', null, InputOption::VALUE_REQUIRED, 'Org ID (defaults to value in accounts.json in the current directory)')
+            ->addOption('cluster', null, InputOption::VALUE_REQUIRED, 'Deployment location', 'dev-us-east-1')
+            ->addOption('wpAdminUser', null, InputOption::VALUE_REQUIRED, 'Wordpress Admin Username on initial db creation', 'account-user')
+            ->addOption('wpAdminPass', null, InputOption::VALUE_REQUIRED, 'Wordpress Admin Password on initial db creation', 'random-value')
+            ->addOption('wpAdminEmail', null, InputOption::VALUE_REQUIRED, 'Wordpress Admin Email on initial db creation', 'account-email')
+            ->addOption('wpTitle', null, InputOption::VALUE_REQUIRED, 'Wordpress title', "app-name")
+            ->addOption('wpIsMultisite', null, InputOption::VALUE_NONE, 'Wordpress is this a multi-site install')
+            ->addOption('wpMultisiteSubdomains', null, InputOption::VALUE_NONE, 'Wordpress multi-site subdomains install')
         ;
         $this->addOauthOptions();
     }
@@ -60,6 +66,7 @@ class CreateCommand extends Command
         }
 
         $args = $input->getArguments();
+        $options = $input->getOptions();
         $io = new SymfonyStyle($input, $output);
 
         // create folder structure
@@ -81,8 +88,8 @@ class CreateCommand extends Command
             $r = $this->api->createApp(
                 $this->token->token,
                 $args['name'],
-                $args['orgId'],
-                $args['cluster'],
+                $options['orgId'],
+                $options['cluster'],
                 $args['primaryDomain']
             );
         } catch (ClientException $e) {
@@ -99,12 +106,12 @@ class CreateCommand extends Command
         $data = json_decode($r->getBody()->getContents());
         $this->printSuccess($io, $data, $appPath);
 
+        $install = $this->buildWpInstallArgs($options, $args, $io);
+
         $this->mkDirIfNotExists($appPath);
         $this->mkDirIfNotExists("{$appPath}/config");
         $this->mkDirIfNotExists("{$appPath}/config/dev");
-        file_put_contents("{$appPath}/config/dev/config.json", json_encode(['environment' => 'development', 'auth-type' => 'standard']));
         $this->mkDirIfNotExists("{$appPath}/config/prod");
-        file_put_contents("{$appPath}/config/prod/config.json", json_encode(['environment' => 'production']));
         $this->mkDirIfNotExists("{$appPath}/config/test");
         file_put_contents("{$appPath}/config/test/config.json", json_encode(['environment' => 'testing', 'auth-type' => 'standard']));
         $this->mkDirIfNotExists("{$appPath}/app");
@@ -114,18 +121,26 @@ class CreateCommand extends Command
         foreach ($data->data as $sapp) {
             $env[$sapp->environment] = $sapp->id;
 
-            if ($sapp->environment != 'prod')
+            switch($sapp->environment)
             {
-                file_put_contents("{$appPath}/config/{$sapp->environment}/domains.json", json_encode(
-                    ['domains' => ["ns-{$sapp->id}.{$sapp->cluster}-northstack.com"]]
-                ));
+            case 'prod':
+                $config = ['environment' => 'production', 'install' => $install];
+                $domains = ['domains' => [$args['primaryDomain']]];
+                break;
+            case 'test':
+                $config = ['environment' => 'testing', 'auth-type' => 'standard', 'install' => $install];
+                $domains = ['domains' => ["ns-{$sapp->id}.{$sapp->cluster}-northstack.com"]];
+            case 'dev':
+                $config = ['environment' => 'development', 'auth-type' => 'standard', 'install' => $install];
+                $domains = ['domains' => ["ns-{$sapp->id}.{$sapp->cluster}-northstack.com"]];
+                break;
             }
-        }
-        file_put_contents("{$appPath}/config/environment.json", json_encode($env));
 
-        file_put_contents("{$appPath}/config/prod/domains.json", json_encode(
-            ['domains' => [$args['primaryDomain']]]
-        ));
+            file_put_contents("{$appPath}/config/{$sapp->environment}/config.json", json_encode($config, JSON_PRETTY_PRINT));
+            file_put_contents("{$appPath}/config/{$sapp->environment}/domains.json", json_encode($domains, JSON_PRETTY_PRINT));
+        }
+
+        file_put_contents("{$appPath}/config/environment.json", json_encode($env));
 
         $assetPath = dirname(__DIR__, 3).'/assets';
         copy("{$assetPath}/config.json", "{$appPath}/config/config.json");
@@ -152,5 +167,45 @@ class CreateCommand extends Command
             ];
        }
         $io->table($headers, $rows);
+    }
+
+    protected function buildWpInstallArgs($options, $args, $io)
+    {
+        if ($options['wpTitle'] == 'app-name')
+            $title = $args['name'];
+        else
+            $title = $args['title'];
+
+
+        if ($options['wpAdminUser'] == 'account-user')
+        {
+            // TODO grab the username of the currently logged in user
+            $user = "ns-admin";
+            $io->writeln("Wordpress Admin User: $user\n");
+        }
+        else
+        {
+            $user = $options['wpAdminUser'];
+        }
+
+        if ($options['wpAdminPass'] == 'random-value')
+        {
+            $pass = bin2hex(random_bytes(16));
+            $io->writeln("Wordpress Admin Password: $pass\n");
+        }
+        else
+        {
+            $pass = $options['wpAdminPass'];
+        }
+
+        $install = [
+            'url' => $args['primaryDomain'],
+            'title' => $title,
+            'admin_user' => $user,
+            'admin_pass' => $pass,
+            'multisite' => $options['wpIsMultisite'],
+            'subdomains' => $options['wpMultisiteSubdomains'],
+        ];
+        return $install;
     }
 }
