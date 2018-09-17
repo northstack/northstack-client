@@ -128,11 +128,15 @@ class CreateCommand extends Command
                 $domains = ['domains' => [$args['primaryDomain']]];
                 break;
             case 'test':
+                $domain = "ns-{$sapp->id}.{$sapp->cluster}-northstack.com";
+                $install['url'] = "http://$domain/";
                 $config = ['environment' => 'testing', 'auth-type' => 'standard', 'install' => $install];
-                $domains = ['domains' => ["ns-{$sapp->id}.{$sapp->cluster}-northstack.com"]];
+                $domains = ['domains' => [$domain]];
             case 'dev':
+                $domain = "ns-{$sapp->id}.{$sapp->cluster}-northstack.com";
+                $install['url'] = "http://$domain/";
                 $config = ['environment' => 'development', 'auth-type' => 'standard', 'install' => $install];
-                $domains = ['domains' => ["ns-{$sapp->id}.{$sapp->cluster}-northstack.com"]];
+                $domains = ['domains' => [$domain]];
                 break;
             }
 
@@ -174,7 +178,7 @@ class CreateCommand extends Command
         if ($options['wpTitle'] == 'app-name')
             $title = $args['name'];
         else
-            $title = $args['title'];
+            $title = $args['wpTitle'];
 
 
         if ($options['wpAdminUser'] == 'account-user')
