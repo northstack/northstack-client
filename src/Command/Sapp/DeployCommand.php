@@ -13,6 +13,7 @@ use NorthStack\NorthStackClient\JSON\Merger;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 
 class DeployCommand extends Command
 {
@@ -127,6 +128,46 @@ class DeployCommand extends Command
         }
 
         $output->writeln("Deploy finished code: ".$r->getStatusCode());
-        print_r(json_decode($r->getBody()->getContents()));
+        $body = json_decode($r->getBody()->getContents());
+
+        $io = new SymfonyStyle($input, $output);
+
+        $app = $body->sapp;
+        $io->writeln("App Info");
+        $headers = ['Field', 'Value'];
+        $rows = [
+            ['Name', $app->name],
+            ['Cluster', $app->cluster],
+            ['Id', $app->id],
+            ['OrgId', $app->orgId],
+            ['Parent', $app->parentSapp],
+            ['Env', $app->environment],
+            ['Domains', implode("\n",$app->domains->domains)],
+        ];
+
+        $io->table($headers, $rows);
+
+
+        $io->writeln("Build");
+        $headers = ['Field', 'Value'];
+        $rows = [
+            ['Task Arn', $body->deploy->builder->taskArn],
+            ['Started', $body->deploy->builder->started],
+            ['Stopped', $body->deploy->builder->stopped],
+            ['Length', strtotime($body->deploy->builder->stopped) - strtotime($body->deploy->builder->started)],
+        ];
+
+        $io->table($headers, $rows);
+
+        $io->writeln("Worker");
+        $headers = ['Field', 'Value'];
+        $rows = [
+            ['Task Arn', $body->deploy->worker->taskArn],
+            ['Started', $body->deploy->worker->started],
+        ];
+
+        $io->table($headers, $rows);
+
+
     }
 }
