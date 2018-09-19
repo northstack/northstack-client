@@ -43,14 +43,17 @@ class SignupCommand extends Command
         $question = new Question('Organization Name: ');
         $orgName = $helper->ask($input, $output, $question);
 
-        $question = new Question('Username: ');
+        $question = new Question('Username (usually email address): ');
         $username = $helper->ask($input, $output, $question);
 
         $question = (new Question('Password: '))->setHidden(true);
         $password = $helper->ask($input, $output, $question);
 
-        $question = new Question('Owner Name: ');
-        $name = $helper->ask($input, $output, $question);
+        $question = new Question('Owner First Name: ');
+        $firstName = $helper->ask($input, $output, $question);
+
+        $question = new Question('Owner Last Name: ');
+        $lastName = $helper->ask($input, $output, $question);
 
         $question = new Question('Owner Email: ');
         $email = $helper->ask($input, $output, $question);
@@ -60,7 +63,8 @@ class SignupCommand extends Command
                 $orgName,
                 $username,
                 $password,
-                $name,
+                $firstName,
+                $lastName,
                 $email
             );
         } catch (ClientException $e) {

@@ -14,7 +14,8 @@ class OrgsClient extends BaseApiClient
         $organizationName,
         $username,
         $password,
-        $name,
+        $firstName,
+        $lastName,
         $email
     )
     {
@@ -25,8 +26,9 @@ class OrgsClient extends BaseApiClient
                     'name' => $organizationName,
                     'username' => $username,
                     'password' => $password,
-                    'personName' => $name,
-                    'email' => $email
+                    'firstName' => $firstName,
+                    'lastName' => $lastName,
+                    'email' => $email,
                 ],
             ]
         );
