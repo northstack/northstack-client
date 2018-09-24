@@ -81,6 +81,7 @@ class InfoCommand extends Command
             ['Env', $app->environment],
             ['Domains', implode("\n",$app->domains->domains)],
         ];
+        print_r($app);
 
         $io->table($headers, $rows);
     }
