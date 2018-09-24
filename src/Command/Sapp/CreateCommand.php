@@ -84,11 +84,22 @@ class CreateCommand extends Command
             return;
         }
 
+        $orgId = $options['orgId'];
+        if (empty($orgId))
+        {
+            $path = getcwd()."/account.json";
+            if (file_exists($path))
+            {
+                $account = json_decode(file_get_contents($path));
+                $orgId = $account->id;
+            }
+        }
+
         try {
             $r = $this->api->createApp(
                 $this->token->token,
                 $args['name'],
-                $options['orgId'],
+                $orgId,
                 $options['cluster'],
                 $args['primaryDomain']
             );
