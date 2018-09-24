@@ -129,6 +129,13 @@ class DeployCommand extends Command
 
         $output->writeln("Deploy finished code: ".$r->getStatusCode());
         $body = json_decode($r->getBody()->getContents());
+        if ($r->getStatusCode() != 200)
+        {
+            print_r($body);
+            $output->Writeln("Deploy failed");
+            exit(1);
+        }
+        print_r($body);
 
         $io = new SymfonyStyle($input, $output);
 
