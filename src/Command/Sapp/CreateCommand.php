@@ -125,22 +125,26 @@ class CreateCommand extends Command
             {
             case 'prod':
                 $config = ['environment' => 'production', 'install' => $install];
+                $build = [];
                 $domains = ['domains' => [$args['primaryDomain']]];
                 break;
             case 'test':
                 $domain = "ns-{$sapp->id}.{$sapp->cluster}-northstack.com";
                 $install['url'] = "http://$domain/";
-                $config = ['environment' => 'testing', 'auth-type' => 'standard', 'install' => $install];
+                $config = ['environment' => 'testing', 'auth-type' => 'standard'];
+                $build = ['wordpress-install' => $install];
                 $domains = ['domains' => [$domain]];
             case 'dev':
                 $domain = "ns-{$sapp->id}.{$sapp->cluster}-northstack.com";
                 $install['url'] = "http://$domain/";
-                $config = ['environment' => 'development', 'auth-type' => 'standard', 'install' => $install];
+                $config = ['environment' => 'development', 'auth-type' => 'standard'];
+                $build = ['wordpress-install' => $install];
                 $domains = ['domains' => [$domain]];
                 break;
             }
 
             file_put_contents("{$appPath}/config/{$sapp->environment}/config.json", json_encode($config, JSON_PRETTY_PRINT));
+            file_put_contents("{$appPath}/config/{$sapp->environment}/build.json", json_encode($build, JSON_PRETTY_PRINT));
             file_put_contents("{$appPath}/config/{$sapp->environment}/domains.json", json_encode($domains, JSON_PRETTY_PRINT));
         }
 
