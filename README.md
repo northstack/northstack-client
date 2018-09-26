@@ -14,6 +14,11 @@ cd northstack
 sudo ./bin/install.sh
 ```
 
+## OS Support
+
+Our goal is to support this client anywhere that docker can run.  Currently the
+wrapper scripts only work Linux and Mac.  Windows wrappers scripts are still a todo.
+
 # Using the client
 
 ## Login
