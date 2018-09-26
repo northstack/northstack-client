@@ -1,16 +1,17 @@
 # northstack-client
 PHP Library to access the NorthStack NorthStack APIs
 
-*Note that PHP 7.1+ is required*
-
 # Installation
 
-Installation assumes you already have git, PHP7.1+, and composer installed.
+Have a working docker install
+
+The client is dockerized run, so you can checkout the client and run the install script
+to build a local docker image and add the wrapper to `/usr/local/bin/northstack`
 
 ```
 git clone git@github.com:pagely/northstack.git
-cd northstack/
-composer install
+cd northstack
+sudo ./bin/install.sh
 ```
 
 # Using the client
