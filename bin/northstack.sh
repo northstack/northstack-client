@@ -16,7 +16,7 @@ fi
 
 docker run -ti --rm \
     --user=$UID --userns=host \
-    --volume `pwd`:/current \
+    --volume "$(pwd)":/current \
     --volume $HOME:$HOME \
     --volume /etc/passwd:/etc/passwd \
     --volume "$socket":/var/lib/docker.sock \
