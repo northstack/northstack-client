@@ -15,6 +15,7 @@ else
 fi
 
 docker run -ti --rm \
+    -e DEBUG=$DEBUG \
     --user=$UID --userns=host \
     --volume "$(pwd)":/current \
     --volume $HOME:$HOME \
