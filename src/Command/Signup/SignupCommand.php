@@ -82,11 +82,11 @@ class SignupCommand extends Command
             $this->mkDirIfNotExists($nsdir);
         }
 
-        file_put_contents("$nsdir/account.json", json_encode($data));
+        file_put_contents("$nsdir/.account.json", json_encode($data));
 
         $output->writeln([
             "Success! Welcome to NorthStack, {$username}.",
-            "Your account details have been written to {$nsdir}/account.json for safekeeping.",
+            "Your account details have been written to {$nsdir}/.account.json for safekeeping.",
             "You can sign into your account by running `northstack org:login {$username}`."
         ]);
     }

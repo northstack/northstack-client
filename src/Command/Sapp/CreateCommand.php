@@ -87,7 +87,7 @@ class CreateCommand extends Command
         $orgId = $options['orgId'];
         if (empty($orgId))
         {
-            $path = getcwd()."/account.json";
+            $path = getcwd()."/.account.json";
             if (file_exists($path))
             {
                 $account = json_decode(file_get_contents($path));
