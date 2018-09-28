@@ -61,6 +61,16 @@ class WhoAmICommand extends Command
                     ['Email', $user->email],
                 ];
                 $io->table($headers, $rows);
+
+                $r = $this->api->getCurrentUserPermissions($this->token->$token);
+                $permissions = json_decode($r->getBody()->getContents());
+                $headers = ['Org Id', 'Permission', 'Added By', 'Updated'];
+                $rows = [];
+                foreach($permissions->data as $org)
+                {
+                    $rows[] = [$org->orgId, $org->permissions, $org->addedByUser, $org->updated];
+                }
+                $io->table($headers, $rows);
             }
         }
 
