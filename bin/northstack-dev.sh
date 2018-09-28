@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 
 # Wrapper for running the northstack cli in docker
 # Handles uid mapping, and given access to the docker sock so northstack can start local dev
