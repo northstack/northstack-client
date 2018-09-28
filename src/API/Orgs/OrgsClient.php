@@ -34,18 +34,27 @@ class OrgsClient extends BaseApiClient
         );
     }
 
-    public function get($orgId)
+    public function get($accessToken, $orgId)
     {
-        return $this->guzzle()->get("/orgs/$orgId");
+        return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
+            ->get("/orgs/$orgId");
     }
 
-    public function listUsers($orgId)
+    public function listUsers($accessToken, $orgId)
     {
-        return $this->guzzle()->get("/orgs/$orgId/users");
+        return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
+            ->get("/orgs/$orgId/users");
     }
 
-    public function getUser($userId)
+    public function getUser($accessToken, $userId)
     {
-        return $this->guzzle()->get("/orgs/user/$userId");
+        return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
+            ->get("/orgs/user/$userId");
+    }
+
+    public function getCurrentUserPermissions($accessToken)
+    {
+        return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
+            ->get("/orgs/permissions");
     }
 }
