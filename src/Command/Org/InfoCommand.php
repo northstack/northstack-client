@@ -52,16 +52,18 @@ class InfoCommand extends Command
         }
 
         $args = $input->getArguments();
-        $r = $this->api->get($args['id']);
+        $r = $this->api->get($this->token->token, $args['id']);
 
         $io = new SymfonyStyle($input, $output);
 
         $org = json_decode($r->getBody()->getContents());
-        print_r($org);
         $headers = ['Field', 'Value'];
         $rows = [
             ['Id', $org->id],
             ['Name', $org->name],
+            ['Created', $org->created],
+            ['Updated', $org->updated],
+            ['OwnerId', $org->ownerId],
         ];
 
         $io->table($headers, $rows);
