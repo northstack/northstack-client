@@ -38,4 +38,14 @@ class OrgsClient extends BaseApiClient
     {
         return $this->guzzle()->get("/orgs/$orgId");
     }
+
+    public function listUsers($orgId)
+    {
+        return $this->guzzle()->get("/orgs/$orgId/users");
+    }
+
+    public function getUser($userId)
+    {
+        return $this->guzzle()->get("/orgs/user/$userId");
+    }
 }
