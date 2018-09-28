@@ -33,4 +33,9 @@ class OrgsClient extends BaseApiClient
             ]
         );
     }
+
+    public function get($orgId)
+    {
+        return $this->guzzle()->get("/orgs/$orgId");
+    }
 }
