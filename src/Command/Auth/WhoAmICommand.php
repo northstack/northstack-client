@@ -48,9 +48,19 @@ class WhoAmICommand extends Command
 
             if ($type == 'Pagely.Model.Orgs.OrgUser')
             {
-                $r = $this->api->getUser($id);
+                $r = $this->api->getUser($this->token->$token, $id);
                 $user = json_decode($r->getBody()->getContents());
-                print_r($user);
+                $io = new SymfonyStyle($input, $output);
+
+                $headers = ['Field', 'Value'];
+                $rows = [
+                    ['Id', $user->id],
+                    ['Username', $user->username],
+                    ['First', $user->firstName],
+                    ['Last', $user->lastName],
+                    ['Email', $user->email],
+                ];
+                $io->table($headers, $rows);
             }
         }
 
