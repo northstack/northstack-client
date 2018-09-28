@@ -73,7 +73,7 @@ class SignupCommand extends Command
             return;
         }
 
-        $data = json_decode($r->getBody()->getContents());
+        $data = ['org' => json_decode($r->getBody()->getContents())];
 
         $nsdir = $input->getArgument('baseFolder');
         if ($nsdir === '.' || empty($nsdir)) {

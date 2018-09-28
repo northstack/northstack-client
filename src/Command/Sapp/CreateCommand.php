@@ -91,7 +91,7 @@ class CreateCommand extends Command
             if (file_exists($path))
             {
                 $account = json_decode(file_get_contents($path));
-                $orgId = $account->id;
+                $orgId = $account->org->id;
             }
         }
 
