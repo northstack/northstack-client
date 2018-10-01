@@ -135,8 +135,8 @@ class CreateCommand extends Command
             switch($sapp->environment)
             {
             case 'prod':
-                $config = ['environment' => 'production', 'install' => $install];
-                $build = [];
+                $config = ['environment' => 'production'];
+                $build = ['wordpress-install' => $install];
                 $domains = ['domains' => [$args['primaryDomain']]];
                 break;
             case 'test':
