@@ -27,7 +27,7 @@ class LoginCommand extends Command
         parent::configure();
         $this
             ->setDescription('Login and get save access token')
-            ->addArgument('username', InputArgument::REQUIRED)
+            ->addArgument('username', InputArgument::OPTIONAL)
             ->addOption('scope', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Scope keys', [])
             ->addOption('show', 's', InputOption::VALUE_NONE, 'Just show the token, do not save it!')
         ;
@@ -40,6 +40,14 @@ class LoginCommand extends Command
             $this->api->setDebug(true);
         }
 
+        $username = $input->getArgument('username');
+        if (empty($username))
+        {
+            $question = new Question('Username: ');
+            $helper = $this->getHelper('question');
+            $username = $helper->ask($input, $output, $question);
+        }
+
         $question = new Question('Password: ');
         $question->setHidden(true);
 
@@ -48,7 +56,7 @@ class LoginCommand extends Command
 
         try {
             $r = $this->api->login(
-                $input->getArgument('username'),
+                $username,
                 $password,
                 null,
                 $input->getOption('scope'),
