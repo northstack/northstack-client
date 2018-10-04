@@ -16,7 +16,9 @@ class OrgsClient extends BaseApiClient
         $password,
         $firstName,
         $lastName,
-        $email
+        $email,
+        $phone,
+        $phoneCountry = '1'
     )
     {
         return $this->guzzle()->post(
@@ -29,6 +31,8 @@ class OrgsClient extends BaseApiClient
                     'firstName' => $firstName,
                     'lastName' => $lastName,
                     'email' => $email,
+                    'phone' => $phone,
+                    'phoneCountry' => $phoneCountry,
                 ],
             ]
         );
@@ -55,6 +59,16 @@ class OrgsClient extends BaseApiClient
     public function getCurrentUserPermissions($accessToken)
     {
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->get("/orgs/permissions");
+            ->get('/orgs/permissions');
+    }
+
+    public function verify($accessToken, $orgId, $code)
+    {
+        return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
+            ->post("/orgs/{$orgId}/verify", [
+                'json' => [
+                    'code' => $code,
+                ],
+            ]);
     }
 }

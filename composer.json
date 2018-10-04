@@ -23,6 +23,7 @@
         "ramsey/uuid": "^3.5",
         "colinodell/json5": "^1.0",
         "eloquent/enumeration": "^5.1",
-        "ratchet/pawl": "^0.3.2"
+        "ratchet/pawl": "^0.3.2",
+        "giggsey/libphonenumber-for-php": "^8.9"
     }
 }
