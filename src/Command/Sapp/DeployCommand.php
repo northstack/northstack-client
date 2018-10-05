@@ -85,15 +85,7 @@ class DeployCommand extends Command
         exec("cd $appFolder && tar cvzf {$zip} app");
 
         // upload to s3
-        $this->guzzle->put($uploadUrl, [
-            'multipart' => [
-                [
-                    'name'     => 'file',
-                    'contents' => fopen($zip, 'rb'),
-                    'filename' => "{$sappId}.tar.gz",
-                ],
-            ],
-        ]);
+        $this->guzzle->put($uploadUrl, [ 'body' => fopen($zip, 'rb') ]);
         unlink($zip);
 
         // merge configs
