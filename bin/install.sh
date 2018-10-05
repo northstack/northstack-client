@@ -1,4 +1,4 @@
-#!/usr/bin/env sh
+#!/usr/bin/env bash
 set -e
 
 CDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
