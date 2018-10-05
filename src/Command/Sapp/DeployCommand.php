@@ -117,9 +117,9 @@ class DeployCommand extends Command
             $r = $this->api->deploy(
                 $this->token->token,
                 $sappId,
-                ($configs['config.json']),
-                ($configs['build.json']),
-                ($configs['domains.json'])
+                $configs['config.json'],
+                $configs['build.json'],
+                $configs['domains.json']
             );
         }
         catch(ClientException $e)
@@ -129,10 +129,10 @@ class DeployCommand extends Command
 
         $output->writeln("Deploy finished code: ".$r->getStatusCode());
         $body = json_decode($r->getBody()->getContents());
-        if ($r->getStatusCode() != 200)
+        if ($r->getStatusCode() !== 200)
         {
             print_r($body);
-            $output->Writeln("Deploy failed");
+            $output->writeln("Deploy failed");
             exit(1);
         }
         print_r($body);
@@ -155,18 +155,26 @@ class DeployCommand extends Command
         $io->table($headers, $rows);
 
 
-        $io->writeln("Build");
+        $io->writeln("Build Status:");
         $headers = ['Field', 'Value'];
+        $started = @$body->deploy->builder->started;
+        $stopped = @$body->deploy->builder->stopped;
+        $length = $started && $stopped ? strtotime($stopped) - strtotime($started) : '';
         $rows = [
-            ['Task Arn', $body->deploy->builder->taskArn],
-            ['Started', $body->deploy->builder->started],
-            ['Stopped', $body->deploy->builder->stopped],
-            ['Length', strtotime($body->deploy->builder->stopped) - strtotime($body->deploy->builder->started)],
+            ['Task Arn', @$body->deploy->builder->taskArn],
+            ['Started', $started],
+            ['Stopped', $stopped],
+            ['Length', $length],
         ];
 
         $io->table($headers, $rows);
 
-        $io->writeln("Worker");
+        if (!$stopped || isset($body->deploy->builder->failure)) {
+            $io->writeln('<error>Build failed</error>');
+            return;
+        }
+
+        $io->writeln("Worker Status");
         $headers = ['Field', 'Value'];
         $rows = [
             ['Task Arn', $body->deploy->worker->taskArn],
@@ -174,7 +182,5 @@ class DeployCommand extends Command
         ];
 
         $io->table($headers, $rows);
-
-
     }
 }
