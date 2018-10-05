@@ -6,6 +6,7 @@ namespace NorthStack\NorthStackClient\Command\Sapp;
 use GuzzleHttp\Exception\ClientException;
 use NorthStack\NorthStackClient\API\AuthApi;
 use NorthStack\NorthStackClient\API\Sapp\SappClient;
+use NorthStack\NorthStackClient\API\Orgs\OrgsClient;
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
 use Symfony\Component\Console\Input\InputArgument;
@@ -22,10 +23,13 @@ class CreateCommand extends Command
      */
     protected $api;
 
-    public function __construct(SappClient $api)
+    protected $orgs;
+
+    public function __construct(SappClient $api, OrgsClient $orgs)
     {
         parent::__construct('app:create');
         $this->api = $api;
+        $this->orgs = $orgs;
     }
 
     public function configure()
@@ -217,11 +221,24 @@ class CreateCommand extends Command
             $pass = $options['wpAdminPass'];
         }
 
+        if ($options['wpAdminEmail'] == 'account-email')
+        {
+            [$type, $id] = explode(':',json_decode(base64_decode(explode('.', $this->token->token)[1]))->sub);
+            $r = $this->orgs->getUser($this->token->token, $id);
+            $currentUser = json_decode($r->getBody()->getContents());
+            $email = $currentUser->email;
+        }
+        else
+        {
+            $email = $options['wpAdminEmail'];
+        }
+
         $install = [
             'url' => $args['primaryDomain'],
             'title' => $title,
             'admin_user' => $user,
             'admin_pass' => $pass,
+            'admin_email' => $email,
             'multisite' => $options['wpIsMultisite'],
             'subdomains' => $options['wpMultisiteSubdomains'],
         ];
