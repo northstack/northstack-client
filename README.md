@@ -49,9 +49,9 @@ To get usage help for any command, simply prefix the command name with `help`
 ## Help!
 
 ### What is my Account ID?
-1. You can get your account ID by logging into https://atomic-beta.pagely.com and
+1. You can get your account ID by logging into https://console.northstack.com and
 looking at the address in your browser. Your account ID will be the number directly following `/account/` in the address.
 
-2. If you are a collaborator and need the ID for another account, log in to atomic-beta (link above) and use the account switcher
+2. If you are a collaborator and need the ID for another account, log in to console (link above) and use the account switcher
 (click your name in the upper right) and switch to the account in question. The address in your browser
 will change to reflect the account ID you are now looking at.
