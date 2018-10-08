@@ -39,7 +39,6 @@ class CreateCommand extends Command
             ->addArgument('name', InputArgument::REQUIRED, 'App name')
             ->addArgument('primaryDomain', InputArgument::REQUIRED, 'Primary Domain')
             ->addArgument('baseFolder', InputArgument::OPTIONAL, 'Folder to create/install to (defaults to current directory)')
-            ->addOption('orgId', null, InputOption::VALUE_REQUIRED, 'Org ID (defaults to value in account.json in the current directory)')
             ->addOption('cluster', null, InputOption::VALUE_REQUIRED, 'Deployment location', 'dev-us-east-1')
             ->addOption('wpAdminUser', null, InputOption::VALUE_REQUIRED, 'Wordpress Admin Username on initial db creation', 'account-user')
             ->addOption('wpAdminPass', null, InputOption::VALUE_REQUIRED, 'Wordpress Admin Password on initial db creation', 'random-value')
@@ -87,18 +86,14 @@ class CreateCommand extends Command
             return;
         }
 
-        $orgId = $options['orgId'];
-        if (empty($orgId))
+        $path = "{$nsdir}/.account.json";
+        if (file_exists($path))
         {
-            $path = getcwd()."/.account.json";
-            if (file_exists($path))
-            {
-                $account = json_decode(file_get_contents($path));
-                $orgId = $account->org->id;
-            } else {
-                $output->writeln('<error>You must provide an Org ID via --orgId the first time you create an app</error>');
-                return;
-            }
+            $account = json_decode(file_get_contents($path));
+            $orgId = $account->org->id;
+        } else {
+            $output->writeln("<error>.account.json file not found in {$nsdir}. Please provide the path used when you signed up.</error>");
+            return;
         }
 
         try {
@@ -227,7 +222,7 @@ class CreateCommand extends Command
 
         if ($options['wpAdminEmail'] === 'account-email')
         {
-            [$type, $id] = explode(':',json_decode(base64_decode(explode('.', $this->token->token)[1]))->sub);
+            [, $id] = explode(':',json_decode(base64_decode(explode('.', $this->token->token)[1]))->sub);
             $r = $this->orgs->getUser($this->token->token, $id);
             $currentUser = json_decode($r->getBody()->getContents());
             $email = $currentUser->email;
