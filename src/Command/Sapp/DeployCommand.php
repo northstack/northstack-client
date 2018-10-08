@@ -127,7 +127,6 @@ class DeployCommand extends Command
             $output->writeln("Deploy failed");
             exit(1);
         }
-        print_r($body);
 
         $io = new SymfonyStyle($input, $output);
 
