@@ -4,7 +4,6 @@
 namespace NorthStack\NorthStackClient\Command\Sapp;
 
 use GuzzleHttp\Exception\ClientException;
-use NorthStack\NorthStackClient\API\AuthApi;
 use NorthStack\NorthStackClient\API\Sapp\SappClient;
 use NorthStack\NorthStackClient\API\Orgs\OrgsClient;
 use NorthStack\NorthStackClient\Command\Command;
@@ -40,7 +39,7 @@ class CreateCommand extends Command
             ->addArgument('name', InputArgument::REQUIRED, 'App name')
             ->addArgument('primaryDomain', InputArgument::REQUIRED, 'Primary Domain')
             ->addArgument('baseFolder', InputArgument::OPTIONAL, 'Folder to create/install to (defaults to current directory)')
-            ->addOption('orgId', null, InputOption::VALUE_REQUIRED, 'Org ID (defaults to value in accounts.json in the current directory)')
+            ->addOption('orgId', null, InputOption::VALUE_REQUIRED, 'Org ID (defaults to value in account.json in the current directory)')
             ->addOption('cluster', null, InputOption::VALUE_REQUIRED, 'Deployment location', 'dev-us-east-1')
             ->addOption('wpAdminUser', null, InputOption::VALUE_REQUIRED, 'Wordpress Admin Username on initial db creation', 'account-user')
             ->addOption('wpAdminPass', null, InputOption::VALUE_REQUIRED, 'Wordpress Admin Password on initial db creation', 'random-value')
@@ -96,6 +95,9 @@ class CreateCommand extends Command
             {
                 $account = json_decode(file_get_contents($path));
                 $orgId = $account->org->id;
+            } else {
+                $output->writeln('<error>You must provide an Org ID via --orgId the first time you create an app</error>');
+                return;
             }
         }
 
