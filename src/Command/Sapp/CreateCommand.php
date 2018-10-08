@@ -151,6 +151,7 @@ class CreateCommand extends Command
                 $config = ['environment' => 'testing', 'auth-type' => 'standard'];
                 $build = ['wordpress-install' => $install];
                 $domains = ['domains' => [$domain]];
+                break;
             case 'dev':
                 $domain = "ns-{$sapp->id}.{$sapp->cluster}-northstack.com";
                 $install['url'] = "http://$domain/";
@@ -172,7 +173,7 @@ class CreateCommand extends Command
         copy("{$assetPath}/build.json", "{$appPath}/config/build.json");
     }
 
-    function printSuccess($io, $data, $appPath)
+    function printSuccess(SymfonyStyle $io, $data, $appPath)
     {
         $sapps = $data->data;
         $appName = $sapps[0]->name;
@@ -194,15 +195,16 @@ class CreateCommand extends Command
         $io->table($headers, $rows);
     }
 
-    protected function buildWpInstallArgs($options, $args, $io)
+    protected function buildWpInstallArgs($options, $args, OutputInterface $io)
     {
-        if ($options['wpTitle'] == 'app-name')
+        if ($options['wpTitle'] === 'app-name') {
             $title = $args['name'];
-        else
+        } else {
             $title = $args['wpTitle'];
+        }
 
 
-        if ($options['wpAdminUser'] == 'account-user')
+        if ($options['wpAdminUser'] === 'account-user')
         {
             // TODO grab the username of the currently logged in user
             $user = "ns-admin";
@@ -213,7 +215,7 @@ class CreateCommand extends Command
             $user = $options['wpAdminUser'];
         }
 
-        if ($options['wpAdminPass'] == 'random-value')
+        if ($options['wpAdminPass'] === 'random-value')
         {
             $pass = bin2hex(random_bytes(16));
             $io->writeln("Wordpress Admin Password: $pass\n");
@@ -223,7 +225,7 @@ class CreateCommand extends Command
             $pass = $options['wpAdminPass'];
         }
 
-        if ($options['wpAdminEmail'] == 'account-email')
+        if ($options['wpAdminEmail'] === 'account-email')
         {
             [$type, $id] = explode(':',json_decode(base64_decode(explode('.', $this->token->token)[1]))->sub);
             $r = $this->orgs->getUser($this->token->token, $id);
