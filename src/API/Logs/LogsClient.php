@@ -6,6 +6,7 @@ namespace NorthStack\NorthStackClient\API\Logs;
 
 use NorthStack\NorthStackClient\API\BaseApiClient;
 use Ratchet\Client;
+use Symfony\Component\Console\Output\OutputInterface;
 
 class LogsClient extends BaseApiClient
 {
@@ -16,7 +17,7 @@ class LogsClient extends BaseApiClient
     protected $topic;
     protected $accessToken;
 
-    public function streamTopic(string $accessToken, callable $sender, string $topic)
+    public function streamTopic(string $accessToken, callable $sender, string $topic, OutputInterface $output = null)
     {
         $this->sender = $sender;
         $this->topic = $topic;
@@ -25,14 +26,20 @@ class LogsClient extends BaseApiClient
         $uri = rtrim($uri, '/');
         $uri .= '/logs';
 
+        if ($output) {
+            $output->writeln('Connecting...');
+        }
         Client\connect($uri)
             ->then(
-                function (Client\WebSocket $conn) {
+                function (Client\WebSocket $conn) use ($output) {
                     $conn->on('message', function ($message) {
                         $sender = $this->sender;
                         $sender($message);
                     });
 
+                    if ($output) {
+                        $output->writeln('Authenticating...');
+                    }
                     $conn->send(json_encode([
                         'accessToken' => $this->accessToken,
                         'action' => 'subscribe',

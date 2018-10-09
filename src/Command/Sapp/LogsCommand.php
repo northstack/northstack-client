@@ -72,6 +72,6 @@ class LogsCommand extends Command
         $this->api->streamTopic($this->token->token, function (Message $message) use ($output) {
             $data = json_decode((string) $message);
             $output->writeln($data->message);
-        }, $topic);
+        }, $topic, $output);
     }
 }
