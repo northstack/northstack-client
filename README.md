@@ -1,12 +1,17 @@
 # northstack-client
-PHP Library to access the NorthStack NorthStack APIs
+CLI Client and PHP Library to access the NorthStack NorthStack APIs
 
 # Installation
 
-Have a working docker install
+## Requirements
+*A working docker install*
 
-The client is dockerized run, so you can checkout the client and run the install script
-to build a local docker image and add the wrapper to `/usr/local/bin/northstack`
+## Install
+You will run the client in docker, so that takes care of the majority of the work.
+
+However configuration is required on each run (current path info volume mappating etc).
+
+So a wrapper install is installed into `/usr/local/bin/northstack` to handle that.
 
 ```
 git clone git@github.com:pagely/northstack.git
