@@ -8,7 +8,7 @@ use NorthStack\NorthStackClient\OauthToken;
 
 class LogoutCommand extends Command
 {
-    public function __construct($name = 'org:logout')
+    public function __construct($name = 'auth:logout')
     {
         parent::__construct($name);
     }

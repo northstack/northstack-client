@@ -43,7 +43,7 @@ northstack
 
 To get usage help for any command, simply prefix the command name with `help`
 ```
-northstack help org:login
+northstack help auth:login
 ```
 
 ## Help!

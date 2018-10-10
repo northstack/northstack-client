@@ -18,7 +18,7 @@ class LoginCommand extends Command
 
     public function __construct(AuthApi $api)
     {
-        parent::__construct('org:login');
+        parent::__construct('auth:login');
         $this->api = $api;
     }
 
