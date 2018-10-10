@@ -95,7 +95,7 @@ class SignupCommand extends Command
         $output->writeln([
             "Success! Welcome to NorthStack, {$username}.",
             "Your account details have been written to {$nsdir}/.account.json for safekeeping.",
-            "You can sign into your account by running `northstack org:login {$username}`."
+            "You can sign into your account by running `northstack auth:login {$username}`."
         ]);
     }
     protected function mkDirIfNotExists($path) {
