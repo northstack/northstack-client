@@ -23,7 +23,7 @@ wrapper scripts only work Linux and Mac.  Windows wrappers scripts are still a t
 
 ## Login
 ```
-./bin/northstack auth:login my@northstack-username.com
+northstack auth:login my@northstack-username.com
 ```
 
 This will save a login token to `~/.northstacklogin`. The login will be good for 14 hours.  After that you will need to login again.
@@ -38,12 +38,12 @@ When done, you may use the `auth:logout` command or simply remove the `~/.norths
 
 Executing the `northstack` command by itself will show the commands available.
 ```
-./bin/northstack
+northstack
 ```
 
 To get usage help for any command, simply prefix the command name with `help`
 ```
-./bin/northstack help auth:login
+northstack help org:login
 ```
 
 ## Help!
