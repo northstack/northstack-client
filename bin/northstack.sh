@@ -9,6 +9,8 @@ if [[ -S /var/lib/docker.sock ]]; then
 elif [[ -S $HOME/Library/Containers/com.docker.docker/Data/docker.sock ]]; then
     # the control socket likes to hide here on OSX
     socket=$HOME/Library/Containers/com.docker.docker/Data/docker.sock
+elif [[ -S /var/run/docker.sock ]]; then
+    socket=/var/run/docker.sock
 else
     echo "Error: no docker control socket found. Is docker installed and running?"
     exit 1
