@@ -28,10 +28,10 @@ class VerifyCommand extends Command
     public function configure()
     {
         parent::configure();
-        $this->setDescription('NorthStack Signup Verification')
+        $this->setDescription('NorthStack Signup Phone Verification')
             ->addArgument('orgId', InputArgument::REQUIRED, 'Organization ID from signup')
-            ->addArgument('code', InputArgument::REQUIRED, 'Code sent via text message')
-        ;
+            ->addArgument('code', InputArgument::REQUIRED, 'Code sent via text message');
+        $this->addOauthOptions();
     }
 
     public function execute(InputInterface $input, OutputInterface $output)
