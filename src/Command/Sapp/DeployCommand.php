@@ -81,8 +81,10 @@ class DeployCommand extends Command
         $uploadUrl = $r->uploadUrl;
 
         // tarball folder
-        $zip = "{$args['baseFolder']}/{$sappId}.tar.gz";
-        exec("cd $appFolder && tar cvzf {$zip} app");
+        $zip = escapeshellarg("{$args['baseFolder']}/{$sappId}.tar.gz");
+        $tarFolder = escapeshellarg($appFolder);
+        $cmd = "tar -C {$tarFolder} -cvzf {$zip} app";
+        exec($cmd);
 
         // upload to s3
         $this->guzzle->put($uploadUrl, [ 'body' => fopen($zip, 'rb') ]);
