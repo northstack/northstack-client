@@ -85,7 +85,16 @@ class DeployCommand extends Command
         $tarFile = escapeshellarg($zip);
         $tarFolder = escapeshellarg($appFolder);
         $cmd = "tar -C {$tarFolder} -cvzf {$tarFile} app";
-        exec($cmd);
+        exec($cmd, $out, $ret);
+        if ($ret !== 0)
+        {
+            $output->writeln([
+                "Uh oh, something went wrong while preparing the app for deploy",
+                "Command: {$cmd}",
+                "Exit code: {$ret}",
+            ]);
+            exit(1);
+        }
 
         // upload to s3
         $this->guzzle->put($uploadUrl, [ 'body' => fopen($zip, 'rb') ]);
