@@ -71,4 +71,10 @@ class OrgsClient extends BaseApiClient
                 ],
             ]);
     }
+
+    public function verifyRequest($accessToken, $orgId)
+    {
+        return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
+            ->post("/orgs/{$orgId}/verify-request");
+    }
 }

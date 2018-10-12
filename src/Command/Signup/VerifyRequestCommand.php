@@ -11,7 +11,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-class VerifyCommand extends Command
+class VerifyRequestCommand extends Command
 {
     use OauthCommandTrait;
     /**
@@ -21,23 +21,22 @@ class VerifyCommand extends Command
 
     public function __construct(OrgsClient $api)
     {
-        parent::__construct('signup:verify');
+        parent::__construct('signup:reverify');
         $this->api = $api;
     }
 
     public function configure()
     {
         parent::configure();
-        $this->setDescription('NorthStack Signup Phone Verification')
-            ->addArgument('orgId', InputArgument::REQUIRED, 'Organization ID from signup')
-            ->addArgument('code', InputArgument::REQUIRED, 'Code sent via text message');
+        $this->setDescription('NorthStack Signup Phone Verification (re-request a text)')
+            ->addArgument('orgId', InputArgument::REQUIRED, 'Organization ID from signup');
         $this->addOauthOptions();
     }
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->api->verify($this->token->token, $input->getArgument('orgId'), $input->getArgument('code'));
+        $this->api->verifyRequest($this->token->token, $input->getArgument('orgId'));
 
-        $output->writeln('Verified!');
+        $output->writeln('Check your phone!');
     }
 }
