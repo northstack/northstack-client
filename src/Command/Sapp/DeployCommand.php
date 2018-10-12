@@ -81,9 +81,10 @@ class DeployCommand extends Command
         $uploadUrl = $r->uploadUrl;
 
         // tarball folder
-        $zip = escapeshellarg("{$args['baseFolder']}/{$sappId}.tar.gz");
+        $zip = "{$args['baseFolder']}/{$sappId}.tar.gz";
+        $tarFile = escapeshellarg($zip);
         $tarFolder = escapeshellarg($appFolder);
-        $cmd = "tar -C {$tarFolder} -cvzf {$zip} app";
+        $cmd = "tar -C {$tarFolder} -cvzf {$tarFile} app";
         exec($cmd);
 
         // upload to s3
