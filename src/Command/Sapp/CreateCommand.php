@@ -8,6 +8,7 @@ use NorthStack\NorthStackClient\API\Sapp\SappClient;
 use NorthStack\NorthStackClient\API\Orgs\OrgsClient;
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
+use NorthStack\NorthStackClient\OrgAccountHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
@@ -23,12 +24,17 @@ class CreateCommand extends Command
     protected $api;
 
     protected $orgs;
+    /**
+     * @var OrgAccountHelper
+     */
+    private $orgAccountHelper;
 
-    public function __construct(SappClient $api, OrgsClient $orgs)
+    public function __construct(SappClient $api, OrgsClient $orgs, OrgAccountHelper $orgAccountHelper)
     {
         parent::__construct('app:create');
         $this->api = $api;
         $this->orgs = $orgs;
+        $this->orgAccountHelper = $orgAccountHelper;
     }
 
     public function configure()
@@ -46,6 +52,7 @@ class CreateCommand extends Command
             ->addOption('wpTitle', null, InputOption::VALUE_REQUIRED, 'WordPress title', "app-name")
             ->addOption('wpIsMultisite', null, InputOption::VALUE_NONE, 'WordPress is this a multi-site install')
             ->addOption('wpMultisiteSubdomains', null, InputOption::VALUE_NONE, 'WordPress multi-site subdomains install')
+            ->addOption('orgId', null, InputOption::VALUE_REQUIRED, 'Only needed if you have access to multiple organizations')
         ;
         $this->addOauthOptions();
     }
@@ -73,7 +80,7 @@ class CreateCommand extends Command
 
         // create folder structure
         $nsdir = $input->getArgument('baseFolder');
-        $HOME = getenv('HOME');
+
         if ($nsdir === '.' || empty($nsdir)) {
             $nsdir = getcwd();
         } elseif (!file_exists($nsdir)) {
@@ -87,24 +94,7 @@ class CreateCommand extends Command
             return;
         }
 
-        $path = "{$HOME}/.northstackaccount.json";
-        if (file_exists($path))
-        {
-            $accounts = json_decode(file_get_contents($path), true);
-            if (count($accounts) > 1) {
-                if (!$input->getOption('orgId')) {
-                    $output->writeln('<error>As there are multiple orgs available to you, you must provide an org ID via --orgId</error>');
-                    return;
-                }
-
-                $orgId = $input->getOption('orgId');
-            } else {
-                $orgId = array_keys($accounts)[0];
-            }
-        } else {
-            $output->writeln("<error>.northstackaccount.json file not found in {$HOME}. Please log in again to generate it.</error>");
-            return;
-        }
+        $orgId = $input->getOption('orgId') ?: $this->orgAccountHelper->getDefaultOrg()['id'];
 
         try {
             $r = $this->api->createApp(
