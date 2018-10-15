@@ -40,12 +40,12 @@ class CreateCommand extends Command
             ->addArgument('primaryDomain', InputArgument::REQUIRED, 'Primary Domain')
             ->addArgument('baseFolder', InputArgument::OPTIONAL, 'Folder to create/install to (defaults to current directory)')
             ->addOption('cluster', null, InputOption::VALUE_REQUIRED, 'Deployment location', 'dev-us-east-1')
-            ->addOption('wpAdminUser', null, InputOption::VALUE_REQUIRED, 'Wordpress Admin Username on initial db creation', 'account-user')
-            ->addOption('wpAdminPass', null, InputOption::VALUE_REQUIRED, 'Wordpress Admin Password on initial db creation', 'random-value')
-            ->addOption('wpAdminEmail', null, InputOption::VALUE_REQUIRED, 'Wordpress Admin Email on initial db creation', 'account-email')
-            ->addOption('wpTitle', null, InputOption::VALUE_REQUIRED, 'Wordpress title', "app-name")
-            ->addOption('wpIsMultisite', null, InputOption::VALUE_NONE, 'Wordpress is this a multi-site install')
-            ->addOption('wpMultisiteSubdomains', null, InputOption::VALUE_NONE, 'Wordpress multi-site subdomains install')
+            ->addOption('wpAdminUser', null, InputOption::VALUE_REQUIRED, 'WordPress Admin Username on initial db creation', 'account-user')
+            ->addOption('wpAdminPass', null, InputOption::VALUE_REQUIRED, 'WordPress Admin Password on initial db creation', 'random-value')
+            ->addOption('wpAdminEmail', null, InputOption::VALUE_REQUIRED, 'WordPress Admin Email on initial db creation', 'account-email')
+            ->addOption('wpTitle', null, InputOption::VALUE_REQUIRED, 'WordPress title', "app-name")
+            ->addOption('wpIsMultisite', null, InputOption::VALUE_NONE, 'WordPress is this a multi-site install')
+            ->addOption('wpMultisiteSubdomains', null, InputOption::VALUE_NONE, 'WordPress multi-site subdomains install')
         ;
         $this->addOauthOptions();
     }
@@ -203,7 +203,7 @@ class CreateCommand extends Command
         {
             // TODO grab the username of the currently logged in user
             $user = "ns-admin";
-            $io->writeln("Wordpress Admin User: $user\n");
+            $io->writeln("WordPress Admin User: $user\n");
         }
         else
         {
@@ -213,7 +213,7 @@ class CreateCommand extends Command
         if ($options['wpAdminPass'] === 'random-value')
         {
             $pass = bin2hex(random_bytes(16));
-            $io->writeln("Wordpress Admin Password: $pass\n");
+            $io->writeln("WordPress Admin Password: $pass\n");
         }
         else
         {
