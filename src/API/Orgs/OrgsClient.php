@@ -77,4 +77,10 @@ class OrgsClient extends BaseApiClient
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
             ->post("/orgs/{$orgId}/verify-request");
     }
+
+    public function listOrgs($accessToken)
+    {
+        return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
+            ->get("/orgs");
+    }
 }
