@@ -2,7 +2,7 @@
 
 log() {
     ts=$(date '+%Y-%m-%d %H:%M:%S')
-    echo $ts $@ > /dev/stderr
+    echo -e "$ts\t$@" > /dev/stderr
 }
 
 getInstallPath() {
@@ -15,7 +15,7 @@ getInstallPath() {
     else
         log "Using install path: $INSTALL_PATH"
     fi
-    echo ${INSTALL_PATH%*/}
+    printf ${INSTALL_PATH%*/}
 }
 
 copyFile() {
