@@ -16,7 +16,7 @@ So a wrapper install is installed into `/usr/local/bin/northstack` to handle tha
 ```
 git clone git@github.com:pagely/northstack.git
 cd northstack
-sudo ./bin/install.sh
+./bin/install.sh
 ```
 
 ## OS Support
