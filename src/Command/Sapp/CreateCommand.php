@@ -73,6 +73,7 @@ class CreateCommand extends Command
 
         // create folder structure
         $nsdir = $input->getArgument('baseFolder');
+        $HOME = getenv('HOME');
         if ($nsdir === '.' || empty($nsdir)) {
             $nsdir = getcwd();
         } elseif (!file_exists($nsdir)) {
@@ -86,13 +87,22 @@ class CreateCommand extends Command
             return;
         }
 
-        $path = "{$nsdir}/.account.json";
+        $path = "{$HOME}/.northstackaccount.json";
         if (file_exists($path))
         {
-            $account = json_decode(file_get_contents($path));
-            $orgId = $account->org->id;
+            $accounts = json_decode(file_get_contents($path), true);
+            if (count($accounts) > 1) {
+                if (!$input->getOption('orgId')) {
+                    $output->writeln('<error>As there are multiple orgs available to you, you must provide an org ID via --orgId</error>');
+                    return;
+                }
+
+                $orgId = $input->getOption('orgId');
+            } else {
+                $orgId = array_keys($accounts)[0];
+            }
         } else {
-            $output->writeln("<error>.account.json file not found in {$nsdir}. Please provide the path used when you signed up.</error>");
+            $output->writeln("<error>.northstackaccount.json file not found in {$HOME}. Please log in again to generate it.</error>");
             return;
         }
 

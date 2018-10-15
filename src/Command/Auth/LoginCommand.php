@@ -1,6 +1,7 @@
 <?php
 namespace NorthStack\NorthStackClient\Command\Auth;
 
+use NorthStack\NorthStackClient\API\Orgs\OrgsClient;
 use NorthStack\NorthStackClient\Command\Command;
 use GuzzleHttp\Exception\BadResponseException;
 use NorthStack\NorthStackClient\API\AuthApi;
@@ -15,11 +16,16 @@ use Symfony\Component\Console\Question\Question;
 class LoginCommand extends Command
 {
     protected $api;
+    /**
+     * @var OrgsClient
+     */
+    private $orgsClient;
 
-    public function __construct(AuthApi $api)
+    public function __construct(AuthApi $api, OrgsClient $orgsClient)
     {
         parent::__construct('auth:login');
         $this->api = $api;
+        $this->orgsClient = $orgsClient;
     }
 
     public function configure()
@@ -48,8 +54,7 @@ class LoginCommand extends Command
             $username = $helper->ask($input, $output, $question);
         }
 
-        $question = new Question('Password: ');
-        $question->setHidden(true);
+        $question = (new Question('Password: '))->setHidden(true);
 
         $helper = $this->getHelper('question');
         $password = $helper->ask($input, $output, $question);
@@ -75,6 +80,30 @@ class LoginCommand extends Command
             $token = new OauthToken();
             $token->saveRaw($r->getBody()->getContents());
             $output->writeln('Logged in');
-       }
+        }
+
+        $home = getenv('HOME');
+        $accountsFile = "{$home}/.northstackaccount.json";
+        if (file_exists($accountsFile)) {
+            $orgs = json_decode(file_get_contents($accountsFile), true);
+        } else {
+            $orgs = [];
+        }
+
+        $token = new OauthToken();
+        try {
+            $data = $this->orgsClient->listOrgs($token->token)->getBody()->getContents();
+        } catch (\Throwable $e) {
+            $output->writeln('<error>Could not fetch the orgs you belong to</error>');
+            return;
+        }
+
+        $data = json_decode($data)->data;
+
+        foreach ($data as $org) {
+            $orgs[$org->id] = $org;
+        }
+
+        file_put_contents($accountsFile, json_encode($orgs));
     }
 }

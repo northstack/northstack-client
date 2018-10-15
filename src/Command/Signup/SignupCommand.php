@@ -81,20 +81,16 @@ class SignupCommand extends Command
             return;
         }
 
-        $data = ['org' => json_decode($r->getBody()->getContents())];
+        $org = json_decode($r->getBody()->getContents());
+        $data = [$org->id => $org];
 
-        $nsdir = $input->getArgument('baseFolder');
-        if ($nsdir === '.' || empty($nsdir)) {
-            $nsdir = getcwd();
-        } elseif (!file_exists($nsdir)) {
-            $this->mkDirIfNotExists($nsdir);
-        }
+        $HOME = getenv('HOME');
 
-        file_put_contents("$nsdir/.account.json", json_encode($data));
+        file_put_contents("{$HOME}/.northstackaccount.json", json_encode($data));
 
         $output->writeln([
             "Success! Welcome to NorthStack, {$username}.",
-            "Your account details have been written to {$nsdir}/.account.json for safekeeping.",
+            "Your account details have been written to {$HOME}/.northstackaccount.json for safekeeping.",
             "You can sign into your account by running `northstack auth:login {$username}`."
         ]);
     }
