@@ -89,7 +89,7 @@ class DeployCommand extends Command
         if ($ret !== 0)
         {
             $output->writeln([
-                "Uh oh, something went wrong while preparing the app for deploy",
+                "<error>Uh oh, something went wrong while preparing the app for deploy</error>",
                 "Command: {$cmd}",
                 "Exit code: {$ret}",
             ]);
