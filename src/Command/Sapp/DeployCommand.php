@@ -83,8 +83,8 @@ class DeployCommand extends Command
         // tarball folder
         $zip = "{$args['baseFolder']}/{$sappId}.tar.gz";
         $tarFile = escapeshellarg($zip);
-        $tarFolder = escapeshellarg($appFolder);
-        $cmd = "tar -C {$tarFolder} -cvzf {$tarFile} app";
+        $tarFolder = escapeshellarg($appFolder."/app");
+        $cmd = "tar -C {$tarFolder} -cvzf {$tarFile} .";
         exec($cmd, $out, $ret);
         if ($ret !== 0)
         {
