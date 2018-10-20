@@ -8,6 +8,7 @@ use NorthStack\NorthStackClient\API\Logs\LogsClient;
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
 use NorthStack\NorthStackClient\JSON\Merger;
+use NorthStack\NorthStackClient\LogFormat\LogFormat;
 use Ratchet\RFC6455\Messaging\Message;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -69,9 +70,12 @@ class LogsCommand extends Command
             $topic = $options['topicOverride'];
         }
 
-        $this->api->streamTopic($this->token->token, function (Message $message) use ($output) {
+        $format = LogFormat::getFormat($args['topic']);
+        $formatter = new $format($output);
+
+        $this->api->streamTopic($this->token->token, function (Message $message) use ($formatter) {
             $data = json_decode((string) $message);
-            $output->writeln($data->message);
+            $formatter->render($data);
         }, $topic, $output);
     }
 }
