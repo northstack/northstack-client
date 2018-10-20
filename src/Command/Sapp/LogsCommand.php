@@ -50,6 +50,7 @@ class LogsCommand extends Command
             ->addArgument('topic', InputArgument::REQUIRED, 'Log type (access, error, platform)')
             ->addArgument('baseFolder', InputArgument::OPTIONAL, 'Path to root of NorthStack folder (contains folder named after app)')
             ->addOption('topicOverride', 't', InputOption::VALUE_REQUIRED, 'Override Topic (You should know what you are doing if you are using this)')
+            ->addOption('json', null, InputOption::VALUE_NONE, 'Output raw json', null)
         ;
         $this->addOauthOptions();
     }
@@ -70,7 +71,8 @@ class LogsCommand extends Command
             $topic = $options['topicOverride'];
         }
 
-        $format = LogFormat::getFormat($args['topic']);
+        $formatHint = isset($options['json']) ? 'json' : $args['topic'];
+        $format = LogFormat::getFormat($formatHint);
         $formatter = new $format($output);
 
         $this->api->streamTopic($this->token->token, function (Message $message) use ($formatter) {
