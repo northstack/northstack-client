@@ -71,7 +71,7 @@ class LogsCommand extends Command
             $topic = $options['topicOverride'];
         }
 
-        $formatHint = (null === $options['json']) ? 'json' : $args['topic'];
+        $formatHint = $options['json'] ? 'json' : $args['topic'];
         $format = LogFormat::getFormat($formatHint);
         $formatter = new $format($output);
 
