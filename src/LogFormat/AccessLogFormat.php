@@ -2,31 +2,10 @@
 
 namespace NorthStack\NorthStackClient\LogFormat;
 
-use NorthStack\NorthStackClient\LogFormat\BaseLogFormat;
+use NorthStack\NorthStackClient\LogFormat\TemplateLogFormat;
 
-class AccessLogFormat extends BaseLogFormat
+class AccessLogFormat extends TemplateLogFormat
 {
-    private $fields = [
-        'addr',
-        'host',
-        'method',
-        'normalizedUri',
-        'http_version',
-        'http_status',
-        'ua',
-        'upstream_cache_status'
-    ];
+    protected $template = '[{{@timestamp}}] {{server_name}} {{addr}} {{host}} "{{method}} {{normalizedUri}} {{http_version}}" {{http_status}} "{{ua}}" {{request_time}}';
 
-    public function renderLog($msg)
-    {
-        $data = json_decode($msg->message);
-        $time = date(DATE_ISO8601, $data->{"@timestamp"});
-        $items = [];
-        foreach ($this->fields as $field)
-        {
-            $items[] = @$data->{$field};
-        }
-        $out = implode(' ', $items);
-        $this->io->writeln("{$time} {$out}");
-    }
 }
