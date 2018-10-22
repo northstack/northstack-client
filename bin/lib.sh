@@ -2,7 +2,7 @@
 
 log() {
     ts=$(date '+%Y-%m-%d %H:%M:%S')
-    echo -e "$ts\t$@" > /dev/stderr
+    echo -e "[$ts]\t$@" > /dev/stderr
 }
 
 getInstallPath() {
@@ -29,4 +29,16 @@ copyFile() {
         log "Warning: $dest is not writeable by your shell user. Using sudo to copy"
         sudo cp -v "$src" "$dest"
     fi
+}
+
+checkDocker() {
+    which docker &>/dev/null || {
+        log "No docker executable found. Is docker installed?"
+        exit 1
+    }
+
+    docker info &>/dev/null || {
+        log "Running \`docker info\` failed. Is the docker daemon running?"
+        exit 1
+    }
 }

@@ -5,6 +5,8 @@ CDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 source $CDIR/lib.sh
 
+checkDocker
+
 $CDIR/build.sh
 
 install_path="$(getInstallPath)"
