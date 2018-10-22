@@ -47,7 +47,7 @@ class LogsCommand extends Command
             ->setDescription('NorthStack App Logs')
             ->addArgument('name', InputArgument::REQUIRED, 'App name')
             ->addArgument('environment', InputArgument::REQUIRED, 'Environment (prod, test, or dev)')
-            ->addArgument('topic', InputArgument::REQUIRED, 'Log type (access, error, platform)')
+            ->addArgument('topic', InputArgument::REQUIRED, 'Log type (access, error, build)')
             ->addArgument('baseFolder', InputArgument::OPTIONAL, 'Path to root of NorthStack folder (contains folder named after app)')
             ->addOption('topicOverride', 't', InputOption::VALUE_REQUIRED, 'Override Topic (You should know what you are doing if you are using this)')
             ->addOption('json', null, InputOption::VALUE_NONE, 'Output raw json', null)
@@ -75,9 +75,34 @@ class LogsCommand extends Command
         $format = LogFormat::getFormat($formatHint);
         $formatter = new $format($output);
 
+        if ($args['topic'] === 'build')
+        {
+            $this->showBuildLog($sappId, $formatter);
+            exit;
+        }
         $this->api->streamTopic($this->token->token, function (Message $message) use ($formatter) {
             $data = json_decode((string) $message);
             $formatter->render($data);
         }, $topic, $output);
+    }
+
+    protected function showBuildLog(string $sappId, $formatter)
+    {
+        $resp = $this->api->getBuildLog(
+            $this->token->token,
+            $sappId
+        );
+        $data = json_decode($resp->getBody()->getContents());
+        foreach ($data->data as $msg)
+        {
+            // Massaging things a bit to get the events into the same format as the streaming API
+            $msg->{'@timestamp'} = $msg->timestamp/1000;
+            $formatter->render(
+                (object) [
+                    'type' => 'log',
+                    'message' => json_encode($msg)
+                ]
+            );
+        }
     }
 }
