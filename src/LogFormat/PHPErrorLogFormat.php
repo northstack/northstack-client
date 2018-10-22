@@ -3,13 +3,9 @@
 namespace NorthStack\NorthStackClient\LogFormat;
 
 use NorthStack\NorthStackClient\LogFormat\BaseLogFormat;
+use NorthStack\NorthStackClient\LogFormat\TemplateLogFormat;
 
-class PHPErrorLogFormat extends BaseLogFormat
+class PHPErrorLogFormat extends TemplateLogFormat
 {
-    public function renderLog($msg)
-    {
-        $data = json_decode($msg->message);
-        $time = date(DATE_ISO8601, $data->{"@timestamp"});
-        $this->io->writeln("{$time}  {$data->message}");
-    }
+    protected $template = '[{{@timestamp}}] {{message}}';
 }

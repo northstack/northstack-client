@@ -7,6 +7,7 @@ use NorthStack\NorthStackClient\LogFormat\LogFormatInterface;
 class BaseLogFormat implements LogFormatInterface
 {
     protected $io;
+    protected $timeFmt = DATE_ISO8601;
 
     public function __construct($io)
     {
@@ -30,5 +31,10 @@ class BaseLogFormat implements LogFormatInterface
     protected function renderInfo($msg)
     {
         $this->io->writeln($msg->message);
+    }
+
+    protected function renderTimestamp($ts)
+    {
+        return date($this->timeFmt, $ts);
     }
 }

@@ -17,7 +17,6 @@ class LogFormat
     public static function getFormat($format)
     {
         $fmt = self::$formats[$format];
-        error_log("Using $fmt");
         return $fmt;
     }
 }
