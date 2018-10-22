@@ -8,6 +8,7 @@ use NorthStack\NorthStackClient\API\Logs\LogsClient;
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
 use NorthStack\NorthStackClient\JSON\Merger;
+use NorthStack\NorthStackClient\LogFormat\LogFormat;
 use Ratchet\RFC6455\Messaging\Message;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -49,6 +50,7 @@ class LogsCommand extends Command
             ->addArgument('topic', InputArgument::REQUIRED, 'Log type (access, error, platform)')
             ->addArgument('baseFolder', InputArgument::OPTIONAL, 'Path to root of NorthStack folder (contains folder named after app)')
             ->addOption('topicOverride', 't', InputOption::VALUE_REQUIRED, 'Override Topic (You should know what you are doing if you are using this)')
+            ->addOption('json', null, InputOption::VALUE_NONE, 'Output raw json', null)
         ;
         $this->addOauthOptions();
     }
@@ -69,9 +71,13 @@ class LogsCommand extends Command
             $topic = $options['topicOverride'];
         }
 
-        $this->api->streamTopic($this->token->token, function (Message $message) use ($output) {
+        $formatHint = (null === $options['json']) ? 'json' : $args['topic'];
+        $format = LogFormat::getFormat($formatHint);
+        $formatter = new $format($output);
+
+        $this->api->streamTopic($this->token->token, function (Message $message) use ($formatter) {
             $data = json_decode((string) $message);
-            $output->writeln($data->message);
+            $formatter->render($data);
         }, $topic, $output);
     }
 }
