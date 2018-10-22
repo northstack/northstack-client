@@ -84,13 +84,20 @@ class SignupCommand extends Command
         $org = json_decode($r->getBody()->getContents());
         $data = [$org->id => $org];
 
-        $HOME = getenv('HOME');
+        $accountFile = getenv('HOME').'/.northstackaccount.json';
+        if (file_exists($accountFile))
+        {
 
-        file_put_contents("{$HOME}/.northstackaccount.json", json_encode($data));
+            $output->writeln("Existing NorthStack account file found at {$accountFile}");
+            $existingData = json_decode(file_get_contents($accountFile), true);
+            $data = array_merge($existingData, $data);
+        }
+
+        file_put_contents($accountFile, json_encode($data));
 
         $output->writeln([
             "Success! Welcome to NorthStack, {$username}.",
-            "Your account details have been written to {$HOME}/.northstackaccount.json for safekeeping.",
+            "Your account details have been written to {$accountFile} for safekeeping.",
             "You can sign into your account by running `northstack auth:login {$username}`."
         ]);
     }
