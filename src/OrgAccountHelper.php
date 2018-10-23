@@ -23,7 +23,11 @@ class OrgAccountHelper
         $data = json_decode(file_get_contents($this->file), true);
 
         if (count($data) > 1) {
-            throw new \Exception('More than one org accessible. Please provide org ID');
+            if (array_key_exists('default', $data))
+            {
+                return $data[$data['default']];
+            }
+            throw new \Exception('More than one org accessible, and no default is set. Please provide org ID');
         }
 
         return array_values($data)[0];

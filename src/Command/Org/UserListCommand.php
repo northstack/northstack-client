@@ -6,6 +6,7 @@ use NorthStack\NorthStackClient\API\Orgs\OrgsClient;
 
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
+use NorthStack\NorthStackClient\Command\OrgCommandTrait;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -14,6 +15,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class UserListCommand extends Command
 {
+    use OrgCommandTrait;
     use OauthCommandTrait;
     /**
      * @var OrgsClient
@@ -37,9 +39,9 @@ class UserListCommand extends Command
         parent::configure();
         $this
             ->setDescription('List all the users in an orgization')
-            ->addArgument('id', InputArgument::REQUIRED, 'Org Id')
         ;
         $this->addOauthOptions();
+        $this->addOrgOption();
     }
 
     public function execute(InputInterface $input, OutputInterface $output)
@@ -50,7 +52,8 @@ class UserListCommand extends Command
         }
 
         $args = $input->getArguments();
-        $r = $this->api->listUsers($this->token->token, $args['id']);
+        $this->setCurrentOrg($input->getOption('org'), true);
+        $r = $this->api->listUsers($this->token->token, $this->currentOrg['id']);
 
         $io = new SymfonyStyle($input, $output);
 

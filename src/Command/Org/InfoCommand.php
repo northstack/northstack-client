@@ -8,6 +8,7 @@ use NorthStack\NorthStackClient\API\Orgs\OrgsClient;
 
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
+use NorthStack\NorthStackClient\Command\OrgCommandTrait;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -16,6 +17,7 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 class InfoCommand extends Command
 {
+    use OrgCommandTrait;
     use OauthCommandTrait;
     /**
      * @var OrgsClient
@@ -39,9 +41,9 @@ class InfoCommand extends Command
         parent::configure();
         $this
             ->setDescription('Show details about an Org')
-            ->addArgument('id', InputArgument::REQUIRED, 'Org Id')
         ;
         $this->addOauthOptions();
+        $this->addOrgOption();
     }
 
     public function execute(InputInterface $input, OutputInterface $output)
@@ -52,7 +54,9 @@ class InfoCommand extends Command
         }
 
         $args = $input->getArguments();
-        $r = $this->api->get($this->token->token, $args['id']);
+        $this->setCurrentOrg($input->getOption('org'), true);
+
+        $r = $this->api->get($this->token->token, $this->currentOrg['id']);
 
         $io = new SymfonyStyle($input, $output);
 
