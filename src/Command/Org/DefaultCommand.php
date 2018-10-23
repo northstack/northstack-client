@@ -39,8 +39,11 @@ class DefaultCommand extends Command
                 $this->updateAccountsFile(['default' => $org['id']]);
                 $output->writeln("Default org set to {$org['id']}");
                 return;
+            } else
+            {
+                $output->writeln("<error>Org {$orgId} not found. See `org:list` for a listing of local orgs</error>");
+                return;
             }
-
         }
 
         $default = $this->getDefaultOrg();
