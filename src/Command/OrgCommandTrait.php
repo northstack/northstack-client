@@ -29,20 +29,11 @@ trait OrgCommandTrait
             return;
         }
 
-        $orgs = $this->getOrgs();
-        if (array_key_exists($org, $orgs))
+        $foundOrg = $this->getOrg($org);
+        if ($foundOrg)
         {
-            $this->currentOrg = $orgs[$org];
+            $this->currentOrg = $foundOrg;
             return;
-        }
-
-        foreach ($orgs as $orgByName)
-        {
-            if ($orgByName['name'] === $org)
-            {
-                $this->currentOrg = $orgByName;
-                return;
-            }
         }
 
         throw new \Exception("Org name/ID ({$org}) not found in {$accountFile}");
@@ -77,13 +68,19 @@ trait OrgCommandTrait
     protected function getOrg($idOrName)
     {
         $orgs = $this->getOrgs();
+        // Locate by orgId
         if (array_key_exists($idOrName, $orgs))
         {
             return $orgs[$idOrName];
         }
 
-        foreach ($orgs as $org)
+        // Locate by org name
+        foreach ($orgs as $id => $org)
         {
+            if ($id === 'default')
+            {
+                continue;
+            }
             if ($org['name'] === $idOrName)
             {
                 return $org;
