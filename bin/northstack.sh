@@ -38,11 +38,14 @@ else
     exit 1
 fi
 
+GID=$(id -g)
+
 docker run -ti --rm \
     -e DEBUG=$DEBUG \
     -e HOME=$HOME \
     -e NS_PWD="$NS_PWD" \
-    --user=$UID --userns=host \
+    --user=$UID:$GID \
+    --userns=host \
     --volume "$NS_PWD:$NS_PWD" \
     --volume $HOME:$HOME \
     --volume /etc/passwd:/etc/passwd \
