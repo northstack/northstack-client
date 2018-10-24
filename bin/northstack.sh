@@ -3,6 +3,19 @@
 # Wrapper for running the northstack cli in docker
 # Handles uid mapping, and given access to the docker sock so northstack can start local dev
 
+log() {
+    ts=$(date '+%Y-%m-%d %H:%M:%S')
+    echo -e "[$ts]\t$@" > /dev/stderr
+}
+
+debug() {
+    [[ $DEBUG == 1 ]] && log "$@"
+}
+
+if [[ -z $NS_PWD ]]; then
+    debug "Using default workdir ($PWD); set \$NS_PWD to override"
+    NS_PWD=$PWD
+fi
 
 if [[ -S /var/lib/docker.sock ]]; then
     socket=/var/lib/docker.sock
@@ -12,16 +25,16 @@ elif [[ -S $HOME/Library/Containers/com.docker.docker/Data/docker.sock ]]; then
 elif [[ -S /var/run/docker.sock ]]; then
     socket=/var/run/docker.sock
 else
-    echo "Error: no docker control socket found. Is docker installed and running?"
+    log "Error: no docker control socket found. Is docker installed and running?"
     exit 1
 fi
 
 docker run -ti --rm \
     -e DEBUG=$DEBUG \
     -e HOME=$HOME \
-    -e NS_PWD=$PWD \
+    -e NS_PWD="$NS_PWD" \
     --user=$UID --userns=host \
-    --volume "$PWD:$PWD" \
+    --volume "$NS_PWD:$NS_PWD" \
     --volume $HOME:$HOME \
     --volume /etc/passwd:/etc/passwd \
     --volume "$socket":/var/lib/docker.sock \
