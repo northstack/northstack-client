@@ -9,6 +9,7 @@ use NorthStack\NorthStackClient\API\Orgs\OrgsClient;
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
 use NorthStack\NorthStackClient\OrgAccountHelper;
+use NorthStack\NorthStackClient\PathHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
@@ -29,12 +30,18 @@ class CreateCommand extends Command
      */
     private $orgAccountHelper;
 
-    public function __construct(SappClient $api, OrgsClient $orgs, OrgAccountHelper $orgAccountHelper)
+    public function __construct(
+        SappClient $api,
+        OrgsClient $orgs,
+        OrgAccountHelper $orgAccountHelper,
+        PathHelper $pathHelper
+    )
     {
         parent::__construct('app:create');
         $this->api = $api;
         $this->orgs = $orgs;
         $this->orgAccountHelper = $orgAccountHelper;
+        $this->pathHelper = $pathHelper;
     }
 
     public function configure()
@@ -81,16 +88,20 @@ class CreateCommand extends Command
         // create folder structure
         $nsdir = $input->getArgument('baseFolder');
 
-        if ($nsdir === '.' || empty($nsdir)) {
-            $nsdir = getcwd();
-        } elseif (!file_exists($nsdir)) {
+        if (empty($nsdir)) {
+            $nsdir = '.';
+        }
+        $nsdir = $this->pathHelper->validPath($nsdir);
+        $displayPath = $this->pathHelper->displayPath($nsdir);
+
+        if (!file_exists($nsdir)) {
             $this->mkDirIfNotExists($nsdir);
         }
 
         $appPath = "{$nsdir}/{$args['name']}";
 
         if (file_exists($appPath)) {
-            $output->writeln("Folder for app {$args['name']} already exists at {$appPath}");
+            $output->writeln("Folder for app {$args['name']} already exists at {$displayPath}");
             return;
         }
 
@@ -173,7 +184,8 @@ class CreateCommand extends Command
     {
         $sapps = $data->data;
         $appName = $sapps[0]->name;
-        $io->writeln("Woohoo! Your NorthStack instance ({$appName}) was created successfully. Here are your prod, testing, and dev apps:");
+        $displayPath = $this->pathHelper->displayPath($appPath);
+        $io->writeln("Woohoo! Your NorthStack instance ({$displayPath}) was created successfully. Here are your prod, testing, and dev apps:");
 
         $headers = ['id', 'environment', 'fqdn', 'config path'];
         $rows = [];
@@ -185,7 +197,7 @@ class CreateCommand extends Command
                 ($sapp->parentSapp === null)
                     ? $sapp->primaryDomain
                     : "ns-{$sapp->id}.{$sapp->cluster}-northstack.com",
-                "{$appPath}/config/{$sapp->environment}"
+                "{$displayPath}/config/{$sapp->environment}"
             ];
        }
         $io->table($headers, $rows);

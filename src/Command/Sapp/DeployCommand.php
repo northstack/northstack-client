@@ -10,6 +10,7 @@ use NorthStack\NorthStackClient\API\Sapp\SappClient;
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
 use NorthStack\NorthStackClient\JSON\Merger;
+use NorthStack\NorthStackClient\PathHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -32,16 +33,23 @@ class DeployCommand extends Command
      */
     private $merger;
 
+    /**
+     * @var PathHelper
+     */
+    private $pathHelper;
+
     public function __construct(
         SappClient $api,
         AuthApi $authApi,
-        Client $guzzle
+        Client $guzzle,
+        PathHelper $pathHelper
     )
     {
         parent::__construct('app:deploy');
         $this->api = $api;
         $this->authClient = $authApi;
         $this->guzzle = $guzzle;
+        $this->pathHelper = $pathHelper;
     }
 
     public function configure()
@@ -68,6 +76,7 @@ class DeployCommand extends Command
         if (empty($args['baseFolder']))
             $args['baseFolder'] = getcwd();
 
+        $args['baseFolder'] = $this->pathHelper->validPath($args['baseFolder']);
 
         [$sappId, $appFolder] = $this->getSappIdAndFolderByOptions(
             $args['name'],

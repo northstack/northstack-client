@@ -9,6 +9,8 @@ use NorthStack\NorthStackClient\API\Sapp\SappClient;
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
 
+use NorthStack\NorthStackClient\PathHelper;
+
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -26,13 +28,19 @@ class InfoCommand extends Command
      * @var Client
      */
     private $guzzle;
+    /**
+     * @var PathHelper
+     */
+    private $pathHelper;
 
     public function __construct(
-        SappClient $api
+        SappClient $api,
+        PathHelper $pathHelper
     )
     {
         parent::__construct('app:info');
         $this->api = $api;
+        $this->pathHelper = $pathHelper;
     }
 
     public function configure()
@@ -59,6 +67,7 @@ class InfoCommand extends Command
         if (empty($args['baseFolder']))
             $args['baseFolder'] = getcwd();
 
+        $args['baseFolder'] = $this->pathHelper->validPath($args['baseFolder']);
 
         [$sappId, $appFolder] = $this->getSappIdAndFolderByOptions(
             $args['name'],
