@@ -1,8 +1,19 @@
-#!/bin/bash
-
 log() {
+    local level=${1,,}
+
+    case $level in
+        info|debug|warn|error)
+            shift;;
+        *)
+            level='info';;
+    esac
+
     ts=$(date '+%Y-%m-%d %H:%M:%S')
-    echo -e "[$ts]\t$@" > /dev/stderr
+    echo -e "[$ts] [$level] $@" > /dev/stderr
+}
+
+debug() {
+    [[ $DEBUG == 1 ]] && log "debug" "$@"
 }
 
 getInstallPath() {
@@ -26,19 +37,41 @@ copyFile() {
     if [[ -w $dest_dir ]]; then
         cp -v "$src" "$dest"
     else
-        log "Warning: $dest is not writeable by your shell user. Using sudo to copy"
+        log "warn" "$dest is not writeable by your shell user. Using sudo to copy"
         sudo cp -v "$src" "$dest"
     fi
 }
 
 checkDocker() {
     which docker &>/dev/null || {
-        log "No docker executable found. Is docker installed?"
+        log "error" "No docker executable found. Is docker installed?"
         exit 1
     }
 
     docker info &>/dev/null || {
-        log "Running \`docker info\` failed. Is the docker daemon running?"
+        log "error" "Running \`docker info\` failed. Is the docker daemon running?"
         exit 1
     }
+}
+
+dockerSocket() {
+    local possible=(
+        /var/lib/docker.sock
+        /var/run/docker.sock
+        $HOME/Library/Containers/com.docker.docker/Data/docker.sock
+    )
+
+    for sock in ${possible[@]}; do
+        if [[ -S $sock ]]; then
+            printf "$sock"
+            return
+        fi
+    done
+
+    log "error" "No docker control socket found. Is docker installed and running?"
+    exit 1
+}
+
+getGid() {
+    id -g
 }
