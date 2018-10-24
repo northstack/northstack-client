@@ -4,11 +4,11 @@ set -e
 CDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 BASE="$( dirname "$CDIR")"
 
-source $CDIR/lib.sh
+source "$CDIR"/lib.sh
 
 checkDocker
 
-$CDIR/build-docker.sh
+"$CDIR"/build-docker.sh
 
 wrapperFile=$(mktemp)
 
@@ -23,7 +23,7 @@ if [[ ${0##*/} == "install-dev.sh" ]]; then
     isDev=1
 fi
 
-$CDIR/build-wrapper.sh "$wrapperFile" "$BASE" "$isDev"
+"$CDIR"/build-wrapper.sh "$wrapperFile" "$BASE" "$isDev"
 
 install_path="$(getInstallPath)"
 

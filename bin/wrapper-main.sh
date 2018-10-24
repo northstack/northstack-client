@@ -10,22 +10,34 @@ main() {
 
     GID=$(getGid)
 
-    DEV_ARGS=""
     if [[ $DEV_MODE == 1 ]]; then
-        DEV_ARGS="--volume $DEV_SOURCE:/app "
+        debug "Running in DEV mode"
+        docker run -ti --rm \
+            -e DEBUG=$DEBUG \
+            -e HOME=$HOME \
+            -e NS_PWD="$NS_PWD" \
+            --user=$UID:$GID \
+            --userns=host \
+            --volume "$NS_PWD:$NS_PWD" \
+            --volume $HOME:$HOME \
+            --volume /etc/passwd:/etc/passwd \
+            --volume "$socket":/var/lib/docker.sock \
+            --volume "$DEV_SOURCE":/app \
+            --init \
+            northstack "$@"
+    else
+        docker run -ti --rm \
+            -e DEBUG=$DEBUG \
+            -e HOME=$HOME \
+            -e NS_PWD="$NS_PWD" \
+            --user=$UID:$GID \
+            --userns=host \
+            --volume "$NS_PWD:$NS_PWD" \
+            --volume $HOME:$HOME \
+            --volume /etc/passwd:/etc/passwd \
+            --volume "$socket":/var/lib/docker.sock \
+            --init \
+            northstack "$@"
     fi
 
-    docker run -ti --rm \
-        -e DEBUG=$DEBUG \
-        -e HOME=$HOME \
-        -e NS_PWD="$NS_PWD" \
-        --user=$UID:$GID \
-        --userns=host \
-        --volume "$NS_PWD:$NS_PWD" \
-        --volume $HOME:$HOME \
-        --volume /etc/passwd:/etc/passwd \
-        --volume "$socket":/var/lib/docker.sock \
-        --init \
-        $DEV_ARGS \
-        northstack "$@"
 }
