@@ -19,8 +19,9 @@ fi
 docker run -ti --rm \
     -e DEBUG=$DEBUG \
     -e HOME=$HOME \
+    -e NS_PWD=$PWD \
     --user=$UID --userns=host \
-    --volume "$(pwd)":/current \
+    --volume "$PWD:$PWD" \
     --volume $HOME:$HOME \
     --volume /etc/passwd:/etc/passwd \
     --volume "$socket":/var/lib/docker.sock \
