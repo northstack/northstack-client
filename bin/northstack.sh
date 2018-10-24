@@ -4,12 +4,21 @@
 # Handles uid mapping, and given access to the docker sock so northstack can start local dev
 
 log() {
+    local level=${1,,}
+
+    case $level in
+        info|debug|warn|error)
+            shift;;
+        *)
+            level='info';;
+    esac
+
     ts=$(date '+%Y-%m-%d %H:%M:%S')
-    echo -e "[$ts]\t$@" > /dev/stderr
+    echo -e "[$ts] [$level] $@" > /dev/stderr
 }
 
 debug() {
-    [[ $DEBUG == 1 ]] && log "$@"
+    [[ $DEBUG == 1 ]] && log "debug" "$@"
 }
 
 if [[ -z $NS_PWD ]]; then
