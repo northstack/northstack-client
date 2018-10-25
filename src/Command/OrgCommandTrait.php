@@ -8,6 +8,11 @@ trait OrgCommandTrait
     private $currentOrg;
     private $allOrgs;
 
+    public function getCurrentOrg()
+    {
+        return $this->currentOrg;
+    }
+
     protected function addOrgOption()
     {
         /** @var Command $this */

@@ -8,6 +8,8 @@ use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
 use NorthStack\NorthStackClient\Command\OrgCommandTrait;
 
+use NorthStack\NorthStackClient\Enumeration\OrgPermission;
+use NorthStack\NorthStackClient\Enumeration\OrgPermissionName;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -64,10 +66,25 @@ class UserListCommand extends Command
                 $user->firstName,
                 $user->lastName,
                 $user->email,
-                $user->orgPermissions[0]->permissions
+                implode("\n", $this->getPermissionNames($user->orgPermissions[0]->permissions)),
             ];
         }
 
         $io->table($headers, $rows);
+    }
+
+    protected function getPermissionNames(int $perms)
+    {
+        $list = [];
+        /**
+         * @var OrgPermission $orgPermission
+         */
+        foreach (OrgPermission::members() as $key => $orgPermission) {
+            if ($perms & $orgPermission->value()) {
+                $list[] = OrgPermissionName::memberByKey($key)->value();
+            }
+        }
+
+        return $list;
     }
 }
