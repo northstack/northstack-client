@@ -23,7 +23,7 @@ trait OrgCommandTrait
             $default = $this->getDefaultOrg();
             if ($required && !$default)
             {
-                throw new \Exception("You must specify an org");
+                throw new \Exception("You must specify an org using --org");
             }
             $this->currentOrg = $default;
             return;
