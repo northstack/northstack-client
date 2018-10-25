@@ -5,7 +5,6 @@ namespace NorthStack\NorthStackClient\Command\Org;
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OrgCommandTrait;
 
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -39,11 +38,10 @@ class DefaultCommand extends Command
                 $this->updateAccountsFile(['default' => $org['id']]);
                 $output->writeln("Default org set to {$org['id']}");
                 return;
-            } else
-            {
-                $output->writeln("<error>Org {$orgId} not found. See `org:list` for a listing of local orgs</error>");
-                return;
             }
+
+            $output->writeln("<error>Org {$orgId} not found. See `org:list` for a listing of local orgs</error>");
+            return;
         }
 
         $default = $this->getDefaultOrg();
@@ -51,10 +49,8 @@ class DefaultCommand extends Command
         {
             $output->writeln("The current default org is: {$default['id']}");
             return;
-        } else 
-        {
-            $output->writeln("No default org set--run with `--org <orgName|orgId>` to set it.");
-            return;
         }
+
+        $output->writeln("No default org set--run with `--org <orgName|orgId>` to set it.");
     }
 }

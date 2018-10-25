@@ -1,9 +1,7 @@
 <?php
 namespace NorthStack\NorthStackClient\Command;
 
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
 
 trait OrgCommandTrait
 {
@@ -42,12 +40,15 @@ trait OrgCommandTrait
     protected function getDefaultOrg()
     {
         $orgs = $this->getOrgs();
-        $org = null;
-        if (array_key_exists('default', $orgs) && array_key_exists($orgs['default'], $orgs))
-        {
-            $org = $orgs[$orgs['default']];
+
+        if (array_key_exists('default', $orgs)) {
+            return $orgs['default'];
         }
-        return $org;
+
+        if (count($orgs) === 1) {
+            return array_values($orgs)[0];
+        }
+        return null;
     }
 
     protected function getOrgs()
