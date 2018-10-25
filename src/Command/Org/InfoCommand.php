@@ -3,14 +3,13 @@
 
 namespace NorthStack\NorthStackClient\Command\Org;
 
-use NorthStack\NorthStackClient\API\AuthApi;
+use GuzzleHttp\Client;
 use NorthStack\NorthStackClient\API\Orgs\OrgsClient;
 
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
 use NorthStack\NorthStackClient\Command\OrgCommandTrait;
 
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -39,11 +38,9 @@ class InfoCommand extends Command
     public function configure()
     {
         parent::configure();
-        $this
-            ->setDescription('Show details about an Org')
-        ;
-        $this->addOauthOptions();
-        $this->addOrgOption();
+        $this->setDescription('Show details about an Org')
+            ->addOauthOptions()
+            ->addOrgOption();
     }
 
     public function execute(InputInterface $input, OutputInterface $output)
@@ -53,7 +50,6 @@ class InfoCommand extends Command
             $this->api->setDebug(true);
         }
 
-        $args = $input->getArguments();
         $this->setCurrentOrg($input->getOption('org'), true);
 
         $r = $this->api->get($this->token->token, $this->currentOrg['id']);

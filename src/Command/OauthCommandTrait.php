@@ -19,7 +19,7 @@ trait OauthCommandTrait
     protected function addOauthOptions()
     {
         /** @var Command $this */
-        $this->addOption('authToken', null, InputOption::VALUE_REQUIRED, 'Access Token')
+        return $this->addOption('authToken', null, InputOption::VALUE_REQUIRED, 'Access Token')
             ->addOption('authClientId', null, InputOption::VALUE_REQUIRED, 'OAuth Client ID', 2)
             ->addOption('authClientSecret', null, InputOption::VALUE_REQUIRED, 'Client Secret')
             ->addOption('authUsername', null, InputOption::VALUE_REQUIRED, 'Username')
@@ -48,7 +48,7 @@ trait OauthCommandTrait
             $r = $this->authClient->clientLogin($clientId, $secret, $input->getOption('authScope'));
         }
 
-        if (isset($r)) {
+        if ($r !== null) {
             $data = json_decode($r->getBody()->getContents(), true);
             $this->token->updateFromResponse($data);
         }

@@ -37,11 +37,9 @@ class UserListCommand extends Command
     public function configure()
     {
         parent::configure();
-        $this
-            ->setDescription('List all the users in an orgization')
-        ;
-        $this->addOauthOptions();
-        $this->addOrgOption();
+        $this->setDescription('List all the users in an orgization')
+            ->addOauthOptions()
+            ->addOrgOption();
     }
 
     public function execute(InputInterface $input, OutputInterface $output)

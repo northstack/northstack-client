@@ -13,7 +13,7 @@ trait OrgCommandTrait
     protected function addOrgOption()
     {
         /** @var Command $this */
-        $this->addOption('org', null, InputOption::VALUE_REQUIRED, 'Org name (or ID) to run this command as');
+        return $this->addOption('org', null, InputOption::VALUE_REQUIRED, 'Org name (or ID) to run this command as');
     }
 
     protected function setCurrentOrg($org, $required = false)
@@ -36,7 +36,7 @@ trait OrgCommandTrait
             return;
         }
 
-        throw new \Exception("Org name/ID ({$org}) not found in {$accountFile}");
+        throw new \Exception("Org name/ID ({$org}) not found in ~/.northstackaccount.json");
     }
 
     protected function getDefaultOrg()
@@ -57,7 +57,6 @@ trait OrgCommandTrait
             return $this->allOrgs;
         }
         $accountFile = getenv('HOME').'/.northstackaccount.json';
-        $orgs = [];
         if (file_exists($accountFile))
         {
             $this->allOrgs = json_decode(file_get_contents($accountFile), true);
