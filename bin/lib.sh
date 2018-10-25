@@ -23,7 +23,7 @@ copyFile() {
     local dest=$2
 
     dest_dir=$(dirname "$dest")
-    if [[ -w $dest_dir ]]; then
+    if [[ -w $dest_dir ]] && [[ -w $dest ]]; then
         cp -v "$src" "$dest"
     else
         log "Warning: $dest is not writeable by your shell user. Using sudo to copy"
