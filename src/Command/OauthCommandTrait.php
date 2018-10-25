@@ -48,7 +48,8 @@ trait OauthCommandTrait
             $r = $this->authClient->clientLogin($clientId, $secret, $input->getOption('authScope'));
         }
 
-        if ($r !== null) {
+        /** @noinspection UnSafeIsSetOverArrayInspection */
+        if (isset($r)) {
             $data = json_decode($r->getBody()->getContents(), true);
             $this->token->updateFromResponse($data);
         }
