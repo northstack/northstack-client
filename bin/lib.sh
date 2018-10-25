@@ -1,5 +1,5 @@
 log() {
-    local level=${1,,}
+    local level="$(echo "$1" | tr '[:upper:]' '[:lower:]')"
 
     case $level in
         info|debug|warn|error)
