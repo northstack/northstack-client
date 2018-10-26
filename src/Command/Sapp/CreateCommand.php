@@ -9,6 +9,10 @@ use NorthStack\NorthStackClient\API\Orgs\OrgsClient;
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
 use NorthStack\NorthStackClient\OrgAccountHelper;
+
+use NorthStack\AppTypes\BaseType;
+use NorthStack\AppTypes\WordPressType;
+
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
@@ -54,6 +58,7 @@ class CreateCommand extends Command
             ->addOption('wpIsMultisite', null, InputOption::VALUE_NONE, 'WordPress is this a multi-site install')
             ->addOption('wpMultisiteSubdomains', null, InputOption::VALUE_NONE, 'WordPress multi-site subdomains install')
             ->addOption('orgId', null, InputOption::VALUE_REQUIRED, 'Only needed if you have access to multiple organizations')
+            ->addOption('type', 't', InputOption::VALUE_REQUIRED, 'Application type (one of: [wordpress, static])', 'wordpress')
         ;
         $this->addOauthOptions();
     }
@@ -97,6 +102,26 @@ class CreateCommand extends Command
 
         $orgId = $input->getOption('orgId') ?: $this->orgAccountHelper->getDefaultOrg()['id'];
 
+        $appTemplate = null;
+        $templateArgs = [
+            'appName' => $args['name'],
+            'baseDir' => $appPath,
+            'primaryDomain' => $args['primaryDomain'],
+            'cluster' => $options['cluster']
+        ];
+        $questionHelper = $this->getHelper('question');
+
+        // TODO: move this logic somewhere else
+        switch($args['type']) {
+            case 'wordpress':
+                $appTemplate = new WordPressType($input, $output, $questionHelper, $templateArgs);
+                break;
+            default:
+                $appTemplate = new BaseType($input, $output, $questionHelper, $templateArgs);
+        }
+
+        $appTemplate->promptForArgs();
+
         try {
             $r = $this->api->createApp(
                 $this->token->token,
@@ -118,57 +143,8 @@ class CreateCommand extends Command
         }
 
         $data = json_decode($r->getBody()->getContents());
+        $appTemplate->writeConfigs($data->data);
         $this->printSuccess($io, $data, $appPath);
-
-        $install = $this->buildWpInstallArgs($options, $args, $io);
-
-        $this->mkDirIfNotExists($appPath);
-        $this->mkDirIfNotExists("{$appPath}/config");
-        $this->mkDirIfNotExists("{$appPath}/config/dev");
-        $this->mkDirIfNotExists("{$appPath}/config/prod");
-        $this->mkDirIfNotExists("{$appPath}/config/test");
-        file_put_contents("{$appPath}/config/test/config.json", json_encode(['environment' => 'testing', 'auth-type' => 'standard']));
-        $this->mkDirIfNotExists("{$appPath}/app");
-        $this->mkDirIfNotExists("{$appPath}/app/public");
-        $this->mkDirIfNotExists("{$appPath}/logs");
-
-        $env = [];
-        foreach ($data->data as $sapp) {
-            $env[$sapp->environment] = $sapp->id;
-
-            switch($sapp->environment)
-            {
-            case 'prod':
-                $config = ['environment' => 'production'];
-                $build = ['wordpress-install' => $install];
-                $domains = ['domains' => [$args['primaryDomain']]];
-                break;
-            case 'test':
-                $domain = "ns-{$sapp->id}.{$sapp->cluster}-northstack.com";
-                $install['url'] = "http://$domain/";
-                $config = ['environment' => 'testing', 'auth-type' => 'standard'];
-                $build = ['wordpress-install' => $install];
-                $domains = ['domains' => [$domain]];
-                break;
-            case 'dev':
-                $domain = "ns-{$sapp->id}.{$sapp->cluster}-northstack.com";
-                $install['url'] = "http://$domain/";
-                $config = ['environment' => 'development', 'auth-type' => 'standard'];
-                $build = ['wordpress-install' => $install];
-                $domains = ['domains' => [$domain]];
-                break;
-            }
-
-            file_put_contents("{$appPath}/config/{$sapp->environment}/config.json", json_encode($config, JSON_PRETTY_PRINT));
-            file_put_contents("{$appPath}/config/{$sapp->environment}/build.json", json_encode($build, JSON_PRETTY_PRINT));
-            file_put_contents("{$appPath}/config/{$sapp->environment}/domains.json", json_encode($domains, JSON_PRETTY_PRINT));
-        }
-
-        file_put_contents("{$appPath}/config/environment.json", json_encode($env));
-
-        $assetPath = dirname(__DIR__, 3).'/assets';
-        copy("{$assetPath}/config.json", "{$appPath}/config/config.json");
-        copy("{$assetPath}/build.json", "{$appPath}/config/build.json");
     }
 
     function printSuccess(SymfonyStyle $io, $data, $appPath)
@@ -191,59 +167,5 @@ class CreateCommand extends Command
             ];
        }
         $io->table($headers, $rows);
-    }
-
-    protected function buildWpInstallArgs($options, $args, OutputInterface $io)
-    {
-        if ($options['wpTitle'] === 'app-name') {
-            $title = $args['name'];
-        } else {
-            $title = $args['wpTitle'];
-        }
-
-
-        if ($options['wpAdminUser'] === 'account-user')
-        {
-            // TODO grab the username of the currently logged in user
-            $user = "ns-admin";
-            $io->writeln("WordPress Admin User: $user\n");
-        }
-        else
-        {
-            $user = $options['wpAdminUser'];
-        }
-
-        if ($options['wpAdminPass'] === 'random-value')
-        {
-            $pass = bin2hex(random_bytes(16));
-            $io->writeln("WordPress Admin Password: $pass\n");
-        }
-        else
-        {
-            $pass = $options['wpAdminPass'];
-        }
-
-        if ($options['wpAdminEmail'] === 'account-email')
-        {
-            [, $id] = explode(':',json_decode(base64_decode(explode('.', $this->token->token)[1]))->sub);
-            $r = $this->orgs->getUser($this->token->token, $id);
-            $currentUser = json_decode($r->getBody()->getContents());
-            $email = $currentUser->email;
-        }
-        else
-        {
-            $email = $options['wpAdminEmail'];
-        }
-
-        $install = [
-            'url' => $args['primaryDomain'],
-            'title' => $title,
-            'admin_user' => $user,
-            'admin_pass' => $pass,
-            'admin_email' => $email,
-            'multisite' => $options['wpIsMultisite'],
-            'subdomains' => $options['wpMultisiteSubdomains'],
-        ];
-        return $install;
     }
 }
