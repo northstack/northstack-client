@@ -42,6 +42,7 @@ class SignupCommand extends Command
             $this->api->setDebug(true);
         }
 
+        /** @var QuestionHelper $helper */
         $helper = $this->getHelper('question');
 
         $question = new Question('Organization Name: ');

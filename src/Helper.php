@@ -1,6 +1,7 @@
 <?php
 namespace NorthStack\NorthStackClient;
 
+use Alchemy\Zippy\Zippy;
 use Auryn\Injector;
 use Dotenv\Dotenv;
 use Dotenv\Exception\InvalidPathException;
@@ -63,6 +64,10 @@ class Helper
 
     public function configureInjector(Injector $injector)
     {
+        $injector->delegate(Zippy::class, function () {
+            return Zippy::load();
+        });
+
         $injector
             ->share(\Psr\Log\LoggerInterface::class)
             ->delegate(\Psr\Log\LoggerInterface::class, function()
