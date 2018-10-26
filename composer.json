@@ -24,7 +24,8 @@
         "colinodell/json5": "^1.0",
         "eloquent/enumeration": "^5.1",
         "ratchet/pawl": "^0.3.2",
-        "giggsey/libphonenumber-for-php": "^8.9"
+        "giggsey/libphonenumber-for-php": "^8.9",
+        "alchemy/zippy": "^0.4.9"
     },
     "require-dev": {
         "phpstan/phpstan": "^0.10.5"

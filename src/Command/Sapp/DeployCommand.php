@@ -3,52 +3,20 @@
 
 namespace NorthStack\NorthStackClient\Command\Sapp;
 
-use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
-use NorthStack\NorthStackClient\API\AuthApi;
-use NorthStack\NorthStackClient\API\Sapp\SappClient;
-use NorthStack\NorthStackClient\Command\Command;
-use NorthStack\NorthStackClient\Command\OauthCommandTrait;
 use NorthStack\NorthStackClient\JSON\Merger;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class DeployCommand extends Command
+class DeployCommand extends AbstractUploadCmd
 {
-    use OauthCommandTrait;
-    use SappEnvironmentTrait;
-    /**
-     * @var SappClient
-     */
-    protected $api;
-    /**
-     * @var Client
-     */
-    private $guzzle;
-    /**
-     * @var Merger
-     */
-    private $merger;
-
-    public function __construct(
-        SappClient $api,
-        AuthApi $authApi,
-        Client $guzzle
-    )
-    {
-        parent::__construct('app:deploy');
-        $this->api = $api;
-        $this->authClient = $authApi;
-        $this->guzzle = $guzzle;
-    }
-
     public function configure()
     {
         parent::configure();
         $this
-            ->setDescription('NorthStack App Create')
+            ->setDescription('NorthStack App Deploy')
             ->addArgument('name', InputArgument::REQUIRED, 'App name')
             ->addArgument('environment', InputArgument::REQUIRED, 'Environment (prod, test, or dev)')
             ->addArgument('baseFolder', InputArgument::OPTIONAL, 'Path to root of NorthStack folder (contains folder named after app)')
@@ -58,48 +26,9 @@ class DeployCommand extends Command
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        if ($output->isDebug())
-        {
-            $this->api->setDebug(true);
-        }
+        [$sappId, $appFolder] = $this->uploadApp($input, $output);
 
-        $args = $input->getArguments();
-
-        if (empty($args['baseFolder']))
-            $args['baseFolder'] = getcwd();
-
-
-        [$sappId, $appFolder] = $this->getSappIdAndFolderByOptions(
-            $args['name'],
-            $args['environment'],
-            $args['baseFolder']
-        );
-
-        // request upload url
-        $r = $this->api->requestDeploy($this->token->token, $sappId);
-        $r = json_decode($r->getBody()->getContents());
-        $uploadUrl = $r->uploadUrl;
-
-        // tarball folder
-        $zip = "{$args['baseFolder']}/{$sappId}.tar.gz";
-        $tarFile = escapeshellarg($zip);
-        $tarFolder = escapeshellarg($appFolder."/app");
-        $cmd = "tar -C {$tarFolder} -cvzf {$tarFile} .";
-        exec($cmd, $out, $ret);
-        if ($ret !== 0)
-        {
-            $output->writeln([
-                "<error>Uh oh, something went wrong while preparing the app for deploy</error>",
-                "Command: {$cmd}",
-                "Exit code: {$ret}",
-            ]);
-            exit(1);
-        }
-
-        // upload to s3
-        $this->guzzle->put($uploadUrl, [ 'body' => fopen($zip, 'rb') ]);
-        unlink($zip);
-
+        $environment = $input->getArgument('environment');
         // merge configs
         $configs = [
             'config.json' => file_get_contents("{$appFolder}/config/config.json"),
@@ -107,18 +36,17 @@ class DeployCommand extends Command
             'domains.json' => '{}',
         ];
         foreach ($configs as $file => $json) {
-            $envFile = "{$appFolder}/config/{$args['environment']}/{$file}";
+            $envFile = "{$appFolder}/config/{$environment}/{$file}";
             if (file_exists($envFile)) {
                 $configs[$file] = Merger::merge($json, file_get_contents($envFile));
-            }
-            else {
+            } else {
                 $configs[$file] = Merger::merge($json, '{}');
             }
         }
         // trigger deploy
         try
         {
-            $r = $this->api->deploy(
+            $r = $this->sappClient->deploy(
                 $this->token->token,
                 $sappId,
                 $configs['config.json'],
@@ -135,6 +63,7 @@ class DeployCommand extends Command
         $body = json_decode($r->getBody()->getContents());
         if ($r->getStatusCode() !== 200)
         {
+            /** @noinspection ForgottenDebugOutputInspection */
             print_r($body);
             $output->writeln("Deploy failed");
             exit(1);
@@ -185,5 +114,10 @@ class DeployCommand extends Command
         ];
 
         $io->table($headers, $rows);
+    }
+
+    protected function commandName(): string
+    {
+        return 'app:create';
     }
 }
