@@ -13,9 +13,7 @@ log() {
 }
 
 debug() {
-    if [[ $DEBUG == 1 ]]; then
-        log "debug" "$@"
-    fi
+    [[ $DEBUG == 1 ]] && log "debug" "$@"
 }
 
 getInstallPath() {
