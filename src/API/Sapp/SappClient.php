@@ -51,7 +51,11 @@ class SappClient extends BaseApiClient
             ->get("/sapps/{$sappId}");
     }
 
-
+    public function update(string $accessToken, string $sappId, $data)
+    {
+        return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
+            ->patch("sapps/{$sappId}",['json' => $data]);
+    }
 
     public function deploy(
         $accessToken,
