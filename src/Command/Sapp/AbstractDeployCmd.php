@@ -10,10 +10,12 @@ use NorthStack\NorthStackClient\API\Sapp\SappClient;
 use NorthStack\NorthStackClient\Build\Archiver;
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
+use NorthStack\NorthStackClient\JSON\Merger;
+use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-abstract class AbstractUploadCmd extends Command
+abstract class AbstractDeployCmd extends Command
 {
     use SappEnvironmentTrait;
     use OauthCommandTrait;
@@ -49,6 +51,17 @@ abstract class AbstractUploadCmd extends Command
     }
 
     abstract protected function commandName(): string;
+
+    public function configure()
+    {
+        parent::configure();
+        $this
+            ->addArgument('name', InputArgument::REQUIRED, 'App name')
+            ->addArgument('environment', InputArgument::REQUIRED, 'Environment (prod, test, or dev)')
+            ->addArgument('baseFolder', InputArgument::OPTIONAL, 'Path to root of NorthStack folder (contains folder named after app)')
+        ;
+        $this->addOauthOptions();
+    }
 
     /**
      * @param InputInterface $input
@@ -93,5 +106,25 @@ abstract class AbstractUploadCmd extends Command
         unlink($zip);
 
         return [$sappId, $appFolder];
+    }
+
+    protected function mergeConfigs(string $appFolder, string $environment)
+    {
+        // merge configs
+        $configs = [
+            'config.json' => file_get_contents("{$appFolder}/config/config.json"),
+            'build.json' => file_get_contents("{$appFolder}/config/build.json"),
+            'domains.json' => '{}',
+        ];
+        foreach ($configs as $file => $json) {
+            $envFile = "{$appFolder}/config/{$environment}/{$file}";
+            if (file_exists($envFile)) {
+                $configs[$file] = Merger::merge($json, file_get_contents($envFile));
+            } else {
+                $configs[$file] = Merger::merge($json, '{}');
+            }
+        }
+
+        return $configs;
     }
 }

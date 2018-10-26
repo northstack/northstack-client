@@ -4,24 +4,16 @@
 namespace NorthStack\NorthStackClient\Command\Sapp;
 
 use GuzzleHttp\Exception\ClientException;
-use NorthStack\NorthStackClient\JSON\Merger;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class DeployCommand extends AbstractUploadCmd
+class DeployCommand extends AbstractDeployCmd
 {
     public function configure()
     {
+        $this->setDescription('Northstack App Deploy');
         parent::configure();
-        $this
-            ->setDescription('NorthStack App Deploy')
-            ->addArgument('name', InputArgument::REQUIRED, 'App name')
-            ->addArgument('environment', InputArgument::REQUIRED, 'Environment (prod, test, or dev)')
-            ->addArgument('baseFolder', InputArgument::OPTIONAL, 'Path to root of NorthStack folder (contains folder named after app)')
-        ;
-        $this->addOauthOptions();
     }
 
     public function execute(InputInterface $input, OutputInterface $output)
@@ -29,20 +21,7 @@ class DeployCommand extends AbstractUploadCmd
         [$sappId, $appFolder] = $this->uploadApp($input, $output);
 
         $environment = $input->getArgument('environment');
-        // merge configs
-        $configs = [
-            'config.json' => file_get_contents("{$appFolder}/config/config.json"),
-            'build.json' => file_get_contents("{$appFolder}/config/build.json"),
-            'domains.json' => '{}',
-        ];
-        foreach ($configs as $file => $json) {
-            $envFile = "{$appFolder}/config/{$environment}/{$file}";
-            if (file_exists($envFile)) {
-                $configs[$file] = Merger::merge($json, file_get_contents($envFile));
-            } else {
-                $configs[$file] = Merger::merge($json, '{}');
-            }
-        }
+        $configs = $this->mergeConfigs($appFolder, $environment);
         // trigger deploy
         try
         {
@@ -118,6 +97,6 @@ class DeployCommand extends AbstractUploadCmd
 
     protected function commandName(): string
     {
-        return 'app:create';
+        return 'app:deploy';
     }
 }
