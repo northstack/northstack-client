@@ -22,10 +22,6 @@ class InfoCommand extends Command
      * @var SappClient
      */
     protected $api;
-    /**
-     * @var Client
-     */
-    private $guzzle;
 
     public function __construct(
         SappClient $api

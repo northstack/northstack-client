@@ -10,6 +10,8 @@ class BaseApiClient
 {
     use GuzzleTrait;
 
+    protected $apiName;
+
     public function __construct(RequestChain $requestChain, $baseUrl = null, LoggerInterface $logger = null)
     {
         $this->requestChain = $requestChain;
