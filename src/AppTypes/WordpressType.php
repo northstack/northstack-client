@@ -4,10 +4,81 @@ namespace NorthStack\AppTypes;
 
 use NorthStack\AppTypes\BaseType;
 
+use Symfony\Component\Console\Question\Question;
+use Symfony\Component\Console\Question\ChoiceQuestion;
+
 class WordPressType extends BaseType
 {
+    private $args = [
+        'wpTitle' => [
+            'prompt' => "Enter the title of your new site",
+            'default' => $this->config['appName']
+        ],
+        'wpAdminUser' => [
+            'prompt' => 'The WP admin username',
+            'default' => $this->config['accountUsername']
+        ],
+        'wpAdminPass' => [
+            'prompt' => 'The WP admin password',
+            'default' => 'randomly generated',
+            'isRandom' => true,
+            'randomLen' => 16,
+            'passwordInput' => true
+        ],
+        'wpAdminEmail' => [
+            'prompt' => 'The WP admin email address',
+            'default' => $this->config['accountEmail']
+        ]
+    ];
+
     protected function promptForArgs($helper)
     {
+        foreach ($this->args as $name => $arg)
+        {
+            $question = new Question($arg['prompt'], $arg['default']);
+            if (array_key_exists('passwordInput', $arg) && ($arg['passwordInput'] === true))
+            {
+                $question->setHidden(true);
+                $question->setHidddenFallback(true);
+            }
+
+            $answer = $this->askQuestion($question);
+
+            if (
+                array_key_exists('isRandom', $arg) &&
+                ($arg['isRandom'] === true) &&
+                ($answer === $arg['default'])
+                )
+            {
+                $answer = bin2hex(random_bytes($arg['randomLen']));
+            }
+
+            $this->config[$name] = $answer;
+        }
+
+        $this->config['wpIsMultisite'] = false;
+        $this->config['wpMultisiteSubdomains'] = false;
+
+        $isMultiSite = new ChoiceQuestion(
+            'Is this a WP multi-site?',
+            [true, false],
+            false
+        );
+
+        if ($this->askQuestion($isMultiSite))
+        {
+            $this->config['wpIsMultisite'] = true;
+            $multiSiteType = new ChoiceQuestion(
+                'What type of multi-site is this?',
+                ['subdomain', 'subfolder'],
+                'subdomain'
+            );
+            if ($this->askQuestion($multiSiteType) === 'subdomain')
+            {
+                $this->config['wpMultisiteSubdomains'] = true;
+            }
+        }
+
     }
 
     protected function writePerEnvBuildConfigs()

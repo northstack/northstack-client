@@ -51,12 +51,6 @@ class CreateCommand extends Command
             ->addArgument('appType', InputArgument::OPTIONAL, 'App Type', 'WORDPRESS')
             ->addArgument('baseFolder', InputArgument::OPTIONAL, 'Folder to create/install to (defaults to current directory)')
             ->addOption('cluster', null, InputOption::VALUE_REQUIRED, 'Deployment location', 'dev-us-east-1')
-            ->addOption('wpAdminUser', null, InputOption::VALUE_REQUIRED, 'WordPress Admin Username on initial db creation', 'account-user')
-            ->addOption('wpAdminPass', null, InputOption::VALUE_REQUIRED, 'WordPress Admin Password on initial db creation', 'random-value')
-            ->addOption('wpAdminEmail', null, InputOption::VALUE_REQUIRED, 'WordPress Admin Email on initial db creation', 'account-email')
-            ->addOption('wpTitle', null, InputOption::VALUE_REQUIRED, 'WordPress title', "app-name")
-            ->addOption('wpIsMultisite', null, InputOption::VALUE_NONE, 'WordPress is this a multi-site install')
-            ->addOption('wpMultisiteSubdomains', null, InputOption::VALUE_NONE, 'WordPress multi-site subdomains install')
             ->addOption('orgId', null, InputOption::VALUE_REQUIRED, 'Only needed if you have access to multiple organizations')
             ->addOption('type', 't', InputOption::VALUE_REQUIRED, 'Application type (one of: [wordpress, static])', 'wordpress')
         ;
