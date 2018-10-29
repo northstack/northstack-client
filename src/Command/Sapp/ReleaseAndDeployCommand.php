@@ -35,7 +35,7 @@ class ReleaseAndDeployCommand extends AbstractDeployCmd
     public function configure()
     {
         $this->setDescription('Use multi-stage deploy (release notes can be piped to this command)');
-        $this->addArgument('Title', InputArgument::REQUIRED, 'Release Title');
+        $this->addArgument('title', InputArgument::REQUIRED, 'Release Title');
         parent::configure();
     }
 
