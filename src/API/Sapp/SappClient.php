@@ -15,13 +15,15 @@ class SappClient extends BaseApiClient
         $name,
         $orgId,
         $cluster,
-        $primaryDomain
+        $primaryDomain,
+        $appType
     )
     {
         $data = [
             'name' => $name,
             'cluster' => $cluster,
             'primaryDomain' => $primaryDomain,
+            'appType' => $appType,
         ];
         if ($orgId) {
             $data['orgId'] = $orgId;
