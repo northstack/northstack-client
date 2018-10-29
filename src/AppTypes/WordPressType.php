@@ -1,8 +1,8 @@
 <?php
 
-namespace NorthStack\AppTypes;
+namespace NorthStack\NorthStackClient\AppTypes;
 
-use NorthStack\AppTypes\BaseType;
+use NorthStack\NorthStackClient\AppTypes\BaseType;
 
 use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Question\ChoiceQuestion;
@@ -12,11 +12,11 @@ class WordPressType extends BaseType
     private $args = [
         'wpTitle' => [
             'prompt' => "Enter the title of your new site",
-            'default' => $this->config['appName']
+            'default' => '$appName',
         ],
         'wpAdminUser' => [
             'prompt' => 'The WP admin username',
-            'default' => $this->config['accountUsername']
+            'default' => '$accountUsername',
         ],
         'wpAdminPass' => [
             'prompt' => 'The WP admin password',
@@ -27,11 +27,11 @@ class WordPressType extends BaseType
         ],
         'wpAdminEmail' => [
             'prompt' => 'The WP admin email address',
-            'default' => $this->config['accountEmail']
+            'default' => '$accountEmail',
         ]
     ];
 
-    protected function promptForArgs($helper)
+    public function promptForArgs()
     {
         foreach ($this->args as $name => $arg)
         {
@@ -79,6 +79,7 @@ class WordPressType extends BaseType
             }
         }
 
+        print_r($this->config); exit;
     }
 
     protected function writePerEnvBuildConfigs()
@@ -161,6 +162,7 @@ class WordPressType extends BaseType
             'multisite' => $options['wpIsMultisite'],
             'subdomains' => $options['wpMultisiteSubdomains'],
         ];
+
         return $install;
     }
 

@@ -1,6 +1,6 @@
 <?php
 
-namespace NorthStack\AppTypes;
+namespace NorthStack\NorthStackClient\AppTypes;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;

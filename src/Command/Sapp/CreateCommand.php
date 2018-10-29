@@ -10,8 +10,8 @@ use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
 use NorthStack\NorthStackClient\OrgAccountHelper;
 
-use NorthStack\AppTypes\BaseType;
-use NorthStack\AppTypes\WordPressType;
+use NorthStack\NorthStackClient\AppTypes\BaseType;
+use NorthStack\NorthStackClient\AppTypes\WordPressType;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
@@ -106,7 +106,7 @@ class CreateCommand extends Command
         $questionHelper = $this->getHelper('question');
 
         // TODO: move this logic somewhere else
-        switch($args['type']) {
+        switch($options['type']) {
             case 'wordpress':
                 $appTemplate = new WordPressType($input, $output, $questionHelper, $templateArgs);
                 break;
@@ -114,7 +114,7 @@ class CreateCommand extends Command
                 $appTemplate = new BaseType($input, $output, $questionHelper, $templateArgs);
         }
 
-        $appTemplate->promptForArgs();
+        $appTemplate->promptForArgs(); exit;
 
         try {
             $r = $this->api->createApp(
@@ -137,6 +137,7 @@ class CreateCommand extends Command
         }
 
         $data = json_decode($r->getBody()->getContents());
+        file_put_contents('./resp.json', json_encode($data, JSON_PRETTY_PRINT));
         $appTemplate->writeConfigs($data->data);
         $this->printSuccess($io, $data, $appPath);
     }
