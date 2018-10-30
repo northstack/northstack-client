@@ -3,7 +3,6 @@
 
 namespace NorthStack\NorthStackClient\Command\Sapp;
 
-use NorthStack\NorthStackClient\API\AuthApi;
 use NorthStack\NorthStackClient\API\Sapp\SappClient;
 
 use NorthStack\NorthStackClient\Command\Command;
@@ -52,11 +51,12 @@ class InfoCommand extends Command
 
         $args = $input->getArguments();
 
-        if (empty($args['baseFolder']))
+        if (empty($args['baseFolder'])) {
             $args['baseFolder'] = getcwd();
+        }
 
 
-        [$sappId, $appFolder] = $this->getSappIdAndFolderByOptions(
+        [$sappId] = $this->getSappIdAndFolderByOptions(
             $args['name'],
             $args['environment'],
             $args['baseFolder']
@@ -68,6 +68,7 @@ class InfoCommand extends Command
 
         $app = json_decode($r->getBody()->getContents());
         $headers = ['Field', 'Value'];
+        $domains = json_decode($app->domains);
         $rows = [
             ['Name', $app->name],
             ['Cluster', $app->cluster],
@@ -75,7 +76,7 @@ class InfoCommand extends Command
             ['OrgId', $app->orgId],
             ['Parent', $app->parentSapp],
             ['Env', $app->environment],
-            ['Domains', implode("\n",$app->domains->domains)],
+            ['Domains', implode("\n", $domains->domains)],
         ];
 
         $io->table($headers, $rows);
