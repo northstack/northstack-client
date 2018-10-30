@@ -68,7 +68,6 @@ class InfoCommand extends Command
 
         $app = json_decode($r->getBody()->getContents());
         $headers = ['Field', 'Value'];
-        $domains = json_decode($app->domains);
         $rows = [
             ['Name', $app->name],
             ['Cluster', $app->cluster],
@@ -76,7 +75,7 @@ class InfoCommand extends Command
             ['OrgId', $app->orgId],
             ['Parent', $app->parentSapp],
             ['Env', $app->environment],
-            ['Domains', implode("\n", $domains->domains)],
+            ['Domains', implode("\n", $app->domains->domains)],
         ];
 
         $io->table($headers, $rows);
