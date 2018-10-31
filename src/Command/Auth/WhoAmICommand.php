@@ -38,15 +38,11 @@ class WhoAmICommand extends Command
         $io = new SymfonyStyle($input, $output);
         if (!empty($this->token->token))
         {
-            $parts = explode('.', $this->token->token);
-            [$type, $id] = explode(':',json_decode(base64_decode($parts[1]))->sub);
+            $user = $this->requireLogin($this->api);
 
-            $io->writeln("current logged in as $type:$id");
-
-            if ($type === 'Pagely.Model.Orgs.OrgUser')
+            if ($user)
             {
-                $r = $this->api->getUser($this->token->token, $id);
-                $user = json_decode($r->getBody()->getContents());
+                $io->writeln("current logged in as {$user->type}:{$user->id}");
                 $io = new SymfonyStyle($input, $output);
 
                 $headers = ['Field', 'Value'];

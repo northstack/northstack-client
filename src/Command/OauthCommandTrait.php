@@ -7,6 +7,8 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use NorthStack\NorthStackClient\OauthToken;
 
+use Guzzle\Exception\ClientException;
+
 trait OauthCommandTrait
 {
     /**
@@ -57,5 +59,40 @@ trait OauthCommandTrait
         if (!$this->token->token && !$this->optionalOauth) {
             throw new \Exception('Not enough information to make an access token');
         }
+    }
+
+    protected function currentUser($orgsClient)
+    {
+        if (empty($this->token->token))
+        {
+            return null;
+        }
+
+        $parts = explode('.', $this->token->token);
+        [$type, $id] = explode(':',json_decode(base64_decode($parts[1]))->sub);
+
+        if ($type === 'Pagely.Model.Orgs.OrgUser')
+        {
+            $r = $orgsClient->getUser($this->token->token, $id);
+            $user = json_decode($r->getBody()->getContents());
+            $user->type = $type;
+            return $user;
+        }
+
+        return null;
+    }
+
+    protected function requireLogin($orgsClient)
+    {
+        try {
+            $user = $this->currentUser($orgsClient);
+        } catch (ClientException $e) {}
+
+        if (!$user)
+        {
+            throw new Exception("You must be logged in to perform this action");
+        }
+
+        return $user;
     }
 }
