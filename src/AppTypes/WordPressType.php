@@ -46,10 +46,7 @@ class WordPressType extends BaseType
 
     protected function writePerEnvBuildConfigs()
     {
-        if ($this->config['wpIsMultisite'])
-        {
-            $this->config['wpMultisiteSubdomains'] = ($this->config['wpMultisiteSubdomains'] === 'subdomain') ? true : false;
-        }
+        $this->config['wpMultisiteSubdomains'] = ($this->config['wpMultisiteSubdomains'] === 'subfolder') ? false : true;
 
         foreach ($this->sapps as $sapp)
         {

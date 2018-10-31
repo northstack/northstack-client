@@ -195,7 +195,7 @@ class BaseType
                 );
             } elseif (isset($arg['choices']))
             {
-                $question = ChoiceQuestion(
+                $question = new ChoiceQuestion(
                     $prompt,
                     $arg['choices'],
                     $default
