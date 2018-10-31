@@ -2,6 +2,7 @@
 namespace NorthStack\NorthStackClient\Command;
 
 use NorthStack\NorthStackClient\API\AuthApi;
+use NorthStack\NorthStackClient\API\Orgs\OrgsClient;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -60,7 +61,7 @@ trait OauthCommandTrait
         }
     }
 
-    protected function currentUser($orgsClient)
+    protected function currentUser(OrgsClient $orgsClient)
     {
         if (empty($this->token->token))
         {
@@ -81,7 +82,7 @@ trait OauthCommandTrait
         return null;
     }
 
-    protected function requireLogin($orgsClient)
+    protected function requireLogin(OrgsClient $orgsClient)
     {
         try {
             $user = $this->currentUser($orgsClient);
