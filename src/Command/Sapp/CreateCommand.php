@@ -10,7 +10,7 @@ use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
 use NorthStack\NorthStackClient\OrgAccountHelper;
 
-use NorthStack\NorthStackClient\AppTypes\BaseType;
+use NorthStack\NorthStackClient\AppTypes\StaticType;
 use NorthStack\NorthStackClient\AppTypes\WordPressType;
 
 use Symfony\Component\Console\Input\InputArgument;
@@ -115,7 +115,7 @@ class CreateCommand extends Command
                 $appTemplate = new WordPressType($input, $output, $questionHelper, $templateArgs);
                 break;
             default:
-                $appTemplate = new BaseType($input, $output, $questionHelper, $templateArgs);
+                $appTemplate = new StaticType($input, $output, $questionHelper, $templateArgs);
         }
         $appTemplate->promptForArgs();
 

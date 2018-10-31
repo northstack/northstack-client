@@ -9,7 +9,7 @@ use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Question\ChoiceQuestion;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
 
-class BaseType
+abstract class BaseType
 {
     protected $input;
     protected $output;
