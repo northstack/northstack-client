@@ -96,12 +96,16 @@ class CreateCommand extends Command
 
         $orgId = $input->getOption('orgId') ?: $this->orgAccountHelper->getDefaultOrg()['id'];
 
+        $user = $this->requireLogin($this->orgs);
+
         $appTemplate = null;
         $templateArgs = [
             'appName' => $args['name'],
             'baseDir' => $appPath,
             'primaryDomain' => $args['primaryDomain'],
-            'cluster' => $options['cluster']
+            'cluster' => $options['cluster'],
+            'accountUsername' => $user->username,
+            'accountEmail' => $user->email
         ];
         $questionHelper = $this->getHelper('question');
 
@@ -113,8 +117,7 @@ class CreateCommand extends Command
             default:
                 $appTemplate = new BaseType($input, $output, $questionHelper, $templateArgs);
         }
-
-        $appTemplate->promptForArgs(); exit;
+        $appTemplate->promptForArgs();
 
         try {
             $r = $this->api->createApp(
@@ -123,7 +126,7 @@ class CreateCommand extends Command
                 $orgId,
                 $options['cluster'],
                 $args['primaryDomain'],
-                $args['appType']
+                strtoupper($options['type'])
             );
         } catch (ClientException $e) {
             $i = $e->getResponse()->getStatusCode();

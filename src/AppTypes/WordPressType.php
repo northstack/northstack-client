@@ -4,166 +4,99 @@ namespace NorthStack\NorthStackClient\AppTypes;
 
 use NorthStack\NorthStackClient\AppTypes\BaseType;
 
-use Symfony\Component\Console\Question\Question;
-use Symfony\Component\Console\Question\ChoiceQuestion;
 
 class WordPressType extends BaseType
 {
-    private $args = [
+    protected $args = [
         'wpTitle' => [
-            'prompt' => "Enter the title of your new site",
+            'prompt' => 'Enter the title of the site:',
             'default' => '$appName',
         ],
         'wpAdminUser' => [
-            'prompt' => 'The WP admin username',
+            'prompt' => 'Enter the WP admin username:',
             'default' => '$accountUsername',
         ],
         'wpAdminPass' => [
-            'prompt' => 'The WP admin password',
+            'prompt' => 'Enter the WP admin password:',
             'default' => 'randomly generated',
             'isRandom' => true,
             'randomLen' => 16,
             'passwordInput' => true
         ],
         'wpAdminEmail' => [
-            'prompt' => 'The WP admin email address',
+            'prompt' => 'Enter the WP admin email address:',
             'default' => '$accountEmail',
+        ],
+        'wpIsMultisite' => [
+            'prompt' => 'Is this a multi-site WP app?',
+            'type' => 'bool',
+            'default' => false
+        ],
+        'wpMultisiteSubdomains' => [
+            'prompt' => 'Multi-site mode: ',
+            'choices' => ['subdomain', 'subfolder'],
+            'depends' => 'wpIsMultisite',
+            'default' => 'subdomain'
+        ],
+        'wpVersion' => [
+            'prompt' => 'WordPress version: ',
+            'default' => '4.8'
         ]
     ];
 
-    public function promptForArgs()
-    {
-        foreach ($this->args as $name => $arg)
-        {
-            $question = new Question($arg['prompt'], $arg['default']);
-            if (array_key_exists('passwordInput', $arg) && ($arg['passwordInput'] === true))
-            {
-                $question->setHidden(true);
-                $question->setHidddenFallback(true);
-            }
-
-            $answer = $this->askQuestion($question);
-
-            if (
-                array_key_exists('isRandom', $arg) &&
-                ($arg['isRandom'] === true) &&
-                ($answer === $arg['default'])
-                )
-            {
-                $answer = bin2hex(random_bytes($arg['randomLen']));
-            }
-
-            $this->config[$name] = $answer;
-        }
-
-        $this->config['wpIsMultisite'] = false;
-        $this->config['wpMultisiteSubdomains'] = false;
-
-        $isMultiSite = new ChoiceQuestion(
-            'Is this a WP multi-site?',
-            [true, false],
-            false
-        );
-
-        if ($this->askQuestion($isMultiSite))
-        {
-            $this->config['wpIsMultisite'] = true;
-            $multiSiteType = new ChoiceQuestion(
-                'What type of multi-site is this?',
-                ['subdomain', 'subfolder'],
-                'subdomain'
-            );
-            if ($this->askQuestion($multiSiteType) === 'subdomain')
-            {
-                $this->config['wpMultisiteSubdomains'] = true;
-            }
-        }
-
-        print_r($this->config); exit;
-    }
-
     protected function writePerEnvBuildConfigs()
     {
-        // Doesn't work yet!
-        foreach ($this->sapps as $sapp) {
-
-            switch($sapp->environment)
-            {
-            case 'prod':
-                $build = ['wordpress-install' => $install];
-                break;
-            case 'test':
-                $install['url'] = "http://$domain/";
-                $build = ['wordpress-install' => $install];
-                break;
-            case 'dev':
-                $install['url'] = "http://$domain/";
-                $build = ['wordpress-install' => $install];
-                break;
-            }
-
-            file_put_contents("{$appPath}/config/{$sapp->environment}/build.json", json_encode($build, JSON_PRETTY_PRINT));
+        if ($this->config['wpIsMultisite'])
+        {
+            $this->config['wpMultisiteSubdomains'] = ($this->config['wpMultisiteSubdomains'] === 'subdomain') ? true : false;
         }
 
+        foreach ($this->sapps as $sapp)
+        {
+            $this->writeConfigFile(
+                "config/{$sapp->environment}/build.json",
+                $this->buildWpInstallArgs($sapp)
+            );
+        }
 
-        $assetPath = dirname(__DIR__, 3).'/assets';
-        copy("{$assetPath}/config.json", "{$appPath}/config/config.json");
-        copy("{$assetPath}/build.json", "{$appPath}/config/build.json");
+        $this->writeConfigFile(
+            "config/build.json",
+            [
+                'image' => [
+                    'name' => 'wordpress-php',
+                    'version' => $this->config['wpVersion']
+                ],
+                'build-type' => 'builder',
+                'wordpress-version' => '^'.$this->config['wpVersion']
+            ]
+        );
+
+        $this->writeConfigFile(
+            "config/config.json",
+            [
+                'app-type' => 'wordpress',
+                'layout' => 'standard',
+                'shared-paths' => [
+                    'wp-content/uploads',
+                    'wp-content/cache'
+                ]
+            ]
+        );
     }
 
-    protected function buildWpInstallArgs($options, $args, OutputInterface $io)
+    protected function buildWpInstallArgs($sapp)
     {
-        if ($options['wpTitle'] === 'app-name') {
-            $title = $args['name'];
-        } else {
-            $title = $args['wpTitle'];
-        }
-
-
-        if ($options['wpAdminUser'] === 'account-user')
-        {
-            // TODO grab the username of the currently logged in user
-            $user = "ns-admin";
-            $io->writeln("WordPress Admin User: $user\n");
-        }
-        else
-        {
-            $user = $options['wpAdminUser'];
-        }
-
-        if ($options['wpAdminPass'] === 'random-value')
-        {
-            $pass = bin2hex(random_bytes(16));
-            $io->writeln("WordPress Admin Password: $pass\n");
-        }
-        else
-        {
-            $pass = $options['wpAdminPass'];
-        }
-
-        if ($options['wpAdminEmail'] === 'account-email')
-        {
-            [, $id] = explode(':',json_decode(base64_decode(explode('.', $this->token->token)[1]))->sub);
-            $r = $this->orgs->getUser($this->token->token, $id);
-            $currentUser = json_decode($r->getBody()->getContents());
-            $email = $currentUser->email;
-        }
-        else
-        {
-            $email = $options['wpAdminEmail'];
-        }
-
-        $install = [
-            'url' => $args['primaryDomain'],
-            'title' => $title,
-            'admin_user' => $user,
-            'admin_pass' => $pass,
-            'admin_email' => $email,
-            'multisite' => $options['wpIsMultisite'],
-            'subdomains' => $options['wpMultisiteSubdomains'],
+        return [
+            'wordpress-install' => [
+                'url'         => $this->domainForSapp($sapp),
+                'title'       => $this->config['wpTitle'],
+                'admin_user'  => $this->config['wpAdminUser'],
+                'admin_pass'  => $this->config['wpAdminPass'],
+                'admin_email' => $this->config['wpAdminEmail'],
+                'multisite'   => $this->config['wpIsMultisite'],
+                'subdomains'  => $this->config['wpMultisiteSubdomains'],
+            ]
         ];
-
-        return $install;
     }
 
 }
