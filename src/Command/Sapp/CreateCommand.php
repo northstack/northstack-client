@@ -140,7 +140,6 @@ class CreateCommand extends Command
         }
 
         $data = json_decode($r->getBody()->getContents());
-        file_put_contents('./resp.json', json_encode($data, JSON_PRETTY_PRINT));
         $appTemplate->writeConfigs($data->data);
         $this->printSuccess($io, $data, $appPath);
     }
