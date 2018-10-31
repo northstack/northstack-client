@@ -6,8 +6,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use NorthStack\NorthStackClient\OauthToken;
-
-use Guzzle\Exception\ClientException;
+use GuzzleHttp\Exception\ClientException;
 
 trait OauthCommandTrait
 {
@@ -90,7 +89,7 @@ trait OauthCommandTrait
 
         if (!$user)
         {
-            throw new Exception("You must be logged in to perform this action");
+            throw new \Exception("You must be logged in to perform this action");
         }
 
         return $user;
