@@ -102,7 +102,7 @@ abstract class BaseType
     protected function writeConfigFile(string $path, array $data)
     {
         $path = $this->config['baseDir'] . '/' . $path;
-        file_put_contents($path, json_encode($data), JSON_PRETTY_PRINT);
+        file_put_contents($path, json_encode($data, JSON_PRETTY_PRINT));
     }
 
     protected function writeDomainConfigs()
