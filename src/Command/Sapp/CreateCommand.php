@@ -52,7 +52,7 @@ class CreateCommand extends Command
             ->addArgument('baseFolder', InputArgument::OPTIONAL, 'Folder to create/install to (defaults to current directory)')
             ->addOption('cluster', null, InputOption::VALUE_REQUIRED, 'Deployment location', 'dev-us-east-1')
             ->addOption('orgId', null, InputOption::VALUE_REQUIRED, 'Only needed if you have access to multiple organizations')
-            ->addOption('type', 't', InputOption::VALUE_REQUIRED, 'Application type (one of: [wordpress, static])', 'wordpress')
+            ->addOption('stack', null, InputOption::VALUE_REQUIRED, 'Application stack type (one of: [wordpress, static])', 'wordpress')
         ;
         $this->addOauthOptions();
     }
@@ -110,7 +110,7 @@ class CreateCommand extends Command
         $questionHelper = $this->getHelper('question');
 
         // TODO: move this logic somewhere else
-        switch($options['type']) {
+        switch($options['stack']) {
             case 'wordpress':
                 $appTemplate = new WordPressType($input, $output, $questionHelper, $templateArgs);
                 break;
@@ -126,7 +126,7 @@ class CreateCommand extends Command
                 $orgId,
                 $options['cluster'],
                 $args['primaryDomain'],
-                strtoupper($options['type'])
+                strtoupper($options['stack'])
             );
         } catch (ClientException $e) {
             $i = $e->getResponse()->getStatusCode();
