@@ -42,7 +42,7 @@ class WhoAmICommand extends Command
 
             if ($user)
             {
-                $io->writeln("current logged in as {$user->type}:{$user->id}");
+                $io->writeln("Currently logged in as {$user->type}:{$user->id}");
                 $io = new SymfonyStyle($input, $output);
 
                 $headers = ['Field', 'Value'];

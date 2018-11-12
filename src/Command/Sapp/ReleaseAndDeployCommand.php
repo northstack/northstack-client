@@ -130,7 +130,7 @@ class ReleaseAndDeployCommand extends AbstractDeployCmd
 
     protected function testWorker(string $releaseId) {
         try {
-            $result = $this->deployClient->run($this->token->token, $releaseId);
+            $result = $this->deployClient->test($this->token->token, $releaseId);
             if ($result->getStatusCode() === 102) {
                 return 'UNKNOWN';
             }
