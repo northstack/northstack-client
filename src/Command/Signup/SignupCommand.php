@@ -31,8 +31,7 @@ class SignupCommand extends Command
     public function configure()
     {
         parent::configure();
-        $this->setDescription('NorthStack Signup')
-            ->addArgument('baseFolder', InputArgument::OPTIONAL, 'Folder that apps will be created in (defaults to current dir)');
+        $this->setDescription('NorthStack Signup');
     }
 
     public function execute(InputInterface $input, OutputInterface $output)

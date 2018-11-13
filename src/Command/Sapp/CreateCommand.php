@@ -48,7 +48,6 @@ class CreateCommand extends Command
             ->setDescription('NorthStack App Create')
             ->addArgument('name', InputArgument::REQUIRED, 'App name')
             ->addArgument('primaryDomain', InputArgument::REQUIRED, 'Primary Domain')
-            ->addArgument('baseFolder', InputArgument::OPTIONAL, 'Folder to create/install to (defaults to current directory)')
             ->addOption('cluster', null, InputOption::VALUE_REQUIRED, 'Deployment location', 'dev-us-east-1')
             ->addOption('orgId', null, InputOption::VALUE_REQUIRED, 'Only needed if you have access to multiple organizations')
             ->addOption('stack', null, InputOption::VALUE_REQUIRED, 'Application stack type (one of: [wordpress, static])', 'wordpress')
@@ -78,13 +77,8 @@ class CreateCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         // create folder structure
-        $nsdir = $input->getArgument('baseFolder');
 
-        if ($nsdir === '.' || empty($nsdir)) {
-            $nsdir = getcwd();
-        } elseif (!file_exists($nsdir)) {
-            $this->mkDirIfNotExists($nsdir);
-        }
+        $nsdir = getcwd();
 
         $appPath = "{$nsdir}/{$args['name']}";
 

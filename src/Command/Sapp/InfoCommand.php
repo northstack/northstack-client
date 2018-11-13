@@ -37,7 +37,6 @@ class InfoCommand extends Command
             ->setDescription('Show details about an App')
             ->addArgument('name', InputArgument::REQUIRED, 'App name')
             ->addArgument('environment', InputArgument::REQUIRED, 'Environment (prod, test, or dev)')
-            ->addArgument('baseFolder', InputArgument::OPTIONAL, 'Path to root of NorthStack folder (contains folder named after app)')
         ;
         $this->addOauthOptions();
     }
@@ -51,15 +50,9 @@ class InfoCommand extends Command
 
         $args = $input->getArguments();
 
-        if (empty($args['baseFolder'])) {
-            $args['baseFolder'] = getcwd();
-        }
-
-
         [$sappId] = $this->getSappIdAndFolderByOptions(
             $args['name'],
-            $args['environment'],
-            $args['baseFolder']
+            $args['environment']
         );
 
         $r = $this->api->get($this->token->token, $sappId);
