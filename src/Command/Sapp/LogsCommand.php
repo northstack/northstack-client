@@ -62,8 +62,7 @@ class LogsCommand extends Command
         if (!$options['topicOverride']) {
             [$sappId] = $this->getSappIdAndFolderByOptions(
                 $args['name'],
-                $args['environment'],
-                getcwd()
+                $args['environment']
             );
             $topic = "{$sappId}_{$args['topic']}";
         } else {
