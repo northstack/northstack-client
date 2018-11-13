@@ -58,7 +58,6 @@ abstract class AbstractDeployCmd extends Command
         $this
             ->addArgument('name', InputArgument::REQUIRED, 'App name')
             ->addArgument('environment', InputArgument::REQUIRED, 'Environment (prod, test, or dev)')
-            ->addArgument('baseFolder', InputArgument::OPTIONAL, 'Path to root of NorthStack folder (contains folder named after app)')
         ;
         $this->addOauthOptions();
     }
@@ -77,14 +76,9 @@ abstract class AbstractDeployCmd extends Command
 
         $args = $input->getArguments();
 
-        if (empty($args['baseFolder'])) {
-            $args['baseFolder'] = getcwd();
-        }
-
         [$sappId, $appFolder] = $this->getSappIdAndFolderByOptions(
             $args['name'],
-            $args['environment'],
-            $args['baseFolder']
+            $args['environment']
         );
 
         // request upload url
@@ -92,7 +86,7 @@ abstract class AbstractDeployCmd extends Command
         $r = json_decode($r->getBody()->getContents());
         $uploadUrl = $r->uploadUrl;
         try {
-            $zip = $this->archiver->archive($args['baseFolder'], $sappId, $appFolder);
+            $zip = $this->archiver->archive($sappId, $appFolder);
         } catch (\Throwable $e) {
             $output->writeln([
                 "<error>Uh oh, something went wrong while preparing the app for deploy</error>",

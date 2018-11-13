@@ -48,7 +48,6 @@ class LogsCommand extends Command
             ->addArgument('name', InputArgument::REQUIRED, 'App name')
             ->addArgument('environment', InputArgument::REQUIRED, 'Environment (prod, test, or dev)')
             ->addArgument('topic', InputArgument::REQUIRED, 'Log type (access, error, build)')
-            ->addArgument('baseFolder', InputArgument::OPTIONAL, 'Path to root of NorthStack folder (contains folder named after app)')
             ->addOption('topicOverride', 't', InputOption::VALUE_REQUIRED, 'Override Topic (You should know what you are doing if you are using this)')
             ->addOption('json', null, InputOption::VALUE_NONE, 'Output raw json', null)
         ;
@@ -64,7 +63,7 @@ class LogsCommand extends Command
             [$sappId] = $this->getSappIdAndFolderByOptions(
                 $args['name'],
                 $args['environment'],
-                $args['baseFolder']
+                getcwd()
             );
             $topic = "{$sappId}_{$args['topic']}";
         } else {

@@ -18,8 +18,9 @@ class Archiver
         $this->zippy = $zippy;
     }
 
-    public function archive(string $baseFolder, string $sappId, string $appFolder): string
+    public function archive(string $sappId, string $appFolder): string
     {
+        $baseFolder = getcwd();
         $zip = "{$baseFolder}/{$sappId}.tar.gz";
 
         $this->zippy->create($zip, [

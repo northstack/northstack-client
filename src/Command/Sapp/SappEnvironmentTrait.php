@@ -6,27 +6,9 @@ namespace NorthStack\NorthStackClient\Command\Sapp;
 
 trait SappEnvironmentTrait
 {
-    protected function getSappIdAndFolderByOptions($name, $environment, $baseFolder)
+    protected function getSappIdAndFolderByOptions($name, $environment)
     {
-        if (empty($baseFolder)) {
-            $baseFolder = getcwd();
-        }
-
-        if (!file_exists($baseFolder)) {
-            throw new \RuntimeException("<error>Folder {$baseFolder} not found</error>");
-        }
-
-        // calculate app folder
-        if (strpos($baseFolder, './') === 0) {
-            $baseFolder = getcwd().substr($baseFolder, 1);
-        } elseif ($baseFolder === '.') {
-            $baseFolder = getcwd();
-        } elseif (strpos($baseFolder, '~/') === 0) {
-            $baseFolder = getenv('HOME').substr($baseFolder, 1);
-        }
-        $baseFolder = rtrim($baseFolder, '/');
-
-        $appFolder = $baseFolder.'/'.$name;
+        $appFolder = getcwd().'/'.$name;
 
         if (!file_exists($appFolder)) {
             throw new \RuntimeException("<error>Folder {$appFolder} not found</error>");

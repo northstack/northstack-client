@@ -49,7 +49,6 @@ class LaunchCommand extends Command
             ->setHelp('Northstack will launch additional workers for you as needed.  This command can be used for debugging, or to prime additional capacity.  Note that unused capacity will shutoff after the inactivity period.')
             ->addArgument('name', InputArgument::REQUIRED, 'App name')
             ->addArgument('environment', InputArgument::REQUIRED, 'Environment (prod, test, or dev)')
-            ->addArgument('baseFolder', InputArgument::OPTIONAL, 'Path to root of NorthStack folder (contains folder named after app)')
         ;
         $this->addOauthOptions();
     }
@@ -63,14 +62,9 @@ class LaunchCommand extends Command
 
         $args = $input->getArguments();
 
-        if (empty($args['baseFolder']))
-            $args['baseFolder'] = getcwd();
-
-
         [$sappId, $appFolder] = $this->getSappIdAndFolderByOptions(
             $args['name'],
-            $args['environment'],
-            $args['baseFolder']
+            $args['environment']
         );
 
         try
