@@ -75,6 +75,7 @@ class InfoCommand extends Command
             ['OrgId', $app->orgId],
             ['Parent', $app->parentSapp],
             ['Env', $app->environment],
+            ['Stack', $app->appType],
             ['Domains', implode("\n", $app->domains->domains)],
         ];
 
