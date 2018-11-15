@@ -41,7 +41,7 @@ class ReleaseAndDeployCommand extends AbstractDeployCmd
 
     protected function commandName(): string
     {
-        return 'app:deploy-release';
+        return 'app:deploy';
     }
 
     public function execute(InputInterface $input, OutputInterface $output)

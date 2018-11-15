@@ -97,6 +97,6 @@ class DeployCommand extends AbstractDeployCmd
 
     protected function commandName(): string
     {
-        return 'app:deploy';
+        return 'app:deploy-legacy';
     }
 }
