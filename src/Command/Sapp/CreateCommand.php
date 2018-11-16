@@ -107,8 +107,11 @@ class CreateCommand extends Command
             case 'wordpress':
                 $appTemplate = new WordPressType($input, $output, $questionHelper, $templateArgs);
                 break;
-            default:
+            case 'static':
                 $appTemplate = new StaticType($input, $output, $questionHelper, $templateArgs);
+                break;
+            default:
+                throw new \Exception("Invalid stack {$options['stack']}");
         }
         $appTemplate->promptForArgs();
 
