@@ -135,7 +135,7 @@ abstract class BaseType
                 'environment' => 'production'
             ],
             'test' => [
-                'environment' => 'testing',
+                'environment' => 'test',
                 'auth-type' => 'standard'
             ],
             'dev' => [
