@@ -52,6 +52,8 @@ class ReleaseAndDeployCommand extends AbstractDeployCmd
         $environment = $input->getArgument('environment');
         $configs = $this->mergeConfigs($appFolder, $environment);
 
+        $appType = json_decode($configs['config.json'])->{'app-type'};
+
         // update configs
         $output->writeln('Updating Sapp configs...');
         $this->sappClient->update($this->token->token, $sappId, [
@@ -83,6 +85,12 @@ class ReleaseAndDeployCommand extends AbstractDeployCmd
         } catch (ClientException $e) {
             $output->writeln('Could not update gateway. - '.$e->getMessage());
             exit(1);
+        }
+
+        // nothing left to do for static apps
+        if ($appType === 'static') {
+            $output->writeln('Release and Deploy Finished!');
+            return;
         }
 
         try {
