@@ -7,6 +7,7 @@ use GuzzleHttp\Client;
 use NorthStack\NorthStackClient\API\Logs\LogsClient;
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
+use NorthStack\NorthStackClient\Command\AutoLoginTrait;
 use NorthStack\NorthStackClient\JSON\Merger;
 use NorthStack\NorthStackClient\LogFormat\LogFormat;
 use Ratchet\RFC6455\Messaging\Message;

@@ -10,6 +10,7 @@ use NorthStack\NorthStackClient\API\Sapp\SappClient;
 use NorthStack\NorthStackClient\Build\Archiver;
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
+use NorthStack\NorthStackClient\Command\AutoLoginTrait;
 use NorthStack\NorthStackClient\JSON\Merger;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -19,6 +20,7 @@ abstract class AbstractDeployCmd extends Command
 {
     use SappEnvironmentTrait;
     use OauthCommandTrait;
+    use AutoLoginTrait;
     /**
      * @var SappClient
      */
