@@ -78,9 +78,9 @@ class LoginCommand extends Command
 
         $this->api->setResponseHandler(401,
             function (ResponseInterface $response) use ($output) {
+                $output->writeln("<error>Login Failed:</error>");
                 $info = json_decode($response->getBody()->getContents());
-                $output->writeln("<error>{$info->error}</error>");
-                $output->writeln($info->message);
+                $output->writeln(json_encode($info, JSON_PRETTY_PRINT));
                 exit(1);
             }
         );
