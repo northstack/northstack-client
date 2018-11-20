@@ -194,12 +194,12 @@ trait GuzzleTrait
         return $this->bearerTokenMiddleware[$accessToken];
     }
 
-    protected function setResponseHandler(int $status, callable $function)
+    public function setResponseHandler(int $status, callable $function)
     {
         $this->responseHandlers[$status] = $function;
     }
 
-    protected function unsetResponseHandler(int $status)
+    public function unsetResponseHandler(int $status)
     {
         unset($this->responseHandlers[$status]);
     }
