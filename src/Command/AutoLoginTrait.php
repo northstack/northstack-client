@@ -3,25 +3,25 @@ namespace NorthStack\NorthStackClient\Command;
 
 use NorthStack\NorthStackClient\Client\LoginRequiredException;
 
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Input\ArrayInput;
+use Symfony\Component\Console\Input\InputInterface;
+use Symfony\Component\Console\Output\NullOutput;
+use Symfony\Component\Console\Output\OutputInterface;
 
 trait AutoLoginTrait
 {
 
-    public function interact(InputInterface $input, OutputInterface $output)
+    public function run(InputInterface $input, OutputInterface $output)
     {
-        parent::interact($input, $output);
         $auth = $this->getApplication()->find('auth:whoami');
         try {
-            echo "Testing if you're logged in\n";
-            $result = $auth->run(new ArrayInput([]), $output);
+            $result = $auth->run(new ArrayInput([]), new NullOutput());
         } catch (LoginRequiredException $e) {
-            echo "Looks like you need to log in\n";
+            $output->writeln("Your login token is expired or absent. Time to log in.");
             $login = $this->getApplication()->find('auth:login');
-            return $login->run($input, $output);
+            $login->run(new ArrayInput([]), $output);
         }
 
+        parent::run($input, $output);
     }
 }
