@@ -6,7 +6,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use NorthStack\NorthStackClient\OauthToken;
 
-class LogoutCommand extends Command
+class LogoutCommand extends AbstractAuthCmd
 {
     public function __construct($name = 'auth:logout')
     {
