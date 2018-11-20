@@ -7,6 +7,7 @@ use NorthStack\NorthStackClient\API\Sapp\SappClient;
 
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
+use NorthStack\NorthStackClient\Command\AutoLoginTrait;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -17,6 +18,7 @@ class InfoCommand extends Command
 {
     use OauthCommandTrait;
     use SappEnvironmentTrait;
+    use AutoLoginTrait;
     /**
      * @var SappClient
      */
