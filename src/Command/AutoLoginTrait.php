@@ -17,9 +17,11 @@ trait AutoLoginTrait
         try {
             $result = $auth->run(new ArrayInput([]), new NullOutput());
         } catch (LoginRequiredException $e) {
-            $output->writeln("Your login token is expired or absent. Time to log in.");
-            $login = $this->getApplication()->find('auth:login');
-            $login->run(new ArrayInput([]), $output);
+            if ($input->isInteractive()) {
+                $output->writeln("No active NorthStack token found. Please log in.");
+                $login = $this->getApplication()->find('auth:login');
+                $login->run(new ArrayInput([]), $output);
+            }
         }
 
         parent::run($input, $output);
