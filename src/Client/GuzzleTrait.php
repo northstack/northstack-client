@@ -43,6 +43,8 @@ trait GuzzleTrait
     protected $bearerTokenMiddleware = [];
     protected $maxRetries = 10;
 
+    protected $responseHandlers = [];
+
     public function setExceptions($bool)
     {
         $this->allowExceptions = $bool;
@@ -78,6 +80,14 @@ trait GuzzleTrait
             }
 
             $this->setupGuzzleDebug($stack);
+
+            $stack->push(
+                Middleware::mapResponse(
+                    function (ResponseInterface $response) {
+                        return $this->handleResponse($response);
+                    }
+                )
+            );
 
             $options = array_merge([
                 'handler' => $stack,
@@ -182,5 +192,25 @@ trait GuzzleTrait
         }
 
         return $this->bearerTokenMiddleware[$accessToken];
+    }
+
+    protected function setResponseHandler(int $status, callable $function)
+    {
+        $this->responseHandlers[$status] = $function;
+    }
+
+    protected function unsetResponseHandler(int $status)
+    {
+        unset($this->responseHandlers[$status]);
+    }
+
+    protected function handleResponse(ResponseInterface $response)
+    {
+        $code = $response->getStatusCode();
+        if (!empty($this->responseHandlers[$code])) {
+            $response = $this->responseHandlers[$code]($response);
+        }
+
+        return $response;
     }
 }
