@@ -3,6 +3,7 @@
 namespace NorthStack\NorthStackClient\API;
 
 use NorthStack\NorthStackClient\Client\GuzzleTrait;
+use NorthStack\NorthStackClient\Client\LoginRequiredException;
 use NorthStack\NorthStackClient\RequestChain;
 use Psr\Log\LoggerInterface;
 
@@ -19,5 +20,15 @@ class BaseApiClient
             getenv('MGMT_API_URL')
         ;
         $this->logger = $logger;
+        $this->setGuzzleResponseHandlers();
+    }
+
+    protected function setGuzzleResponseHandlers()
+    {
+        $this->setResponseHandler(401,
+            function ($response) {
+                throw new LoginRequiredException();
+            }
+        );
     }
 }
