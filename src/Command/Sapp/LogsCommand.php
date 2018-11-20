@@ -20,6 +20,7 @@ class LogsCommand extends Command
 {
     use OauthCommandTrait;
     use SappEnvironmentTrait;
+    use AutoLoginTrait;
     /**
      * @var LogsClient
      */
