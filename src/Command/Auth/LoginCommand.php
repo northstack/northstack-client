@@ -49,7 +49,15 @@ class LoginCommand extends Command
         $username = $input->getArgument('username');
         if (empty($username))
         {
-            $question = new Question('Username: ');
+            $question = (new Question('Username: '))
+                ->setValidator(function ($answer) {
+                    if (empty($answer))
+                    {
+                        throw new \Exception("Username cannot be empty");
+                    }
+                    return $answer;
+                })
+                ->setMaxAttempts(3);
             $helper = $this->getHelper('question');
             $username = $helper->ask($input, $output, $question);
         }
