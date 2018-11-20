@@ -8,7 +8,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\NullOutput;
 use Symfony\Component\Console\Output\OutputInterface;
 
-trait AutoLoginTrait
+trait LoginRequiredTrait
 {
 
     public function run(InputInterface $input, OutputInterface $output)
