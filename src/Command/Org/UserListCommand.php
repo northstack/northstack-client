@@ -7,6 +7,7 @@ use NorthStack\NorthStackClient\API\Orgs\OrgsClient;
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
 use NorthStack\NorthStackClient\Command\OrgCommandTrait;
+use NorthStack\NorthStackClient\Command\AutoLoginTrait;
 
 use NorthStack\NorthStackClient\Enumeration\OrgPermission;
 use NorthStack\NorthStackClient\Enumeration\OrgPermissionName;
@@ -18,6 +19,7 @@ class UserListCommand extends Command
 {
     use OrgCommandTrait;
     use OauthCommandTrait;
+    use AutoLoginTrait;
     /**
      * @var OrgsClient
      */
