@@ -10,7 +10,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use NorthStack\NorthStackClient\OauthToken;
 
-class ClientLoginCommand extends Command
+class ClientLoginCommand extends AbstractAuthCmd
 {
     protected $api;
     public function __construct(AuthApi $api)

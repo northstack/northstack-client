@@ -8,7 +8,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class WhoAmICommand extends Command
+class WhoAmICommand extends AbstractAuthCmd
 {
     use OauthCommandTrait;
     protected $api;

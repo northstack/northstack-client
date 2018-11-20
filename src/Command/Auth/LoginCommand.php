@@ -13,7 +13,7 @@ use Psr\Http\Message\ResponseInterface;
 use NorthStack\NorthStackClient\OauthToken;
 use Symfony\Component\Console\Question\Question;
 
-class LoginCommand extends Command
+class LoginCommand extends AbstractAuthCmd
 {
     protected $api;
     /**
