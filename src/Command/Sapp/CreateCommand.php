@@ -8,7 +8,6 @@ use NorthStack\NorthStackClient\API\Sapp\SappClient;
 use NorthStack\NorthStackClient\API\Orgs\OrgsClient;
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
-use NorthStack\NorthStackClient\Command\AutoLoginTrait;
 use NorthStack\NorthStackClient\OrgAccountHelper;
 
 use NorthStack\NorthStackClient\AppTypes\StaticType;
@@ -23,7 +22,6 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 class CreateCommand extends Command
 {
     use OauthCommandTrait;
-    use AutoLoginTrait;
     /**
      * @var SappClient
      */

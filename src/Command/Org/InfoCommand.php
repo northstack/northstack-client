@@ -9,7 +9,6 @@ use NorthStack\NorthStackClient\API\Orgs\OrgsClient;
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
 use NorthStack\NorthStackClient\Command\OrgCommandTrait;
-use NorthStack\NorthStackClient\Command\AutoLoginTrait;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -19,7 +18,6 @@ class InfoCommand extends Command
 {
     use OrgCommandTrait;
     use OauthCommandTrait;
-    use AutoLoginTrait;
     /**
      * @var OrgsClient
      */
