@@ -3,12 +3,12 @@ namespace NorthStack\NorthStackClient\Command\Auth;
 
 use NorthStack\NorthStackClient\API\Orgs\OrgsClient;
 use NorthStack\NorthStackClient\Command\Command;
-use GuzzleHttp\Exception\BadResponseException;
 use NorthStack\NorthStackClient\API\AuthApi;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Psr\Http\Message\ResponseInterface;
 
 use NorthStack\NorthStackClient\OauthToken;
 use Symfony\Component\Console\Question\Question;
@@ -54,24 +54,36 @@ class LoginCommand extends Command
             $username = $helper->ask($input, $output, $question);
         }
 
-        $question = (new Question('Password: '))->setHidden(true);
+        $question = (new Question('Password: '))
+            ->setHidden(true)
+            ->setValidator(function ($answer) {
+                if (empty($answer))
+                {
+                    throw new \Exception("Password cannot be empty");
+                }
+                return $answer;
+            })
+            ->setMaxAttempts(3);
 
         $helper = $this->getHelper('question');
         $password = $helper->ask($input, $output, $question);
 
-        try {
-            $r = $this->api->login(
-                $username,
-                $password,
-                null,
-                $input->getOption('scope'),
-                'org'
-            );
-        } catch (BadResponseException $e) {
-            $output->writeln('<error>Invalid Login</error>');
-            $output->writeln($e->getResponse()->getBody()->getContents());
-            return;
-        }
+        $this->api->setResponseHandler(401,
+            function (ResponseInterface $response) use ($output) {
+                $info = json_decode($response->getBody()->getContents());
+                $output->writeln("<error>{$info->error}</error>");
+                $output->writeln($info->message);
+                exit(1);
+            }
+        );
+
+        $r = $this->api->login(
+            $username,
+            $password,
+            null,
+            $input->getOption('scope'),
+            'org'
+        );
 
         if ($input->getOption('show')) {
             $data = json_decode($r->getBody()->getContents());
