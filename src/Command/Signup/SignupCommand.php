@@ -22,6 +22,8 @@ class SignupCommand extends Command
      */
     protected $api;
 
+    protected $skipLoginCheck = true;
+
     public function __construct(OrgsClient $api)
     {
         parent::__construct('signup');
