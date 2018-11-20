@@ -13,6 +13,8 @@ class DefaultCommand extends Command
 
     use OrgCommandTrait;
 
+    protected $skipLoginCheck = true;
+
     public function __construct()
     {
         parent::__construct('org:default');
