@@ -8,6 +8,7 @@ use GuzzleHttp\Promise\PromiseInterface;
 use GuzzleHttp\Psr7\Request;
 use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\RequestOptions;
+use GuzzleHttp\Psr7;
 use Monolog\Formatter\LineFormatter;
 use Monolog\Handler\StreamHandler;
 use Monolog\Logger;
@@ -141,34 +142,36 @@ trait GuzzleTrait
                     use ($logger, $handler)
                     {
                         $msg = 'API Request: ' .$request->getMethod(). ' ' .$request->getUri();
+                        $logRequest = $this->sanitizeRequest($request);
                         $logger->debug($msg, [
                             'api' => $this->apiName,
-                            'request' => \GuzzleHttp\Psr7\str($request),
-                            'uri' => $request->getUri(),
-                            'method' => $request->getMethod()
+                            'request' => \GuzzleHttp\Psr7\str($logRequest),
+                            'uri' => $logRequest->getUri(),
+                            'method' => $logRequest->getMethod()
                         ]);
 
                         /** @var PromiseInterface $promise */
                         $promise = $handler($request, $options);
                         return $promise->then(
-                            function (ResponseInterface $response) use ($logger, $request)
+                            function (ResponseInterface $response) use ($logger, $logRequest)
                             {
-                                $msg = 'API Response: ' .$request->getMethod(). ' ' .$request->getUri(). ' = ' .$response->getStatusCode();
+                                $logResponse = $this->sanitizeResponse($response);
+                                $msg = 'API Response: ' .$logRequest->getMethod(). ' ' .$logRequest->getUri(). ' = ' .$logResponse->getStatusCode();
                                 $context = [
                                     'api' => $this->apiName,
-                                    'code' => $response->getStatusCode(),
-                                    'uri' => $request->getUri(),
-                                    'method' => $request->getMethod()
+                                    'code' => $logResponse->getStatusCode(),
+                                    'uri' => $logRequest->getUri(),
+                                    'method' => $logRequest->getMethod()
                                 ];
                                 /** @noinspection PhpUndefinedFieldInspection */
                                 if ($response->getStatusCode() >= 400) {
                                     $context = [
                                         'api' => $this->apiName,
-                                        'response' => \GuzzleHttp\Psr7\str($response),
-                                        'request' => \GuzzleHttp\Psr7\str($request),
-                                        'code' => $response->getStatusCode(),
-                                        'uri' => $request->getUri(),
-                                        'method' => $request->getMethod()
+                                        'response' => \GuzzleHttp\Psr7\str($logResponse),
+                                        'request' => \GuzzleHttp\Psr7\str($logRequest),
+                                        'code' => $logResponse->getStatusCode(),
+                                        'uri' => $logRequest->getUri(),
+                                        'method' => $logRequest->getMethod()
                                     ];
                                     $response->getBody()->rewind();
                                 }
@@ -211,6 +214,48 @@ trait GuzzleTrait
             $response = $this->responseHandlers[$code]($response);
         }
 
+        return $response;
+    }
+
+    protected function sanitizeRequest(RequestInterface $request)
+    {
+        $placeholder = 'REDACTED';
+        $newRequest = clone $request;
+
+        if ($newRequest->hasHeader('Authorization')) {
+            $newRequest = $newRequest->withHeader('Authorization', $placeholder);
+        }
+
+        $rewriteParams = [
+            'password',
+            'client_secret',
+            'mfa',
+        ];
+
+        if (preg_match('@/auth/access_token@', $newRequest->getUri())
+            && $newRequest->getMethod() === 'POST'
+        ) {
+            $body = $newRequest->getBody()->getContents();
+            parse_str($body, $params);
+            foreach ($params as $key => $value) {
+                if (in_array($key, $rewriteParams)) {
+                    $params[$key] = $placeholder;
+                }
+            }
+
+            $newRequest = $newRequest->withBody(
+                Psr7\stream_for(
+                    http_build_query($params)
+                )
+            );
+        }
+
+        return $newRequest;
+
+    }
+
+    protected function sanitizeResponse(ResponseInterface $response)
+    {
         return $response;
     }
 }
