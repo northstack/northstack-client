@@ -18,6 +18,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
+use Symfony\Component\Console\Command\HelpCommand;
 
 class CreateCommand extends Command
 {
@@ -74,7 +75,6 @@ class CreateCommand extends Command
 
         $args = $input->getArguments();
         $options = $input->getOptions();
-        $io = new SymfonyStyle($input, $output);
 
         // create folder structure
 
@@ -137,14 +137,16 @@ class CreateCommand extends Command
 
         $data = json_decode($r->getBody()->getContents());
         $appTemplate->writeConfigs($data->data);
-        $this->printSuccess($io, $data, $appPath);
+        $this->printSuccess($input, $output, $data, $appPath);
     }
 
-    function printSuccess(SymfonyStyle $io, $data, $appPath)
+    function printSuccess($input, $output, $data, $appPath)
     {
+        $io = new SymfonyStyle($input, $output);
         $sapps = $data->data;
         $appName = $sapps[0]->name;
-        $io->writeln("Woohoo! Your NorthStack instance ({$appName}) was created successfully. Here are your prod, testing, and dev apps:");
+        $io->newLine();
+        $io->writeln("Woohoo! Your NorthStack app ({$appName}) was created successfully. Here are your prod, testing, and dev environments:");
 
         $headers = ['id', 'environment', 'fqdn', 'config path'];
         $rows = [];
@@ -160,5 +162,26 @@ class CreateCommand extends Command
             ];
        }
         $io->table($headers, $rows);
+
+        $io->writeln("Paths:");
+        $io->table(
+            ['location', 'path'],
+            [
+                ['root', "{$appPath}"],
+                ['code', "{$appPath}/app"],
+                ['webroot', "{$appPath}/app/public"],
+                ['configuration', "{$appPath}/config"]
+            ]
+        );
+
+        $io->newLine();
+        $io->note("Your app isn't live until you create and deploy your first release! Use the `app:deploy` command for that:");
+        $io->newLine();
+        $io->writeln("$ northstack app:deploy --help\n");
+
+        $help = new HelpCommand();
+        $deploy = $this->getApplication()->find('app:deploy');
+        $help->setCommand($deploy);
+        $help->run($input, $output);
     }
 }
