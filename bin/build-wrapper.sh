@@ -22,3 +22,5 @@ $MAIN
 main "\$@"
 
 EOF
+
+chmod +x "$OUT"

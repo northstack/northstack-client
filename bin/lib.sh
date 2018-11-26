@@ -37,10 +37,10 @@ copyFile() {
 
     dest_dir=$(dirname "$dest")
     if [[ -w $dest_dir ]] && [[ -w $dest ]]; then
-        cp -v "$src" "$dest"
+        cp -av "$src" "$dest"
     else
         log "warn" "$dest is not writeable by your shell user. Using sudo to copy"
-        sudo cp -v "$src" "$dest"
+        sudo cp -av "$src" "$dest"
     fi
 }
 
