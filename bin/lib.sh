@@ -1,15 +1,50 @@
 log() {
     local level="$(echo "$1" | tr '[:upper:]' '[:lower:]')"
 
+    local red=$'\e[1;91m'
+    local green=$'\e[1;32m'
+    local yellow=$'\e[1;33m'
+    local blue=$'\e[1;34m'
+    local magenta=$'\e[1;35m'
+    local cyan=$'\e[1;36m'
+    local white=$'\e[1;37m'
+    local end=$'\e[0m'
+
+    local level_color
+
     case $level in
-        info|debug|warn|error)
+        info)
+            level_color=$green
+            shift;;
+        debug)
+            level_color=$blue
+            shift;;
+        warn)
+            level_color=$magenta
+            shift;;
+        error)
+            level_color=$red
             shift;;
         *)
+            level_color=$green
             level='info';;
     esac
 
-    ts=$(date '+%Y-%m-%d %H:%M:%S')
-    echo -e "[$ts] [$level] $@" > /dev/stderr
+    local ts=$(date '+%Y-%m-%d %H:%M:%S')
+    local template="[$ts] [$level] %s\n"
+    if [[ -t 2 ]]; then
+        template="[${white}${ts}${end}] [${level_color}${level}${end}] %s\n"
+    fi
+
+    case "$@" in
+        -)
+            while read -rs line; do
+                printf "$template" "$line" > /dev/stderr
+            done;;
+        *)
+            printf "$template" "$@" > /dev/stderr;;
+    esac
+
 }
 
 debug() {
@@ -18,11 +53,11 @@ debug() {
     fi
 }
 
-getInstallPath() {
-    local default=/usr/local/bin
+setInstallPrefix() {
+    local default=/usr/local
 
     if [[ -z $INSTALL_PATH ]]; then
-        log "Using default install path ($default)"
+        log "Using default install prefix ($default)"
         log "You can change this behavior by setting the \$INSTALL_PATH environment variable"
         INSTALL_PATH=$default
     else
@@ -31,16 +66,27 @@ getInstallPath() {
     printf ${INSTALL_PATH%*/}
 }
 
-copyFile() {
+getInstallPrefix() {
+    local binDir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+    printf $(dirname "$binDir")
+}
+
+copyFiles() {
     local src=$1
     local dest=$2
 
     dest_dir=$(dirname "$dest")
     if [[ -w $dest_dir ]] && [[ -w $dest ]]; then
-        cp -av "$src" "$dest"
+        log "info" "cp -av "$src" "$dest""
+        cp -av "$src" "$dest" | debug -
     else
         log "warn" "$dest is not writeable by your shell user. Using sudo to copy"
-        sudo cp -av "$src" "$dest"
+
+        log "info" "sudo mkdir -pv "$dest_dir""
+        sudo mkdir -pv "$dest_dir" | debug -
+
+        log "info" "sudo cp -av "$src" "$dest""
+        sudo cp -av "$src" "$dest" | debug -
     fi
 }
 
@@ -76,4 +122,23 @@ dockerSocket() {
 
 getGid() {
     id -g
+}
+
+checkPaths() {
+    local prefix=$(getInstallPrefix)
+    local failed
+
+    if [[ $DEV_MODE == 1 ]] && [[ ! -d $DEV_SOURCE ]]; then
+        failed=1
+        log "error" "NorthStack was started in DEV_MODE but the dev path ($DEV_SOURCE) does not exist."
+    fi
+
+    if [[ ! -d $prefix/lib/northstack ]]; then
+        failed=1
+        log "error" "NorthStack assets ($prefix/northstack) are missing"
+    fi
+
+    if [[ $failed ]]; then
+        exit 1
+    fi
 }

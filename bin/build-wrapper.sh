@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+set -eu
+
 OUT=$1
 BASE=$2
 DEV_MODE=${3:-0}
