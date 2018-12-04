@@ -23,9 +23,10 @@ if [[ ${0##*/} == "install-dev.sh" ]]; then
     isDev=1
 fi
 
+install_path="$(setInstallPrefix)"
+
 "$CDIR"/build-wrapper.sh "$wrapperFile" "$BASE" "$isDev"
 
-install_path="$(getInstallPath)"
 
-copyFile "$wrapperFile" "${install_path}/northstack"
-
+copyFiles "$wrapperFile" "${install_path}/bin/northstack"
+copyFiles "${BASE}/localdev-docker" "${install_path}/lib/northstack/localdev-docker"

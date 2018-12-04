@@ -5,17 +5,24 @@ main() {
     fi
 
     checkDocker
+    checkPaths
 
     socket=$(dockerSocket)
 
     GID=$(getGid)
 
+    prefix=$(getInstallPrefix)
+
     if [[ $DEV_MODE == 1 ]]; then
+
         debug "Running in DEV mode"
+        prefix=$DEV_SOURCE
+
         docker run -ti --rm \
             -e DEBUG=$DEBUG \
             -e HOME=$HOME \
             -e NS_PWD="$NS_PWD" \
+            -e NS_INSTALL_PREFIX="$prefix" \
             --user=$UID:$GID \
             --userns=host \
             --volume "$NS_PWD:$NS_PWD" \
@@ -30,6 +37,7 @@ main() {
             -e DEBUG=$DEBUG \
             -e HOME=$HOME \
             -e NS_PWD="$NS_PWD" \
+            -e NS_INSTALL_PREFIX="$prefix" \
             --user=$UID:$GID \
             --userns=host \
             --volume "$NS_PWD:$NS_PWD" \
