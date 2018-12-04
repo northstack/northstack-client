@@ -1,0 +1,31 @@
+#!/bin/bash
+
+set -eu
+
+if wp core version ; then
+    echo "WordPress core already downloaded"
+else
+    wp core download \
+        --version="$WORDPRESS_VERSION"
+fi
+
+if [[ ! -e wp-config.php ]]; then
+    wp config create \
+        --dbname="$WORDPRESS_DB_NAME" \
+        --dbuser="$WORDPRESS_DB_USER" \
+        --dbpass="$WORDPRESS_DB_PASSWORD" \
+        --dbhost="$WORDPRESS_DB_HOST"
+fi
+
+if wp core is-installed ; then
+    echo "WordPress is already installed"
+else
+    wp core install \
+        --url="$WORDPRESS_URL" \
+        --title="$WORDPRESS_TITLE" \
+        --admin_user="$WORDPRESS_ADMIN_USER" \
+        --admin_email="$WORDPRESS_ADMIN_EMAIL" \
+        --skip-email
+fi
+
+while true; do sleep 1; done

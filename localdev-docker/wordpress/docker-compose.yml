@@ -1,0 +1,68 @@
+---
+version: '3'
+
+services:
+  web:
+    depends_on:
+      - nginx-unit
+    environment:
+      - PRIMARY_DOMAIN
+
+  wordpress-init:
+    build:
+      context: ./images/wordpress
+    volumes:
+      - "${APP_PUBLIC}:/var/www/html"
+    environment:
+      WORDPRESS_VERSION: ${WORDPRESS_VERSION}
+      WORDPRESS_TITLE: ${WORDPRESS_TITLE}
+      WORDPRESS_URL: ${WORDPRESS_URL}
+      WORDPRESS_ADMIN_USER: ${WORDPRESS_ADMIN_USER}
+      WORDPRESS_ADMIN_EMAIL: ${WORDPRESS_ADMIN_EMAIL}
+      WORDPRESS_DB_HOST: mysql
+      WORDPRESS_DB_USER: wordpress
+      WORDPRESS_DB_NAME: wordpress
+      WORDPRESS_DB_PASSWORD: password
+    depends_on:
+      - mysql
+    networks:
+      northstack_local_dev: {}
+
+  nginx-unit:
+    container_name: nginx-unit-php
+    image: nginx-unit-php
+    build:
+      context: ./images/nginx-unit-php
+    volumes:
+      - "${APP_PUBLIC}:/app/public"
+      - './wordpress/unit.json:/usr/local/unit-state/conf.json:ro'
+    depends_on:
+      - wordpress-init
+    networks:
+      northstack_local_dev: {}
+
+  mysql:
+    container_name: mysql
+    image: mysql:5
+    volumes:
+      - "${APP_ROOT}/localdev/mysql:/var/lib/mysql:delegated"
+    ports:
+      - "${EXPOSE_MYSQL}:3306"
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: wordpress
+      MYSQL_USER: wordpress
+      MYSQL_PASSWORD: password
+    networks:
+      northstack_local_dev: {}
+
+  mailcatcher:
+    container_name: mailcatcher
+    image: schickling/mailcatcher
+    ports:
+      - "1025:1025"
+      - "1080:1080"
+    environment:
+      MAILCATCHER_PORT: 1025
+    networks:
+      northstack_local_dev: {}
