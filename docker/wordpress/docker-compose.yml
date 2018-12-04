@@ -1,5 +1,5 @@
 ---
-version: '3'
+version: '3.4'
 
 services:
   web:
@@ -38,6 +38,9 @@ services:
       - './wordpress/unit.json:/usr/local/unit-state/conf.json:ro'
     depends_on:
       - wordpress-init
+    healthcheck:
+      test: 'curl -s -o /dev/null -D - --unix /nginx-unit/control.unit.sock http://localhost/config'
+      start_period: 5s
     networks:
       northstack_local_dev: {}
 
