@@ -11,7 +11,7 @@ main() {
 
     GID=$(getGid)
 
-    prefix=$(getInstallPrefix)
+    prefix="$(getInstallPrefix)"
 
     if [[ $DEV_MODE == 1 ]]; then
 
