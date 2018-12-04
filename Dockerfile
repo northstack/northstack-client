@@ -1,6 +1,6 @@
 FROM composer as composer
 COPY . /app
-RUN composer install
+RUN composer install --ignore-platform-reqs
 
 
 FROM php:7.2-cli-alpine3.8
