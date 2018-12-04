@@ -1,0 +1,37 @@
+{
+  "settings": {
+    "http": {
+      "send_timeout": 300,
+      "max_body_size": 104857600
+    }
+  },
+  "listeners": {
+    "*:80": {
+      "application": "php"
+    },
+    "*:81": {
+      "application": "php-direct"
+    }
+  },
+  "applications": {
+    "php": {
+      "type": "php",
+      "processes": 1,
+      "root": "/app/public",
+      "working_directory": "/app/public",
+      "script": "index.php",
+      "user": "www-data",
+      "group": "www-data"
+    },
+    "php-direct": {
+      "type": "php",
+      "processes": 1,
+      "root": "/app/public",
+      "working_directory": "/app/public",
+      "index": "index.php",
+      "user": "www-data",
+      "group": "www-data"
+    }
+  },
+  "access_log": "/dev/stdout"
+}
