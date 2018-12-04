@@ -7,8 +7,7 @@ BASE="$( dirname "$CDIR")"
 source "$CDIR"/lib.sh
 
 checkDocker
-
-"$CDIR"/build-docker.sh
+buildDockerImage "$BASE"
 
 wrapperFile=$(mktemp)
 
@@ -29,4 +28,4 @@ install_path="$(setInstallPrefix)"
 
 
 copyFiles "$wrapperFile" "${install_path}/bin/northstack"
-copyFiles "${BASE}/localdev-docker" "${install_path}/lib/northstack/localdev-docker"
+copyFiles "${BASE}/docker" "${install_path}/lib/northstack/docker"

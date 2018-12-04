@@ -8,6 +8,7 @@ main() {
     checkPaths
 
     socket=$(dockerSocket)
+    docker_group=$(stat "$socket" --printf='%G')
 
     GID=$(getGid)
 
@@ -25,10 +26,10 @@ main() {
             -e NS_INSTALL_PREFIX="$prefix" \
             --user=$UID:$GID \
             --userns=host \
+            --group-add="$docker_group" \
             --volume "$NS_PWD:$NS_PWD" \
             --volume $HOME:$HOME \
-            --volume /etc/passwd:/etc/passwd \
-            --volume "$socket":/var/lib/docker.sock \
+            --volume "$socket":/var/run/docker.sock \
             --volume "$DEV_SOURCE":/app \
             --init \
             northstack "$@"
@@ -40,10 +41,10 @@ main() {
             -e NS_INSTALL_PREFIX="$prefix" \
             --user=$UID:$GID \
             --userns=host \
+            --group-add="$docker_group" \
             --volume "$NS_PWD:$NS_PWD" \
             --volume $HOME:$HOME \
-            --volume /etc/passwd:/etc/passwd \
-            --volume "$socket":/var/lib/docker.sock \
+            --volume "$socket":/var/run/docker.sock \
             --init \
             northstack "$@"
     fi

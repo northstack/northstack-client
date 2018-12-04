@@ -47,6 +47,10 @@ log() {
 
 }
 
+getCwd() {
+    echo "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+}
+
 debug() {
     if [[ $DEBUG == 1 ]]; then
         log "debug" "$@"
@@ -67,7 +71,7 @@ setInstallPrefix() {
 }
 
 getInstallPrefix() {
-    local binDir=$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
+    local binDir="$(getCwd)"
     printf $(dirname "$binDir")
 }
 
@@ -137,6 +141,43 @@ checkPaths() {
         failed=1
         log "error" "NorthStack assets ($prefix/northstack) are missing"
     fi
+
+    if [[ $failed ]]; then
+        exit 1
+    fi
+}
+
+buildDockerImage() {
+    local ctx=$1
+
+    local sock="$(dockerSocket)"
+
+    local group="$(stat "$sock" --printf='%G')"
+    local gid="$(stat "$sock" --printf='%g')"
+
+    log info "building the northstack docker image"
+
+    local outfile=$(mktemp)
+    local failed
+
+    set +e
+    docker build \
+        --build-arg DOCKER_GID="$gid" \
+        --build-arg DOCKER_GROUP="$group" \
+        -t northstack \
+        "$ctx" \
+    &> "$outfile"
+
+    if [[ $? -ne 0 ]]; then
+        log "error" "image build failed:"
+        log "error" - < $outfile
+        failed=1
+    else
+        log info "northstack image built successfully"
+        debug - < $outfile
+    fi
+    set -e
+    rm "$outfile"
 
     if [[ $failed ]]; then
         exit 1
