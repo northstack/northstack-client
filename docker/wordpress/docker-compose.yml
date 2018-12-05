@@ -35,7 +35,7 @@ services:
       context: ./images/nginx-unit-php
     volumes:
       - "${APP_PUBLIC}:/app/public"
-      - './wordpress/unit.json:/usr/local/unit-state/conf.json:ro'
+      - "${COMPOSE_ROOT_HOST:-.}/wordpress/unit.json:/usr/local/unit-state/conf.json:ro"
     depends_on:
       - wordpress-init
     healthcheck:
