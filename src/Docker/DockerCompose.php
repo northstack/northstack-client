@@ -34,11 +34,20 @@ class DockerCompose
         return "ns-compose-{$this->stack}";
     }
 
-    public function start()
+    public function start($background = true)
+    {
+        $cmd = ['up'];
+        if ($background) {
+            $cmd[] = '-d';
+        }
+        $this->run($cmd);
+    }
+
+    public function run($cmd)
     {
         $this->client->run(
             $this->getName(),
-            $this->buildConfig(['Cmd' => ['up', '-d']]),
+            $this->buildConfig(['Cmd' => $cmd]),
             false
         );
     }
@@ -57,7 +66,10 @@ class DockerCompose
 
     protected function getEnv()
     {
-        return [];
+        return [
+            'COMPOSE_ROOT=/northstack/docker',
+            'COMPOSE_ROOT_HOST='. getenv('NS_LIB') . '/docker',
+        ];
     }
 
     protected function getMounts()
@@ -76,11 +88,7 @@ class DockerCompose
 
     public function stop()
     {
-        $this->client->run(
-            $this->getName(),
-            $this->buildConfig(['Cmd' => ['down']]),
-            false
-        );
+        $this->run(['down']);
         $this->client->stop($this->getName());
     }
 
