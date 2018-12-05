@@ -13,17 +13,18 @@ main() {
     GID=$(getGid)
 
     prefix="$(getInstallPrefix)"
+    ns_lib="${prefix}/lib/northstack"
 
     if [[ $DEV_MODE == 1 ]]; then
 
         debug "Running in DEV mode"
-        prefix=$DEV_SOURCE
+        ns_lib=$DEV_SOURCE
 
         docker run -ti --rm \
             -e DEBUG=$DEBUG \
             -e HOME=$HOME \
             -e NS_PWD="$NS_PWD" \
-            -e NS_INSTALL_PREFIX="$prefix" \
+            -e NS_LIB="$ns_lib" \
             --user=$UID:$GID \
             --userns=host \
             --group-add="$docker_group" \
@@ -38,7 +39,7 @@ main() {
             -e DEBUG=$DEBUG \
             -e HOME=$HOME \
             -e NS_PWD="$NS_PWD" \
-            -e NS_INSTALL_PREFIX="$prefix" \
+            -e NS_LIB="$ns_lib" \
             --user=$UID:$GID \
             --userns=host \
             --group-add="$docker_group" \
