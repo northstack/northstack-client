@@ -15,10 +15,13 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 
-class LocalDevStopCommand extends Command
+class LocalDevStopCommand extends AbstractLocalDevCmd
 {
-    protected $commandName = 'app:localdev:stop';
     protected $commandDescription = 'Stop the local dev environment';
+
+    protected function commandName(): string {
+        return 'app:localdev:stop';
+    }
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
