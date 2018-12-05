@@ -10,13 +10,11 @@ services:
     build:
       context: ./images/web
     ports:
-      - '${EXPOSE_WEB_HTTP}:80'
-      - '${EXPOSE_WEB_HTTPS}:443'
+      - '${EXPOSE_HTTP_PORT}:80'
     volumes:
       - "${APP_PUBLIC}:/app/public"
     environment:
       - STACK
-      - EXPOSE_WEB_HTTP
-      - EXPOSE_WEB_HTTPS
+      - EXPOSE_HTTP_PORT
     networks:
       northstack_local_dev: {}

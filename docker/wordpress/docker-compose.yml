@@ -7,6 +7,8 @@ services:
       - nginx-unit
     environment:
       - PRIMARY_DOMAIN
+      - STACK
+      - EXPOSE_HTTP_PORT
 
   wordpress-init:
     build:
@@ -50,7 +52,7 @@ services:
     volumes:
       - "${APP_ROOT}/localdev/mysql:/var/lib/mysql:delegated"
     ports:
-      - "${EXPOSE_MYSQL}:3306"
+      - "${EXPOSE_MYSQL_PORT}:3306"
     environment:
       MYSQL_ROOT_PASSWORD: password
       MYSQL_DATABASE: wordpress
