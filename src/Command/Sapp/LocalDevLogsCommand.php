@@ -31,24 +31,13 @@ class LocalDevLogsCommand extends AbstractLocalDevCmd
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $args = $input->getArguments();
-        $opts = $input->getOptions();
+        parent::execute($input, $output);
 
-        [$sappId] = $this->getSappIdAndFolderByOptions(
-            $args['name'],
-            $args['environment']
-        );
+        $follow = $input->getOption('follow') ?: false;
+        $tail = $input->getOption('tail') ?: 'all';
 
         $compose = $this->getComposeClient('wordpress');
-
-        if (isset($opts['tail'])) {
-            $compose->logs(
-                $opts['follow'],
-                $opts['tail']
-            );
-        } else {
-            $compose->logs($opts['follow']);
-        }
+        $compose->logs($follow, $tail);
 
     }
 }

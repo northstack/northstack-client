@@ -25,14 +25,7 @@ class LocalDevStopCommand extends AbstractLocalDevCmd
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $args = $input->getArguments();
-
-        [$sappId] = $this->getSappIdAndFolderByOptions(
-            $args['name'],
-            $args['environment']
-        );
-
+        parent::execute($input, $output);
         $this->getComposeClient('wordpress')->stop();
-
     }
 }
