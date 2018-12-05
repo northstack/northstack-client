@@ -28,9 +28,9 @@ class DeployCommand extends AbstractDeployCmd
             $r = $this->sappClient->deploy(
                 $this->token->token,
                 $sappId,
-                $configs['config.json'],
-                $configs['build.json'],
-                $configs['domains.json']
+                $configs['config'],
+                $configs['build'],
+                $configs['domains']
             );
         }
         catch(ClientException $e)
