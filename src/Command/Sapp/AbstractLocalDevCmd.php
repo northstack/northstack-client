@@ -70,6 +70,11 @@ abstract class AbstractLocalDevCmd extends Command
         $appName = $this->appData['name'];
         $stack = $config->{'app-type'};
 
+        $uid = posix_geteuid();
+        $user = posix_getpwuid($uid)['name'];
+        $gid = posix_getegid();
+        $group = posix_getgrgid($gid)['name'];
+
         $vars = [
             'APP_NAME'             => $appName,
             'STACK'                => $stack,
@@ -79,7 +84,12 @@ abstract class AbstractLocalDevCmd extends Command
             'APP_PUBLIC'           => getcwd() . '/app/public',
             'PRIMARY_DOMAIN'       => 'localhost',
             'COMPOSE_PROJECT_NAME' => $appName,
-            'COMPOSE_FILE'         => '../docker-compose.yml:docker-compose.yml'
+            'COMPOSE_FILE'         => '../docker-compose.yml:docker-compose.yml',
+
+            'NORTHSTACK_USER'   => $user,
+            'NORTHSTACK_UID'    => $uid,
+            'NORTHSTACK_GROUP'  => $group,
+            'NORTHSTACK_GID'    => $gid,
         ];
 
         if ($stack === 'wordpress')
@@ -91,6 +101,7 @@ abstract class AbstractLocalDevCmd extends Command
                 'WORDPRESS_URL'         => $install->url,
                 'WORDPRESS_ADMIN_USER'  => $install->admin_user,
                 'WORDPRESS_ADMIN_EMAIL' => $install->admin_email,
+                'WORDPRESS_ADMIN_PASS'  => $install->admin_pass,
             ];
             $vars = array_merge($vars, $wp);
         }
@@ -100,6 +111,7 @@ abstract class AbstractLocalDevCmd extends Command
         {
             $formatted[] = "{$k}={$v}";
         }
+
         return $formatted;
     }
 

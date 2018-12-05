@@ -76,7 +76,6 @@ RUN cd unit \
     && make all \
     && make install DESTDIR=/usr/local/
 
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 
 FROM alpine:3.8
 COPY --from=build /usr/local /usr/local
@@ -100,14 +99,13 @@ RUN apk add --no-cache --virtual .persistent-deps \
         \
         &&  ln -sf /dev/stderr /usr/local/unit.log
 
-RUN set -x \
-	&& addgroup -g 82 -S www-data \
-    && adduser -u 82 -D -S -G www-data www-data
-
 COPY php.d /usr/local/etc/php/conf.d/
 
 VOLUME ["/nginx-unit/"]
 WORKDIR /usr/local
 
-#ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+COPY unit.json /unit.json.template
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["/usr/local/sbin/unitd", "--no-daemon", "--control", "unix:/nginx-unit/control.unit.sock"]
