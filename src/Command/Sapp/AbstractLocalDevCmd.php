@@ -18,6 +18,8 @@ abstract class AbstractLocalDevCmd extends Command
     protected $skipLoginCheck = true;
     protected $commandDescription;
 
+    protected $appData;
+
     use SappEnvironmentTrait;
 
     public function __construct()
@@ -32,20 +34,73 @@ abstract class AbstractLocalDevCmd extends Command
         parent::configure();
         $this
             ->setDescription($this->commandDescription)
-            ->addArgument('name', InputArgument::REQUIRED, 'App name')
-            ->addArgument('environment', InputArgument::REQUIRED, 'Environment (prod, test, or dev)')
+            ->addOption('env', 'e', InputOption::VALUE_REQUIRED, 'Environment (prod, test, or dev)', 'prod')
         ;
+    }
+
+    public function execute(InputInterface $input, OutputInterface $output)
+    {
+        $env = $input->getOption('env');
+        $this->appData = $this->getSappFromWorkingDir($env);
+    }
+
+    protected function getComposeClient()
+    {
+        $docker = new Docker\DockerClient();
+        $compose = new Docker\DockerCompose(
+            $docker,
+            $this->appData['config']->{'app-type'},
+            $this->buildEnvVars()
+        );
+        return $compose;
     }
 
     protected function buildComposeOptions()
     {
-        return [];
+        return [
+            'Env' => $this->buildEnvVars(),
+        ];
     }
 
-    protected function getComposeClient($stack)
+    protected function buildEnvVars()
     {
-        $docker = new Docker\DockerClient();
-        $compose = new Docker\DockerCompose($docker, $stack, $this->buildComposeOptions());
-        return $compose;
+        $config = $this->appData['config'];
+        $build = $this->appData['build'];
+        $domains = $this->appData['domains'];
+        $appName = $this->appData['name'];
+        $stack = $config->{'app-type'};
+
+        $vars = [
+            'APP_NAME'             => $appName,
+            'STACK'                => $stack,
+            'EXPOSE_HTTP_PORT'     => 8080,
+            'EXPOSE_MYSQL_PORT'    => 3306,
+            'APP_ROOT'             => getcwd(),
+            'APP_PUBLIC'           => getcwd() . '/app/public',
+            'PRIMARY_DOMAIN'       => 'localhost',
+            'COMPOSE_PROJECT_NAME' => $appName,
+            'COMPOSE_FILE'         => '../docker-compose.yml:docker-compose.yml'
+        ];
+
+        if ($stack === 'wordpress')
+        {
+            $install = $build->{'wordpress-install'};
+            $wp = [
+                'WORDPRESS_VERSION'     => $build->{'wordpress-version'},
+                'WORDPRESS_TITLE'       => $install->title,
+                'WORDPRESS_URL'         => $install->url,
+                'WORDPRESS_ADMIN_USER'  => $install->admin_user,
+                'WORDPRESS_ADMIN_EMAIL' => $install->admin_email,
+            ];
+            $vars = array_merge($vars, $wp);
+        }
+
+        $formatted = [];
+        foreach ($vars as $k => $v)
+        {
+            $formatted[] = "{$k}={$v}";
+        }
+        return $formatted;
     }
+
 }

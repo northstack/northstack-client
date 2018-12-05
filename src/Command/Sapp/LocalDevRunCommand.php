@@ -30,15 +30,9 @@ class LocalDevRunCommand extends AbstractLocalDevCmd
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $args = $input->getArguments();
-        $opts = $input->getOptions();
-
-        [$sappId] = $this->getSappIdAndFolderByOptions(
-            $args['name'],
-            $args['environment']
-        );
+        parent::execute($input, $output);
 
         $compose = $this->getComposeClient('wordpress');
-        $compose->run($args['run']);
+        $compose->run($input->getArgument('run'));
     }
 }

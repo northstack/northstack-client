@@ -5,7 +5,7 @@ namespace NorthStack\NorthStackClient\Command\Sapp;
 
 use NorthStack\NorthStackClient\Command\Command;
 
-use Symfony\Component\Console\Input\InputArgument;
+use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -16,17 +16,20 @@ class LocalDevStartCommand extends AbstractLocalDevCmd
     protected function commandName(): string {
         return 'app:localdev:start';
     }
+    public function configure()
+    {
+        parent::configure();
+        $this
+            ->addOption('detach', 'd', InputOption::VALUE_NONE)
+        ;
+    }
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $args = $input->getArguments();
+        parent::execute($input, $output);
 
-        [$sappId] = $this->getSappIdAndFolderByOptions(
-            $args['name'],
-            $args['environment']
-        );
-
-        $this->getComposeClient('wordpress')->start();
+        $background = $input->getOption('detach') ?: false;
+        $this->getComposeClient('wordpress')->start($background);
 
     }
 }
