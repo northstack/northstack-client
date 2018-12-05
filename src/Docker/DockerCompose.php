@@ -66,10 +66,13 @@ class DockerCompose
 
     protected function getEnv()
     {
-        return [
-            'COMPOSE_ROOT=/northstack/docker',
-            'COMPOSE_ROOT_HOST='. getenv('NS_LIB') . '/docker',
-        ];
+        return array_merge(
+            [
+                'COMPOSE_ROOT=/northstack/docker',
+                'COMPOSE_ROOT_HOST='. getenv('NS_LIB') . '/docker',
+            ],
+            $this->env
+        );
     }
 
     protected function getMounts()
