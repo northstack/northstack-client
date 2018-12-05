@@ -28,4 +28,32 @@ else
         --skip-email
 fi
 
+admin_id=$(
+    wp user list \
+        --user_email="$WORDPRESS_ADMIN_EMAIL" \
+        --user_login="$WORDPRESS_ADMIN_USER" \
+        --field=ID
+)
+
+echo "Resetting the admin user's password (ID: $admin_id)"
+
+wp user update \
+    "$admin_id" \
+    --user_pass="$WORDPRESS_ADMIN_PASS" \
+    --skip-email
+
+echo "Updating home+siteurl to $WORDPRESS_URL"
+wp option update home "$WORDPRESS_URL"
+wp option update siteurl "$WORDPRESS_URL"
+
+echo "Creating wp-cli config file"
+
+# We can't put this in the webroot because we don't
+# want wp-cli to use it when we're running in docker
+cat << EOF > /APP_ROOT/app/wp-cli.yml
+---
+ssh: "docker:$(hostname)"
+
+EOF
+
 while true; do sleep 1; done
