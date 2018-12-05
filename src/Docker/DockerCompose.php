@@ -38,7 +38,6 @@ class DockerCompose
     {
         $this->client->run(
             $this->getName(),
-            $this->image,
             $this->buildConfig(['Cmd' => ['up', '-d']]),
             false
         );
@@ -46,44 +45,39 @@ class DockerCompose
 
     protected function buildConfig($opts)
     {
-        $config = [
-            'Env' => $this->buildEnv(),
-            'HostConfig' => $this->buildHostConfig(),
-            'WorkingDir' => "/northstack/docker/{$this->stack}",
-        ];
-
-        foreach ($opts as $k => $v) {
-            $config[$k] = $v;
-        }
-
-        return $config;
+        $container = new Container();
+        return $container
+            ->setImage($this->image)
+            ->setEnv($this->getEnv())
+            ->setWorkingDir("/northstack/docker/{$this->stack}")
+            ->setBindMounts($this->getMounts())
+            ->update($opts)
+        ;
     }
 
-    protected function buildEnv()
+    protected function getEnv()
+    {
+        return [];
+    }
+
+    protected function getMounts()
     {
         return [
+            [
+                'src' => getenv('NS_LIB'),
+                'dest' => '/northstack'
+            ],
+            [
+                'src' => '/var/run/docker.sock',
+                'dest' => '/var/run/docker.sock'
+            ]
         ];
-    }
-
-    protected function buildHostConfig()
-    {
-        $config = new HostConfig();
-        $lib = getenv('NS_LIB');
-        return $config->setBinds([
-            "{$lib}:/northstack",
-            '/var/run/docker.sock:/var/run/docker.sock'
-        ]);
-    }
-
-    public function watch()
-    {
     }
 
     public function stop()
     {
         $this->client->run(
             $this->getName(),
-            $this->image,
             $this->buildConfig(['Cmd' => ['down']]),
             false
         );
@@ -98,7 +92,6 @@ class DockerCompose
         }
         $this->client->run(
             $this->getName(),
-            $this->image,
             $this->buildConfig(['Cmd' => $cmd]),
             true
         );

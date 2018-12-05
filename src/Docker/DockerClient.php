@@ -17,6 +17,7 @@ class DockerClient
     {
         $this->docker = Docker::create();
     }
+
     public function getClient()
     {
         return $this->docker;
@@ -45,10 +46,21 @@ class DockerClient
         ]);
     }
 
-    public function containerExists($nameOrId)
+    public function containerExists($name)
     {
         try {
-            $this->docker->containerInspect($nameOrId);
+            $this->docker->containerInspect($name);
+            return true;
+        } catch (ContainerInspectNotFoundException $e) {
+            return false;
+        }
+    }
+
+    public function containerIsRunning($name)
+    {
+        try {
+            $info = $this->docker->containerInspect($name);
+            print_r($info);
             return true;
         } catch (ContainerInspectNotFoundException $e) {
             return false;
@@ -57,33 +69,23 @@ class DockerClient
 
     public function createContainer(
         string $name,
-        string $image,
-        array $config,
+        Container $conf,
         $recreate = true
     )
     {
-        if ($this->containerExists($name)) {
+        if ($this->containerExists($name))
+        {
+            $this->stop($name, $recreate);
+
             if (!$recreate) {
                 return true;
             }
-            $this->docker->containerDelete($name);
         }
 
-        $conf = new ContainersCreatePostBody();
         $conf
-            ->setImage($image)
             ->setAttachStdout(true)
             ->setAttachStderr(true)
         ;
-
-        foreach ($config as $section => $value) {
-            $method = "set{$section}";
-            if (method_exists($conf, $method)) {
-                $conf->{$method}($value);
-            } else {
-                throw new \Exception("Unknown container creation config section: {$section}");
-            }
-        }
 
         return $this->docker->containerCreate(
             $conf,
@@ -92,9 +94,9 @@ class DockerClient
 
     }
 
-    public function run($name, $image, $config, $destroy = true)
+    public function run($name, $config, $destroy = true)
     {
-        $this->createContainer($name, $image, $config, true);
+        $this->createContainer($name, $config, true);
 
         $attachStream = $this->docker->containerAttach(
             $name,
@@ -123,13 +125,14 @@ class DockerClient
         }
     }
 
-    public function stop($name)
+    public function stop($name, $destroy = false)
     {
         $this->docker->containerStop($name);
         $this->docker->containerWait($name);
+
+        if ($destroy) {
+            $this->docker->containerDelete($name);
+        }
     }
 
-    public function exec($name, $cmd)
-    {
-    }
 }
