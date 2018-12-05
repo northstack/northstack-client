@@ -20,8 +20,8 @@
       "root": "/app/public",
       "working_directory": "/app/public",
       "script": "index.php",
-      "user": "www-data",
-      "group": "www-data"
+      "user": "NORTHSTACK_USERNAME",
+      "group": "NORTHSTACK_GROUP"
     },
     "php-direct": {
       "type": "php",
@@ -29,8 +29,8 @@
       "root": "/app/public",
       "working_directory": "/app/public",
       "index": "index.php",
-      "user": "www-data",
-      "group": "www-data"
+      "user": "NORTHSTACK_USERNAME",
+      "group": "NORTHSTACK_GROUP"
     }
   },
   "access_log": "/dev/stdout"

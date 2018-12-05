@@ -14,13 +14,19 @@ services:
     build:
       context: ./images/wordpress
     volumes:
-      - "${APP_PUBLIC}:/var/www/html"
+      - "${APP_PUBLIC}:${APP_PUBLIC}"
+      - "/etc/passwd:/etc/passwd:ro"
+      - "/etc/group:/etc/group:ro"
+    working_dir: "${APP_PUBLIC}"
+    userns_mode: host
+    user: "${NORTHSTACK_UID}:${NORTHSTACK_GID}"
     environment:
       WORDPRESS_VERSION: ${WORDPRESS_VERSION}
       WORDPRESS_TITLE: ${WORDPRESS_TITLE}
       WORDPRESS_URL: ${WORDPRESS_URL}
       WORDPRESS_ADMIN_USER: ${WORDPRESS_ADMIN_USER}
       WORDPRESS_ADMIN_EMAIL: ${WORDPRESS_ADMIN_EMAIL}
+      WORDPRESS_ADMIN_PASS: ${WORDPRESS_ADMIN_PASS}
       WORDPRESS_DB_HOST: mysql
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_NAME: wordpress
@@ -37,12 +43,17 @@ services:
       context: ./images/nginx-unit-php
     volumes:
       - "${APP_PUBLIC}:/app/public"
-      - "${COMPOSE_ROOT_HOST:-.}/wordpress/unit.json:/usr/local/unit-state/conf.json:ro"
+      - "/etc/passwd:/etc/passwd:ro"
+      - "/etc/group:/etc/group:ro"
     depends_on:
       - wordpress-init
     healthcheck:
       test: 'curl -s -o /dev/null -D - --unix /nginx-unit/control.unit.sock http://localhost/config'
       start_period: 5s
+    userns_mode: host
+    environment:
+      - NORTHSTACK_USER
+      - NORTHSTACK_GROUP
     networks:
       northstack_local_dev: {}
 

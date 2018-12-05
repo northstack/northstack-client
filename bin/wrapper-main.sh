@@ -32,6 +32,8 @@ main() {
             --volume $HOME:$HOME \
             --volume "$socket":/var/run/docker.sock \
             --volume "$DEV_SOURCE":/app \
+            --volume "/etc/passwd:/etc/passwd:ro" \
+            --volume "/etc/group:/etc/group:ro" \
             --init \
             northstack "$@"
     else
@@ -46,6 +48,8 @@ main() {
             --volume "$NS_PWD:$NS_PWD" \
             --volume $HOME:$HOME \
             --volume "$socket":/var/run/docker.sock \
+            --volume "/etc/passwd:/etc/passwd:ro" \
+            --volume "/etc/group:/etc/group:ro" \
             --init \
             northstack "$@"
     fi
