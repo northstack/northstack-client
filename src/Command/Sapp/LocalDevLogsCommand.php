@@ -14,9 +14,11 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class LocalDevLogsCommand extends AbstractLocalDevCmd
 {
-    protected $commandName = 'app:localdev:logs';
     protected $commandDescription = 'View logs from the local dev environment';
 
+    protected function commandName(): string {
+        return 'app:localdev:logs';
+    }
 
     public function configure()
     {

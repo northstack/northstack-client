@@ -16,15 +16,16 @@ use Symfony\Component\Console\Output\OutputInterface;
 abstract class AbstractLocalDevCmd extends Command
 {
     protected $skipLoginCheck = true;
-    protected $commandName;
     protected $commandDescription;
 
     use SappEnvironmentTrait;
 
     public function __construct()
     {
-        parent::__construct($this->commandName);
+        parent::__construct($this->commandName());
     }
+
+    protected abstract function commandName(): string;
 
     public function configure()
     {

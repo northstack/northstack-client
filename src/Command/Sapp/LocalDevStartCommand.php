@@ -11,8 +11,11 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class LocalDevStartCommand extends AbstractLocalDevCmd
 {
-    protected $commandName = 'app:localdev:start';
     protected $commandDescription = 'Start the local dev environment';
+
+    protected function commandName(): string {
+        return 'app:localdev:start';
+    }
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
