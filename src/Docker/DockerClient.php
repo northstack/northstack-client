@@ -4,7 +4,7 @@ namespace NorthStack\NorthStackClient\Docker;
 
 use Docker\Docker;
 use Docker\API\Model\ContainersCreatePostBody;
-
+use Docker\API\Exception\ContainerInspectNotFoundException;
 
 class DockerClient
 {
@@ -45,17 +45,56 @@ class DockerClient
         ]);
     }
 
-    public function run($name, $image, $config, $destroy = true)
+    public function containerExists($nameOrId)
     {
-        $conf = new ContainersCreatePostBody();
-        $conf->setImage($image);
-        $conf->setAttachStdout(true);
-        $conf->setAttachStderr(true);
+        try {
+            $this->docker->containerInspect($nameOrId);
+            return true;
+        } catch (ContainerInspectNotFoundException $e) {
+            return false;
+        }
+    }
 
-        $create = $this->docker->containerCreate(
+    public function createContainer(
+        string $name,
+        string $image,
+        array $config,
+        $recreate = true
+    )
+    {
+        if ($this->containerExists($name)) {
+            if (!$recreate) {
+                return true;
+            }
+            $this->docker->containerDelete($name);
+        }
+
+        $conf = new ContainersCreatePostBody();
+        $conf
+            ->setImage($image)
+            ->setAttachStdout(true)
+            ->setAttachStderr(true)
+        ;
+
+        foreach ($config as $section => $value) {
+            $method = "set{$section}";
+            if (method_exists($conf, $method)) {
+                $conf->{$method}($value);
+            } else {
+                throw new \Exception("Unknown container creation config section: {$section}");
+            }
+        }
+
+        return $this->docker->containerCreate(
             $conf,
             ['name' => $name]
         );
+
+    }
+
+    public function run($name, $image, $config, $destroy = true)
+    {
+        $this->createContainer($name, $image, $config, true);
 
         $attachStream = $this->docker->containerAttach(
             $name,
@@ -69,10 +108,10 @@ class DockerClient
         $this->docker->containerStart($name);
 
         $attachStream->onStdout(function ($stdout) {
-            //echo "STDOUT: {$stdout}";
+            echo $stdout;
         });
         $attachStream->onStderr(function ($stderr) {
-            //echo "STDERR: {$stderr}";
+            echo $stderr;
         });
 
         $attachStream->wait();
@@ -82,5 +121,15 @@ class DockerClient
         if ($destroy) {
             $this->docker->containerDelete($name);
         }
+    }
+
+    public function stop($name)
+    {
+        $this->docker->containerStop($name);
+        $this->docker->containerWait($name);
+    }
+
+    public function exec($name, $cmd)
+    {
     }
 }

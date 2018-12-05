@@ -3,7 +3,8 @@
 namespace NorthStack\NorthStackClient\Docker;
 
 use Docker\Docker;
-
+use Docker\API\Model\Mount;
+use Docker\API\Model\HostConfig;
 
 class DockerCompose
 {
@@ -38,14 +39,40 @@ class DockerCompose
         $this->client->run(
             $this->getName(),
             $this->image,
-            $this->buildConfig(),
-            true
+            $this->buildConfig(['Cmd' => ['up', '-d']]),
+            false
         );
     }
 
-    public function buildConfig()
+    protected function buildConfig($opts)
     {
-        return [];
+        $config = [
+            'Env' => $this->buildEnv(),
+            'HostConfig' => $this->buildHostConfig(),
+            'WorkingDir' => "/northstack/docker/{$this->stack}",
+        ];
+
+        foreach ($opts as $k => $v) {
+            $config[$k] = $v;
+        }
+
+        return $config;
+    }
+
+    protected function buildEnv()
+    {
+        return [
+        ];
+    }
+
+    protected function buildHostConfig()
+    {
+        $config = new HostConfig();
+        $lib = getenv('NS_LIB');
+        return $config->setBinds([
+            "{$lib}:/northstack",
+            '/var/run/docker.sock:/var/run/docker.sock'
+        ]);
     }
 
     public function watch()
@@ -54,5 +81,26 @@ class DockerCompose
 
     public function stop()
     {
+        $this->client->run(
+            $this->getName(),
+            $this->image,
+            $this->buildConfig(['Cmd' => ['down']]),
+            false
+        );
+        $this->client->stop($this->getName());
+    }
+
+    public function logs($follow = true, $tail = 'all')
+    {
+        $cmd = ['logs', "--tail={$tail}"];
+        if ($follow) {
+            $cmd[] = '--follow';
+        }
+        $this->client->run(
+            $this->getName(),
+            $this->image,
+            $this->buildConfig(['Cmd' => $cmd]),
+            true
+        );
     }
 }
