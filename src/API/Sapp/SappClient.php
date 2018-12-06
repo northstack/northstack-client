@@ -58,21 +58,4 @@ class SappClient extends BaseApiClient
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
             ->patch("sapps/{$sappId}",['json' => $data]);
     }
-
-    public function deploy(
-        $accessToken,
-        $sappId,
-        $config,
-        $buildConfig,
-        $domains
-    ) {
-        return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->post("/sapps/{$sappId}/deploy", [
-                'json' => [
-                    'config' => $config,
-                    'build' => $buildConfig,
-                    'domains' => $domains,
-                ],
-            ]);
-    }
 }
