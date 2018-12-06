@@ -69,8 +69,7 @@ abstract class AbstractDeployCmd extends Command
      */
     protected function uploadApp(InputInterface $input, OutputInterface $output): array
     {
-        if ($output->isDebug())
-        {
+        if ($output->isDebug()) {
             $this->sappClient->setDebug(true);
         }
 
@@ -104,19 +103,18 @@ abstract class AbstractDeployCmd extends Command
 
     protected function mergeConfigs(string $appFolder, string $environment)
     {
-        // the gateway file doesn't have to exist at all
-        $gatewayConfig = '{}';
-        if (file_exists("{$appFolder}/config/gateway.json")) {
-            $gatewayConfig = file_get_contents("{$appFolder}/config/gateway.json");
-        }
-
         // merge configs
         $configs = [
             'config.json' => file_get_contents("{$appFolder}/config/config.json"),
             'build.json' => file_get_contents("{$appFolder}/config/build.json"),
-            'gateway.json' => $gatewayConfig,
             'domains.json' => '{}',
         ];
+
+        // the gateway file doesn't have to exist at all
+        if (file_exists("{$appFolder}/config/gateway.json")) {
+            $configs['gateway.json'] = file_get_contents("{$appFolder}/config/gateway.json");
+        }
+
         foreach ($configs as $file => $json) {
             $envFile = "{$appFolder}/config/{$environment}/{$file}";
             if (file_exists($envFile)) {

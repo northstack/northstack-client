@@ -56,11 +56,16 @@ class ReleaseAndDeployCommand extends AbstractDeployCmd
 
         // update configs
         $output->writeln('Updating Sapp configs...');
-        $this->sappClient->update($this->token->token, $sappId, [
+        $update = [
             'configBuild' => $configs['build.json'],
             'domains' => $configs['domains.json'],
             'config' => $configs['config.json'],
-        ]);
+        ];
+        // Since gateway configs are optional...
+        if (isset($configs['gateway.json'])) {
+            $update['gateway'] = $configs['gateway.json'];
+        }
+        $this->sappClient->update($this->token->token, $sappId, $update);
 
         // proceed with the rest of the deploy via northstack api
         $notes = null;
