@@ -77,6 +77,7 @@ abstract class AbstractLocalDevCmd extends Command
         $gid = posix_getegid();
         $group = posix_getgrgid($gid)['name'];
 
+        // TODO: let users configure some of this stuff via $APP_ROOT/config/localdev.json
         $vars = [
             'APP_NAME'             => $appName,
             'STACK'                => $stack,
@@ -94,6 +95,7 @@ abstract class AbstractLocalDevCmd extends Command
             'NORTHSTACK_GID'    => $gid,
         ];
 
+        // TODO: move this logic somewhere else
         if ($stack === 'wordpress')
         {
             $install = $build->{'wordpress-install'};
