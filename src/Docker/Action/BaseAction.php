@@ -19,6 +19,8 @@ abstract class BaseAction
      * @var DockerClient
      */
     protected $docker;
+    protected $input;
+    protected $output;
 
     private static $image = 'docker/compose:1.23.2';
 
