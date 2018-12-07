@@ -100,30 +100,4 @@ abstract class AbstractDeployCmd extends Command
 
         return [$sappId, $appFolder];
     }
-
-    protected function mergeConfigs(string $appFolder, string $environment)
-    {
-        // merge configs
-        $configs = [
-            'config.json' => file_get_contents("{$appFolder}/config/config.json"),
-            'build.json' => file_get_contents("{$appFolder}/config/build.json"),
-            'domains.json' => '{}',
-        ];
-
-        // the gateway file doesn't have to exist at all
-        if (file_exists("{$appFolder}/config/gateway.json")) {
-            $configs['gateway.json'] = file_get_contents("{$appFolder}/config/gateway.json");
-        }
-
-        foreach ($configs as $file => $json) {
-            $envFile = "{$appFolder}/config/{$environment}/{$file}";
-            if (file_exists($envFile)) {
-                $configs[$file] = Merger::merge($json, file_get_contents($envFile));
-            } else {
-                $configs[$file] = Merger::merge($json, '{}');
-            }
-        }
-
-        return $configs;
-    }
 }
