@@ -4,6 +4,9 @@ version: '3.4'
 volumes:
   mysql:
     name: "${APP_ID}_mysql"
+    labels:
+      com.northstack.app.name: "${APP_NAME}"
+      com.northstack.app.id: "${APP_ID}"
 
 services:
   web:
@@ -66,7 +69,10 @@ services:
     container_name: mysql
     image: mysql:5
     volumes:
-      - "mysql:/var/lib/mysql"
+      - type: volume
+        source: mysql
+        target: /var/lib/mysql
+
     ports:
       - "${EXPOSE_MYSQL_PORT}:3306"
     environment:
