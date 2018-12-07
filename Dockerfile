@@ -25,4 +25,4 @@ RUN groupadd \
         --non-unique \
         --system \
         --gid "${DOCKER_GID:?build arg is required}" \
-        "${DOCKER_GROUP?:build arg is required}"
+        "${DOCKER_GROUP:?build arg is required}"
