@@ -101,11 +101,10 @@ RUN apk add --no-cache --virtual .persistent-deps \
 
 COPY php.d /usr/local/etc/php/conf.d/
 
-VOLUME ["/nginx-unit/"]
 WORKDIR /usr/local
 
 COPY unit.json /unit.json.template
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
-CMD ["/usr/local/sbin/unitd", "--no-daemon", "--control", "unix:/nginx-unit/control.unit.sock"]
+CMD ["/usr/local/sbin/unitd", "--no-daemon", "--control", "unix:/var/run/control.unit.sock"]
