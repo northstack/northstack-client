@@ -4,11 +4,13 @@
 namespace NorthStack\NorthStackClient\Command\Sapp;
 
 use NorthStack\NorthStackClient\API\Sapp\SappClient;
+use NorthStack\NorthStackClient\Docker\Action\StopAction;
 
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
 
 use NorthStack\NorthStackClient\Docker;
+use NorthStack\NorthStackClient\Docker\Action;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -23,9 +25,17 @@ class LocalDevStopCommand extends AbstractLocalDevCmd
         return 'app:localdev:stop';
     }
 
+    protected function getDockerAction()
+    {
+        return StopAction::class;
+    }
+
     public function execute(InputInterface $input, OutputInterface $output)
     {
         parent::execute($input, $output);
-        $this->getComposeClient('wordpress')->stop();
+
+        $output->writeln("Stopping containers");
+        $action = $this->getAction();
+        $action->run();
     }
 }

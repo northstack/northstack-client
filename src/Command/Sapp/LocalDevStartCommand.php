@@ -4,6 +4,7 @@
 namespace NorthStack\NorthStackClient\Command\Sapp;
 
 use NorthStack\NorthStackClient\Command\Command;
+use NorthStack\NorthStackClient\Docker\Action\StartAction;
 
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
@@ -16,6 +17,12 @@ class LocalDevStartCommand extends AbstractLocalDevCmd
     protected function commandName(): string {
         return 'app:localdev:start';
     }
+
+    protected function getDockerAction()
+    {
+        return StartAction::class;
+    }
+
     public function configure()
     {
         parent::configure();
@@ -28,8 +35,11 @@ class LocalDevStartCommand extends AbstractLocalDevCmd
     {
         parent::execute($input, $output);
 
+        $action = $this->getAction();
         $background = $input->getOption('detach') ?: false;
-        $this->getComposeClient('wordpress')->start($background);
 
+        $output->writeln("Starting up...");
+        $action->setBackground($background);
+        $action->run();
     }
 }

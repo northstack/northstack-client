@@ -5,6 +5,7 @@ namespace NorthStack\NorthStackClient\Command\Sapp;
 
 
 use NorthStack\NorthStackClient\Command\Command;
+use NorthStack\NorthStackClient\Docker\Action\RunCmdAction;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
@@ -20,6 +21,11 @@ class LocalDevRunCommand extends AbstractLocalDevCmd
         return 'app:localdev:run';
     }
 
+    protected function getDockerAction()
+    {
+        return RunCmdAction::class;
+    }
+
     public function configure()
     {
         parent::configure();
@@ -32,7 +38,8 @@ class LocalDevRunCommand extends AbstractLocalDevCmd
     {
         parent::execute($input, $output);
 
-        $compose = $this->getComposeClient('wordpress');
-        $compose->run($input->getArgument('run'));
+        $action = $this->getAction();
+        $action->setCmd($input->getArgument('run'));
+        $action->run();
     }
 }
