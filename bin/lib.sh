@@ -149,6 +149,7 @@ checkPaths() {
 
 buildDockerImage() {
     local ctx=$1
+    local tag=${2:-northstack}
 
     local sock="$(dockerSocket)"
 
@@ -164,7 +165,7 @@ buildDockerImage() {
     docker build \
         --build-arg DOCKER_GID="$gid" \
         --build-arg DOCKER_GROUP="$group" \
-        -t northstack \
+        -t "$tag" \
         "$ctx" \
     &> "$outfile"
 
