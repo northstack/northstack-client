@@ -153,6 +153,7 @@ abstract class BaseAction
         $ret = $handler->watch();
         if ($this->handleSignals && $ret === DockerStreamHandler::$signaled)
         {
+            $this->output->writeln('');
             $this->cleanup();
         }
     }
