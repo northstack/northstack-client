@@ -4,7 +4,13 @@ namespace NorthStack\NorthStackClient\Docker;
 
 use Docker\Docker;
 use Docker\API\Model\ContainersCreatePostBody;
+use Docker\API\Model\ContainersIdExecPostBody;
 use Docker\API\Exception\ContainerInspectNotFoundException;
+
+use Docker\API\Exception\ContainerCreateConflictException;
+use Docker\API\Exception\ContainerWaitNotFoundException;
+use Docker\API\Exception\ContainerDeleteConflictException;
+use Docker\API\Exception\ContainerStopNotFoundException;
 
 class DockerClient
 {
@@ -23,116 +29,101 @@ class DockerClient
         return $this->docker;
     }
 
-    public function pullImage(string $image)
+    public function wait($name, $condition = 'not-running')
     {
-        if ($this->hasImage($image)) {
-            return true;
-        }
-
-        $res = $this->docker->imageCreate('', [ 'fromImage' => $image])->wait();
-        return $this->hasImage($image);
+        return $this->docker->containerWait($name, ['condition' => $condition]);
     }
 
-    public function hasImage(string $name)
-    {
-        $images = $this->listImages(['reference' => [$name]]);
-        return count($images) > 0;
-    }
-
-    public function listImages(array $filters = [])
-    {
-        return $this->docker->imageList([
-            'filters' => json_encode($filters)
-        ]);
-    }
-
-    public function containerExists($name)
+    public function deleteContainer($name, $forceStop = false)
     {
         try {
-            $this->docker->containerInspect($name);
+            $this->docker->containerDelete($name);
+            $this->wait($name, 'removed');
             return true;
-        } catch (ContainerInspectNotFoundException $e) {
-            return false;
-        }
-    }
-
-    public function containerIsRunning($name)
-    {
-        try {
-            $info = $this->docker->containerInspect($name);
-            print_r($info);
+        } catch (ContainerWaitNotFoundException $e)
+        {
             return true;
-        } catch (ContainerInspectNotFoundException $e) {
-            return false;
+        } catch (ContainerDeleteConflictException $e)
+        {
+            if ($forceStop) {
+                return $this->stop($name, true);
+            }
+            throw new ContainerRunningException($name);
         }
     }
 
     public function createContainer(
         string $name,
         Container $conf,
-        $recreate = true
+        $destroyIfExists = false,
+        $stopIfExists = false
     )
     {
-        if ($this->containerExists($name))
+        try {
+            $this->docker->containerCreate(
+                $conf,
+                ['name' => $name]
+            );
+            return true;
+
+        } catch (ContainerCreateConflictException $e)
         {
-            $this->stop($name, $recreate);
-
-            if (!$recreate) {
-                return true;
+            if ($destroyIfExists)
+            {
+                $this->deleteContainer($name, $stopIfExists);
+                return $this->createContainer($name, $conf);
             }
+
+            throw new ContainerExistsException($name);
         }
-
-        $conf
-            ->setAttachStdout(true)
-            ->setAttachStderr(true)
-        ;
-
-        return $this->docker->containerCreate(
-            $conf,
-            ['name' => $name]
-        );
-
     }
 
-    public function run($name, $config, $destroy = true)
+    public function runDetached($name)
     {
-        $this->createContainer($name, $config, true);
+        return $this->docker->containerStart($name);
+    }
 
-        $attachStream = $this->docker->containerAttach(
+    public function run($name)
+    {
+        $attachStream = $this->docker->containerAttachWebsocket(
             $name,
             [
                 'stream' => true,
+                'stdin'  => false,
                 'stdout' => true,
                 'stderr' => true,
+                'logs'   => true,
             ]
         );
 
         $this->docker->containerStart($name);
 
-        $attachStream->onStdout(function ($stdout) {
-            echo $stdout;
-        });
-        $attachStream->onStderr(function ($stderr) {
-            echo $stderr;
-        });
-
-        $attachStream->wait();
-
-        $this->docker->containerWait($name);
-        $this->docker->containerStop($name);
-        if ($destroy) {
-            $this->docker->containerDelete($name);
-        }
+        return $attachStream;
     }
 
-    public function stop($name, $destroy = false)
+    public function stop($name, $destroy = false, $timeout = 10)
     {
-        $this->docker->containerStop($name);
-        $this->docker->containerWait($name);
+        try {
+            $this->docker->containerStop($name, ['t' => $timeout]);
+        } catch (ContainerStopNotFoundException $e)
+        {
+            return true;
+        }
+
+        try {
+            $this->wait($name);
+        } catch (ContainerWaitNotFoundException $e)
+        {
+            return true;
+        }
 
         if ($destroy) {
-            $this->docker->containerDelete($name);
+            return $this->deleteContainer($name, false);
         }
     }
 
+    public function signal($name, $signal)
+    {
+        $this->docker->containerKill($name, ['signal' => $signal]);
+    }
 }
