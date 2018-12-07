@@ -10,7 +10,7 @@ trait SappEnvironmentTrait
 {
     protected function getSappIdAndFolderByOptions($name, $environment)
     {
-        $appFolder = getcwd().'/'.$name;
+        $appFolder = getcwd() . '/' . $name;
 
         if (!file_exists($appFolder)) {
             throw new \RuntimeException("<error>Folder {$appFolder} not found</error>");
@@ -28,11 +28,9 @@ trait SappEnvironmentTrait
         $name = basename($cwd);
 
         array_map(
-            function($path) use ($cwd)
-            {
+            function ($path) use ($cwd) {
                 $path = $cwd . $path;
-                if (!file_exists($path))
-                {
+                if (!file_exists($path)) {
                     throw new \Exception("Command must be executed inside an app directory (missing: {$path})");
                 }
             },
@@ -60,6 +58,12 @@ trait SappEnvironmentTrait
             'build' => file_get_contents("{$appFolder}/config/build.json"),
             'domains' => '{}',
         ];
+
+        // the gateway file doesn't have to exist at all
+        if (file_exists("{$appFolder}/config/gateway.json")) {
+            $configs['gateway.json'] = file_get_contents("{$appFolder}/config/gateway.json");
+        }
+
         foreach ($configs as $file => $json) {
             $envFile = "{$appFolder}/config/{$environment}/{$file}.json";
             if (file_exists($envFile)) {
@@ -68,8 +72,7 @@ trait SappEnvironmentTrait
                 $configs[$file] = Merger::merge($json, '{}');
             }
 
-            if ($decode)
-            {
+            if ($decode) {
                 $configs[$file] = json_decode($configs[$file]);
             }
         }
