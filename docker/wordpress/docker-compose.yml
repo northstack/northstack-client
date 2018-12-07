@@ -49,7 +49,7 @@ services:
     depends_on:
       - wordpress-init
     healthcheck:
-      test: 'curl -s -o /dev/null -D - --unix /nginx-unit/control.unit.sock http://localhost/config'
+      test: 'curl -s -o /dev/null -D - --unix /var/run/control.unit.sock http://localhost/config'
       start_period: 5s
     userns_mode: host
     environment:
