@@ -17,7 +17,7 @@ main() {
     prefix="$(getInstallPrefix)"
     ns_lib="${prefix}/lib/northstack"
 
-    local DEBUG=${DEBUG:-1}
+    local DEBUG=${DEBUG:-0}
 
     if [[ $DEV_MODE == 1 ]]; then
 
