@@ -22,6 +22,9 @@ isDev=0
 if [[ ${0##*/} == "install-dev.sh" ]]; then
     log "info" "Installing in DEV mode"
     isDev=1
+
+    log "info" "Installing dependencies with composer"
+    installComposerDeps "$BASE"
 fi
 
 install_path="$(setInstallPrefix)"

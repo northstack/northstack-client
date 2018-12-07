@@ -188,3 +188,13 @@ buildDockerImage() {
         exit 1
     fi
 }
+
+installComposerDeps() {
+    local ctx=$1
+
+    docker run --rm \
+        --volume "${ctx}:/app" \
+        composer install --ignore-platform-reqs \
+        2>&1 \
+    | debug -
+}
