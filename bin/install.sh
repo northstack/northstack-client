@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -e
+set -eu
 
 CDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 BASE="$( dirname "$CDIR")"
@@ -16,6 +16,8 @@ cleanup() {
 }
 
 trap cleanup EXIT
+
+isDev=0
 
 if [[ ${0##*/} == "install-dev.sh" ]]; then
     log "info" "Installing in DEV mode"

@@ -1,4 +1,6 @@
 main() {
+    local NS_PWD=${NS_PWD:-}
+
     if [[ -z $NS_PWD ]]; then
         debug "Using default workdir ($PWD); set \$NS_PWD to override"
         NS_PWD=$PWD
@@ -14,6 +16,8 @@ main() {
 
     prefix="$(getInstallPrefix)"
     ns_lib="${prefix}/lib/northstack"
+
+    local DEBUG=${DEBUG:-1}
 
     if [[ $DEV_MODE == 1 ]]; then
 

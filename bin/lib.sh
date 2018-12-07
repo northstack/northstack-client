@@ -52,6 +52,7 @@ getCwd() {
 }
 
 debug() {
+    local DEBUG=${DEBUG:-0}
     if [[ $DEBUG == 1 ]]; then
         log "debug" "$@"
     fi
@@ -59,6 +60,7 @@ debug() {
 
 setInstallPrefix() {
     local default=/usr/local
+    local INSTALL_PATH=${INSTALL_PATH:-}
 
     if [[ -z $INSTALL_PATH ]]; then
         log "Using default install prefix ($default)"
@@ -130,7 +132,7 @@ getGid() {
 
 checkPaths() {
     local prefix=$(getInstallPrefix)
-    local failed
+    local failed=0
 
     if [[ $DEV_MODE == 1 ]] && [[ ! -d $DEV_SOURCE ]]; then
         failed=1
@@ -142,7 +144,7 @@ checkPaths() {
         log "error" "NorthStack assets ($prefix/northstack) are missing"
     fi
 
-    if [[ $failed ]]; then
+    if [[ $failed == 1 ]]; then
         exit 1
     fi
 }
@@ -156,10 +158,12 @@ buildDockerImage() {
     local group="$(stat "$sock" --printf='%G')"
     local gid="$(stat "$sock" --printf='%g')"
 
+    debug "Detected docker group: $group, gid: $gid"
+
     log info "building the northstack docker image"
 
     local outfile=$(mktemp)
-    local failed
+    local failed=0
 
     set +e
     docker build \
@@ -180,7 +184,7 @@ buildDockerImage() {
     set -e
     rm "$outfile"
 
-    if [[ $failed ]]; then
+    if [[ $failed == 1 ]]; then
         exit 1
     fi
 }
