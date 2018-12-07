@@ -10,6 +10,7 @@ use NorthStack\NorthStackClient\Docker\DockerStreamHandler;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
+use Docker\API\Exception\ContainerInspectNotFoundException;
 use Docker\Stream\AttachWebsocketStream;
 
 abstract class BaseAction
@@ -23,14 +24,15 @@ abstract class BaseAction
     protected $output;
 
     private static $image = 'docker/compose:1.23.2';
+    private static $label = 'com.northstack.localdev.version';
 
     protected $stack;
 
     protected $watchOutput = true;
     protected $handleSignals = true;
     protected $stopContainerOnExit = true;
-    protected $destroyContainerOnExit = true;
-    protected $destroyExistingContainer = true;
+    protected $destroyContainerOnExit = false;
+    protected $destroyExistingContainer = false;
     protected $stopExistingContainer = true;
 
     protected $env = [];
@@ -125,10 +127,17 @@ abstract class BaseAction
 
     protected function createContainer()
     {
+        if (!$this->needsNewContainer()) {
+            return;
+        }
+
+        $conf = $this->getContainerConfig();
+        $conf->setLabels($this->getVersionLabel());
+
         $this->docker->createContainer(
             $this->getContainerName(),
-            $this->getContainerConfig(),
-            $this->destroyExistingContainer,
+            $conf,
+            true,
             $this->stopExistingContainer
         );
     }
@@ -158,6 +167,44 @@ abstract class BaseAction
             $this->output->writeln('');
             $this->cleanup();
         }
+    }
+
+    protected function needsNewContainer()
+    {
+        if ($this->destroyExistingContainer)
+        {
+            return true;
+        }
+
+        $new = $this->getContainerVersion();
+
+        try {
+            $labels = $this->docker->getLabels($this->getContainerName());
+        } catch (ContainerInspectNotFoundException $e) {
+            return true;
+        }
+
+        if (!array_key_exists(self::$label, $labels))
+        {
+            return true;
+        }
+
+        $old = $labels[self::$label];
+        return $old !== $new;
+    }
+
+    protected function getContainerVersion()
+    {
+        $data = Container::allValues($this->getContainerConfig());
+        return sha1(json_encode($data));
+    }
+
+    protected function getVersionLabel()
+    {
+        $version = $this->getContainerVersion();
+        return new \ArrayObject([
+            self::$label => $version
+        ]);
     }
 
     protected function getAction($name)

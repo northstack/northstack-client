@@ -126,4 +126,10 @@ class DockerClient
     {
         $this->docker->containerKill($name, ['signal' => $signal]);
     }
+
+    public function getLabels($name)
+    {
+        return $this->docker->containerInspect($name)
+            ->getConfig()->getLabels();
+    }
 }

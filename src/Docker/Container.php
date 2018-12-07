@@ -48,4 +48,24 @@ class Container extends ContainersCreatePostBody
 
         return $this;
     }
+
+    public static function allValues($obj)
+    {
+        $data = [];
+        foreach (get_class_methods(get_class($obj)) as $m)
+        {
+            if (strpos($m, 'get') === 0)
+            {
+                $val = $obj->{$m}();
+                if (is_object($val))
+                {
+                    $val = self::allValues($val);
+                }
+
+                $data[$m] = $val;
+            }
+        }
+
+        return $data;
+    }
 }
