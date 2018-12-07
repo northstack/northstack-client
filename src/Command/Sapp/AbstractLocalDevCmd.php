@@ -70,6 +70,7 @@ abstract class AbstractLocalDevCmd extends Command
         $build = $this->appData['build'];
         $domains = $this->appData['domains'];
         $appName = $this->appData['name'];
+        $appId = $this->appData['id'];
         $stack = $config->{'app-type'};
 
         $uid = posix_geteuid();
@@ -80,6 +81,7 @@ abstract class AbstractLocalDevCmd extends Command
         // TODO: let users configure some of this stuff via $APP_ROOT/config/localdev.json
         $vars = [
             'APP_NAME'             => $appName,
+            'APP_ID'               => $appId,
             'STACK'                => $stack,
             'EXPOSE_HTTP_PORT'     => 8080,
             'EXPOSE_MYSQL_PORT'    => 3306,

@@ -1,6 +1,10 @@
 ---
 version: '3.4'
 
+volumes:
+  mysql:
+    name: "${APP_ID}_mysql"
+
 services:
   web:
     depends_on:
@@ -62,7 +66,7 @@ services:
     container_name: mysql
     image: mysql:5
     volumes:
-      - "${APP_ROOT}/localdev/mysql:/var/lib/mysql:delegated"
+      - "mysql:/var/lib/mysql"
     ports:
       - "${EXPOSE_MYSQL_PORT}:3306"
     environment:
