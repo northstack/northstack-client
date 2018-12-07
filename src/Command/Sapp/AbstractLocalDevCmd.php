@@ -6,6 +6,7 @@ namespace NorthStack\NorthStackClient\Command\Sapp;
 
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Docker;
+use NorthStack\NorthStackClient\Docker\Action;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
@@ -20,6 +21,8 @@ abstract class AbstractLocalDevCmd extends Command
 
     protected $appData;
 
+    protected $action;
+
     use SappEnvironmentTrait;
 
     public function __construct()
@@ -28,6 +31,8 @@ abstract class AbstractLocalDevCmd extends Command
     }
 
     protected abstract function commandName(): string;
+
+    protected abstract function getDockerAction();
 
     public function configure()
     {
@@ -42,24 +47,21 @@ abstract class AbstractLocalDevCmd extends Command
     {
         $env = $input->getOption('env');
         $this->appData = $this->getSappFromWorkingDir($env);
-    }
 
-    protected function getComposeClient()
-    {
         $docker = new Docker\DockerClient();
-        $compose = new Docker\DockerCompose(
-            $docker,
+        $Action = $this->getDockerAction();
+        $this->action = new $Action(
             $this->appData['config']->{'app-type'},
+            $docker,
+            $input,
+            $output,
             $this->buildEnvVars()
         );
-        return $compose;
     }
 
-    protected function buildComposeOptions()
+    protected function getAction()
     {
-        return [
-            'Env' => $this->buildEnvVars(),
-        ];
+        return $this->action;
     }
 
     protected function buildEnvVars()

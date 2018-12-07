@@ -5,6 +5,7 @@ namespace NorthStack\NorthStackClient\Command\Sapp;
 
 
 use NorthStack\NorthStackClient\Command\Command;
+use NorthStack\NorthStackClient\Docker\Action\LogAction;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
@@ -20,6 +21,11 @@ class LocalDevLogsCommand extends AbstractLocalDevCmd
         return 'app:localdev:logs';
     }
 
+    protected function getDockerAction()
+    {
+        return LogAction::class;
+    }
+
     public function configure()
     {
         parent::configure();
@@ -33,11 +39,15 @@ class LocalDevLogsCommand extends AbstractLocalDevCmd
     {
         parent::execute($input, $output);
 
+
         $follow = $input->getOption('follow') ?: false;
         $tail = $input->getOption('tail') ?: 'all';
+        $action = $this->getAction();
 
-        $compose = $this->getComposeClient('wordpress');
-        $compose->logs($follow, $tail);
-
+        $action
+            ->setFollow($follow)
+            ->setTail($tail)
+            ->run()
+        ;
     }
 }
