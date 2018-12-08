@@ -103,20 +103,26 @@ abstract class BaseAction
 
     protected function getEnv()
     {
+        $lib = $this->getRoot();
         return array_merge(
             [
                 'COMPOSE_ROOT=/northstack/docker',
-                'COMPOSE_ROOT_HOST='. getenv('NS_LIB') . '/docker',
+                "COMPOSE_ROOT_HOST={$lib}/docker",
             ],
             $this->env
         );
+    }
+
+    protected function getRoot()
+    {
+        return getenv('NS_LIB') ?: dirname(__DIR__, 3);
     }
 
     protected function getMounts()
     {
         return [
             [
-                'src' => getenv('NS_LIB'),
+                'src' => $this->getRoot(),
                 'dest' => '/northstack'
             ],
             [
