@@ -6,11 +6,13 @@ namespace NorthStack\NorthStackClient\Docker\Action;
 use NorthStack\NorthStackClient\Docker\Container;
 use NorthStack\NorthStackClient\Docker\DockerClient;
 use NorthStack\NorthStackClient\Docker\DockerStreamHandler;
+use NorthStack\NorthStackClient\Docker\DockerActionException;
 
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use Docker\API\Exception\ContainerInspectNotFoundException;
+use Docker\API\Model\ErrorResponse;
 use Docker\Stream\AttachWebsocketStream;
 
 abstract class BaseAction
@@ -55,9 +57,13 @@ abstract class BaseAction
 
     public function run()
     {
-        $this->createContainer();
-        $this->startContainer();
-        $this->finish();
+        try {
+            $this->createContainer();
+            $this->startContainer();
+            $this->finish();
+        } catch (\Exception $e) {
+            throw DockerActionException::fromException($e);
+        }
     }
 
     protected function cleanup()
