@@ -7,6 +7,7 @@ use Docker\API\Model\ContainersCreatePostBody;
 use Docker\API\Model\ContainersIdExecPostBody;
 use Docker\API\Exception\ContainerInspectNotFoundException;
 
+use Docker\API\Exception\ContainerCreateNotFoundException;
 use Docker\API\Exception\ContainerCreateConflictException;
 use Docker\API\Exception\ContainerWaitNotFoundException;
 use Docker\API\Exception\ContainerDeleteConflictException;
@@ -75,7 +76,27 @@ class DockerClient
             }
 
             throw new ContainerExistsException($name);
+        } catch (ContainerCreateNotFoundException $e)
+        {
+            $this->pullImage($conf->getImage());
+            return $this->createContainer(
+              $name,
+              $conf,
+              $destroyIfExists,
+              $stopIfExists
+            );
         }
+    }
+
+    public function pullImage($name)
+    {
+        [$image, $tag] = explode(':', $name, 2);
+        $this->docker->imageCreate('',
+            [
+                'fromImage' => $image,
+                'tag' => $tag,
+            ]
+        );
     }
 
     public function runDetached($name)
