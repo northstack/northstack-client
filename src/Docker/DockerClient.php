@@ -99,33 +99,37 @@ class DockerClient
         );
     }
 
-    public function runDetached($name)
-    {
-        return $this->docker->containerStart($name);
-    }
-
     public function run($name)
     {
-        $attachStream = $this->docker->containerAttachWebsocket(
+        return $this->docker->containerStart(
+            $name,
+            [],
+            $this->docker::FETCH_RESPONSE
+        );
+    }
+
+    public function attachOutput($name)
+    {
+        return $this->docker->containerAttach(
             $name,
             [
                 'stream' => true,
                 'stdin'  => false,
                 'stdout' => true,
                 'stderr' => true,
-                'logs'   => true,
+                'logs'   => false,
             ]
         );
-
-        $this->docker->containerStart($name);
-
-        return $attachStream;
     }
 
     public function stop($name, $destroy = false, $timeout = 10)
     {
         try {
-            $this->docker->containerStop($name, ['t' => $timeout]);
+            $this->docker->containerStop(
+                $name,
+                ['t' => $timeout],
+                $this->docker::FETCH_RESPONSE
+            );
         } catch (ContainerStopNotFoundException $e)
         {
             return true;
