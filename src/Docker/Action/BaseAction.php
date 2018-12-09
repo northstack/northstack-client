@@ -31,8 +31,8 @@ abstract class BaseAction
     protected $stack;
 
     protected $watchOutput = true;
-    protected $handleSignals = true;
-    protected $stopContainerOnExit = true;
+    protected $handleSignals = false;
+    protected $stopContainerOnExit = false;
     protected $destroyContainerOnExit = false;
     protected $destroyExistingContainer = false;
     protected $stopExistingContainer = true;
@@ -59,10 +59,39 @@ abstract class BaseAction
     {
         try {
             $this->createContainer();
+            $outputStream = $this->attachOutput();
             $this->startContainer();
+            $this->followOutput($outputStream);
             $this->finish();
         } catch (\Exception $e) {
             throw DockerActionException::fromException($e);
+        }
+    }
+
+    protected function attachOutput()
+    {
+        if (!$this->watchOutput) {
+            return;
+        }
+
+        $stream = $this->docker->attachOutput($this->getContainerName());
+
+        return new DockerStreamHandler(
+            $stream,
+            $this->output,
+            $this->handleSignals
+        );
+    }
+
+    protected function followOutput($stream)
+    {
+        if (!$this->watchOutput) {
+            return;
+        }
+        $ret = $stream->watch();
+        if ($ret === $stream::$signaled) {
+            $this->output->writeln('');
+            $this->cleanup();
         }
     }
 
@@ -156,29 +185,7 @@ abstract class BaseAction
 
     protected function startContainer()
     {
-        $name = $this->getContainerName();
-
-        if ($this->watchOutput) {
-            $this->handleIO($this->docker->run($name));
-        } else {
-            $this->docker->runDetached($name);
-        }
-    }
-
-    protected function handleIO(AttachWebsocketStream $stream)
-    {
-        $handler = new DockerStreamHandler(
-            $stream,
-            $this->output,
-            true
-        );
-
-        $ret = $handler->watch();
-        if ($this->handleSignals && $ret === DockerStreamHandler::$signaled)
-        {
-            $this->output->writeln('');
-            $this->cleanup();
-        }
+        $this->docker->run($this->getContainerName());
     }
 
     protected function needsNewContainer()
