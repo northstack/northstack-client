@@ -3,7 +3,7 @@
 
 namespace NorthStack\NorthStackClient\Docker;
 
-use Docker\Stream\AttachWebsocketStream;
+use Docker\Stream\DockerRawStream;
 use Symfony\Component\Console\Output\OutputInterface;
 
 class DockerStreamHandler
@@ -14,11 +14,8 @@ class DockerStreamHandler
 
     public static $signaled = 3;
 
-    // controls how long we block on reading
-    protected $readTimeout = 1;
-
     public function __construct(
-        AttachWebsocketStream $stream,
+        DockerRawStream $stream,
         OutputInterface $output,
         $handleSigInt = false
     )
@@ -97,17 +94,12 @@ class DockerStreamHandler
 
     protected function watchInline()
     {
-        while (true)
-        {
-            $out = $this->stream->read($this->readTimeout);
-            if ($out === null) {
-                break;
-            } elseif ($out === false)
-            {
-                continue;
-            }
-
+        $handler = function($out) {
             $this->output->write($out);
-        }
+        };
+
+        $this->stream->onStdout($handler);
+        $this->stream->onStderr($handler);
+        $this->stream->wait();
     }
 }
