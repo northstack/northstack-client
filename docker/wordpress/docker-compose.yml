@@ -43,6 +43,8 @@ services:
       - mysql
     networks:
       northstack_local_dev: {}
+    labels:
+      com.northstack.localdev: 1
 
   nginx-unit:
     container_name: nginx-unit-php
@@ -65,6 +67,8 @@ services:
       - NORTHSTACK_GROUP
     networks:
       northstack_local_dev: {}
+    labels:
+      com.northstack.localdev: 1
 
   mysql:
     container_name: mysql
@@ -83,6 +87,8 @@ services:
       MYSQL_PASSWORD: password
     networks:
       northstack_local_dev: {}
+    labels:
+      com.northstack.localdev: 1
 
   mailcatcher:
     container_name: mailcatcher
@@ -94,3 +100,5 @@ services:
       MAILCATCHER_PORT: 1025
     networks:
       northstack_local_dev: {}
+    labels:
+      com.northstack.localdev: 1

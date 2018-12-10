@@ -11,7 +11,34 @@ cd $BDIR
 mkdir -p $PWD/.tmp
 tmp=$(mktemp --directory --tmpdir="$PWD/.tmp")
 
-cleanup() { echo "Removing $tmp"; rm -rf "$tmp"; }
+prune() {
+    local resource=$1
+    local filter=$2
+
+    docker "$resource" prune --force --filter="$filter"
+}
+
+cleanup() {
+    echo "Cleaning up docker resources"
+    local filter="label=com.northstack.localdev=1"
+
+    for c in $(docker container ls -a --filter="$filter" --format='{{ .Names }}'); do
+        echo "Stopping container: $c"
+        docker container stop -t 0 "$c"
+    done
+    docker container ls -a --filter="$filter"
+    prune container "$filter"
+
+    docker volume ls --filter="$filter"
+    prune volume "$filter"
+
+    docker network ls --filter="$filter"
+    prune network "$filter"
+
+    echo "Removing $tmp"
+    rm -rf "$tmp"
+}
+
 trap cleanup EXIT
 
 rsync -a "$PWD/tests/testdata/" "$tmp"

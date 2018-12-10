@@ -126,6 +126,7 @@ abstract class BaseAction
             ->setWorkingDir("/northstack/docker/{$this->stack}")
             ->setAttachStdout($this->watchOutput)
             ->setAttachStderr($this->watchOutput)
+            ->setLabels($this->getLabels())
         ;
         return $conf;
     }
@@ -173,7 +174,7 @@ abstract class BaseAction
         }
 
         $conf = $this->getContainerConfig();
-        $conf->setLabels($this->getVersionLabel());
+        $conf->setLabels($this->getLabels()->append($this->getVersionLabel()));
 
         $this->docker->createContainer(
             $this->getContainerName(),
@@ -216,6 +217,11 @@ abstract class BaseAction
     {
         $data = Container::allValues($this->getContainerConfig());
         return sha1(json_encode($data));
+    }
+
+    protected function getLabels()
+    {
+        return new \ArrayObject(['com.northstack.localdev' => 1]);
     }
 
     protected function getVersionLabel()
