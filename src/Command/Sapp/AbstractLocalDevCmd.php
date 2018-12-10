@@ -89,7 +89,6 @@ abstract class AbstractLocalDevCmd extends Command
             'APP_PUBLIC'           => getcwd() . '/app/public',
             'PRIMARY_DOMAIN'       => 'localhost',
             'COMPOSE_PROJECT_NAME' => $appName,
-            'COMPOSE_FILE'         => '../docker-compose.yml:docker-compose.yml',
 
             'NORTHSTACK_USER'   => $user,
             'NORTHSTACK_UID'    => $uid,
