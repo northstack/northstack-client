@@ -1,0 +1,11 @@
+{
+    "wordpress-install": {
+        "url": "mactest.com",
+        "title": "mactest",
+        "admin_user": "user@org.com",
+        "admin_pass": "29435deef48c7beb56267bfa2ce19ae1",
+        "admin_email": "user@org.com",
+        "multisite": false,
+        "subdomains": false
+    }
+}
