@@ -125,7 +125,7 @@ class DockerClient
     public function stop($name, $destroy = false, $timeout = 10)
     {
         try {
-            $this->docker->containerStop(
+            return $this->docker->containerStop(
                 $name,
                 ['t' => $timeout],
                 $this->docker::FETCH_RESPONSE
