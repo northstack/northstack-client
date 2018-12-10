@@ -40,7 +40,7 @@ class LocalDevLogsCommand extends AbstractLocalDevCmd
         parent::execute($input, $output);
 
 
-        $follow = $input->getOption('follow') ?: false;
+        $follow = $input->getOption('follow') ? true : false;
         $tail = $input->getOption('tail') ?: 'all';
         $action = $this->getAction();
 

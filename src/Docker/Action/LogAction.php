@@ -14,7 +14,7 @@ class LogAction extends BaseAction
     public function setFollow($follow)
     {
         $this->follow = $follow;
-        $this->handleSignals = !$follow;
+        $this->handleSignals = $follow;
         return $this;
     }
 
