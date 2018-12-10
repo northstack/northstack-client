@@ -26,7 +26,7 @@ cleanup() {
         echo "Stopping container: $c"
         docker container stop -t 0 "$c"
     done
-    docker container ls -a --filter="$filter"
+    docker container ls -a --filter="$filter" --format='{{ .Names }}'
     prune container "$filter"
 
     docker volume ls --filter="$filter"
@@ -43,12 +43,13 @@ trap cleanup EXIT
 
 rsync -a "$PWD/tests/testdata/" "$tmp"
 
-ns="$BDIR/bin/northstack"
+ns="$BDIR/bin/northstack -vvv"
 
 for app in $tmp/*; do
     echo "Testing $app"
     cd "$app"
-    $ns app:localdev:run config > docker-compose.yml
+    $ns app:localdev:run config | tee docker-compose.yml
+    sed -i -e "s|/northstack/docker/|$BDIR/docker/|g" docker-compose.yml
     $ns app:localdev:start -d
     ./run-stack-tests.sh
     $ns app:localdev:stop
