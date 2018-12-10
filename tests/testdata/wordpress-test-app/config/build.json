@@ -1,0 +1,8 @@
+{
+    "image": {
+        "name": "wordpress-php",
+        "version": "4.8"
+    },
+    "build-type": "builder",
+    "wordpress-version": "latest"
+}
