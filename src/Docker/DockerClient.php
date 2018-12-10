@@ -101,11 +101,7 @@ class DockerClient
 
     public function run($name)
     {
-        return $this->docker->containerStart(
-            $name,
-            [],
-            $this->docker::FETCH_RESPONSE
-        );
+        return $this->docker->containerStart($name);
     }
 
     public function attachOutput($name)
@@ -125,11 +121,7 @@ class DockerClient
     public function stop($name, $destroy = false, $timeout = 10)
     {
         try {
-            return $this->docker->containerStop(
-                $name,
-                ['t' => $timeout],
-                $this->docker::FETCH_RESPONSE
-            );
+            return $this->docker->containerStop($name, ['t' => $timeout]);
         } catch (ContainerStopNotFoundException $e)
         {
             return true;
