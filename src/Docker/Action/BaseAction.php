@@ -123,7 +123,7 @@ abstract class BaseAction
             ->setCmd($this->getCmd())
             ->setEnv($this->getEnv())
             ->setBindMounts($this->getMounts())
-            ->setWorkingDir("/northstack/docker/{$this->stack}")
+            ->setWorkingDir($this->getWorkingDir())
             ->setAttachStdout($this->watchOutput)
             ->setAttachStderr($this->watchOutput)
             ->setLabels($this->getLabels())
@@ -138,6 +138,7 @@ abstract class BaseAction
             [
                 'COMPOSE_ROOT=/northstack/docker',
                 "COMPOSE_ROOT_HOST={$lib}/docker",
+                "COMPOSE_FILE=docker-compose.yml:docker-compose-{$this->stack}.yml",
             ],
             $this->env
         );
@@ -146,6 +147,11 @@ abstract class BaseAction
     protected function getRoot()
     {
         return getenv('NS_LIB') ?: dirname(__DIR__, 3);
+    }
+
+    protected function getWorkingDir()
+    {
+        return '/northstack/docker';
     }
 
     protected function getMounts()
@@ -174,7 +180,12 @@ abstract class BaseAction
         }
 
         $conf = $this->getContainerConfig();
-        $conf->setLabels($this->getLabels()->append($this->getVersionLabel()));
+        $labels = $this->getLabels();
+        $labels->offsetSet(
+            self::$label,
+            $this->getContainerVersion()
+        );
+        $conf->setLabels($labels);
 
         $this->docker->createContainer(
             $this->getContainerName(),
@@ -221,15 +232,7 @@ abstract class BaseAction
 
     protected function getLabels()
     {
-        return new \ArrayObject(['com.northstack.localdev' => 1]);
-    }
-
-    protected function getVersionLabel()
-    {
-        $version = $this->getContainerVersion();
-        return new \ArrayObject([
-            self::$label => $version
-        ]);
+        return new \ArrayObject(['com.northstack.localdev' => '1']);
     }
 
     protected function getAction($name)
