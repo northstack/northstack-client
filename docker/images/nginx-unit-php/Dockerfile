@@ -103,6 +103,8 @@ COPY php.d /usr/local/etc/php/conf.d/
 
 WORKDIR /usr/local
 
+RUN apk add shadow
+
 COPY unit.json /unit.json.template
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 

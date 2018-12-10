@@ -58,8 +58,9 @@ services:
     healthcheck:
       test: 'curl -s -o /dev/null -D - --unix /var/run/control.unit.sock http://localhost/config'
       start_period: 5s
-    userns_mode: host
     environment:
+      - NORTHSTACK_UID
+      - NORTHSTACK_GID
       - NORTHSTACK_USER
       - NORTHSTACK_GROUP
     networks:
