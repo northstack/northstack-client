@@ -11,13 +11,17 @@ buildDockerImage .
 docker build \
     -t northstack-test \
     -f Dockerfile-test \
+    --build-arg NORTHSTACK_USER=$USER \
+    --build-arg NORTHSTACK_UID=$UID \
+    --build-arg NORTHSTACK_GROUP=$(id -gn) \
+    --build-arg NORTHSTACK_GID=$(id -g) \
+    --build-arg DOCKER_GROUP=$(stat /var/run/docker.sock --printf='%G') \
     .
 
 NS_PWD="$BDIR"
 mkdir -p "$BDIR/.tmp"
 
 docker run \
-    --rm \
     -it \
     -e DEBUG=$DEBUG \
     -e HOME=$HOME \
@@ -29,11 +33,7 @@ docker run \
     --volume "$NS_PWD:$NS_PWD" \
     --volume "$BDIR/.tmp:/app/.tmp" \
     --workdir "/app" \
-    --entrypoint /app/tests/run-all.sh \
     --user=$UID:$(id -g) \
-    --volume "/etc/passwd:/etc/passwd:ro" \
-    --volume "/etc/group:/etc/group:ro" \
-    --group-add="$(stat /var/run/docker.sock --printf='%G')" \
     --init \
-    northstack-test
-
+    northstack-test \
+    /app/tests/run-all.sh
