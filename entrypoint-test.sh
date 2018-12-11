@@ -35,9 +35,6 @@ useradd \
     --gid "$DOCKER_GID" \
     "$NORTHSTACK_USER"
 
-mkdir -p /app/.tmp
-chown "$NORTHSTACK_USER" /app/.tmp
-
 exec sudo \
     --preserve-env \
     --user "$NORTHSTACK_USER" \
