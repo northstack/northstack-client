@@ -2,6 +2,9 @@
 
 set -eu
 
+NET_ID=$(docker network ls --filter=label=com.docker.compose.network=northstack_local_dev --format '{{ .ID }}')
+NET_GW=$(docker network inspect "$NET_ID" --format '{{ json .IPAM.Config }}' | jq '.[0].Gateway' -r)
+
 fail() {
     local red=$'\e[1;91m'
     local end=$'\e[0m'
@@ -57,7 +60,7 @@ function assertHttp() {
     local uri=$1
     local status=${2:-200}
 
-    local req="http://localhost:8080${uri}"
+    local req="http://${NET_GW}:8080${uri}"
     local ret=$(curl -s -o /dev/null -w '%{http_code}' "$req")
 
     if [[ $? -ne 0 ]]; then
@@ -88,6 +91,7 @@ echo can we run wp-cli commands against the running docker container
 echo can we run wp-cli commands locally too
 {
     cd app/public
+    sed -i -e "s/127.0.0.1/${NET_GW}/g" wp-config.php
     wp @local plugin status
     cd -
 }
