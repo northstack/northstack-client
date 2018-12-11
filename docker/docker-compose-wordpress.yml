@@ -45,6 +45,9 @@ services:
       northstack_local_dev: {}
     labels:
       com.northstack.localdev: 1
+    healthcheck:
+      test: 'test -f index.php || exit 1'
+      start_period: 10s
 
   nginx-unit:
     container_name: nginx-unit-php
@@ -53,12 +56,10 @@ services:
       context: ./images/nginx-unit-php
     volumes:
       - "${APP_PUBLIC}:/app/public"
-      - "/etc/passwd:/etc/passwd:ro"
-      - "/etc/group:/etc/group:ro"
     depends_on:
       - wordpress-init
     healthcheck:
-      test: 'curl -s -o /dev/null -D - --unix /var/run/control.unit.sock http://localhost/config'
+      test: 'curl -s -o /dev/null -D - --unix /var/run/control.unit.sock http://localhost/config || exit 1'
       start_period: 5s
     environment:
       - NORTHSTACK_UID
@@ -89,6 +90,9 @@ services:
       northstack_local_dev: {}
     labels:
       com.northstack.localdev: 1
+    healthcheck:
+      test: 'mysql -u "wordpress" -p"password" "wordpress" -e "SELECT NOW();" || exit 1'
+      start_period: 5s
 
   mailcatcher:
     container_name: mailcatcher
