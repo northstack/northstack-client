@@ -22,5 +22,6 @@ services:
       northstack_local_dev: {}
     labels:
       com.northstack.localdev: 1
+      com.northstack.app.id: "${APP_ID}"
     healthcheck:
       test: 'wget -qO- http://localhost/nginx_status || exit 1'
