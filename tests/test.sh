@@ -30,6 +30,7 @@ docker build \
 
 NS_PWD="$BDIR"
 mkdir -p "$BDIR/.tmp"
+chmod 777 "$BDIR/.tmp"
 
 docker run \
     -it \
