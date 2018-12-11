@@ -78,6 +78,7 @@ abstract class AbstractLocalDevCmd extends Command
         $gid = posix_getegid();
         $group = posix_getgrgid($gid)['name'];
 
+        $pwd = getenv('NS_PWD') ?: getcwd();
         // TODO: let users configure some of this stuff via $APP_ROOT/config/localdev.json
         $vars = [
             'APP_NAME'             => $appName,
@@ -85,8 +86,8 @@ abstract class AbstractLocalDevCmd extends Command
             'STACK'                => $stack,
             'EXPOSE_HTTP_PORT'     => 8080,
             'EXPOSE_MYSQL_PORT'    => 3306,
-            'APP_ROOT'             => getcwd(),
-            'APP_PUBLIC'           => getcwd() . '/app/public',
+            'APP_ROOT'             => $pwd,
+            'APP_PUBLIC'           => $pwd . '/app/public',
             'PRIMARY_DOMAIN'       => 'localhost',
             'COMPOSE_PROJECT_NAME' => $appName,
 
