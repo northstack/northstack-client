@@ -72,3 +72,12 @@ echo we are overriding the siteurl correctly
     fi
     cd -
 }
+
+echo permalinks work
+{
+    cd app/public
+    wp @local rewrite structure '/%year%/%monthnum%/%postname%/'
+    url=$(wp @docker post list --post__in=1 --field=url)
+    url=${url/http:\/\/localhost:8080/}
+    checkHttp "$url" 200
+}
