@@ -2,7 +2,25 @@
 
 set -eu
 
-function awaitFile() {
+fail() {
+    local red=$'\e[1;91m'
+    local end=$'\e[0m'
+
+    local func=${FUNCNAME[1]}
+
+    printf "${red}${func} FAIL:${end} %s\n" "$@"
+}
+
+pass() {
+    local green=$'\e[1;32m'
+    local end=$'\e[0m'
+
+    local func=${FUNCNAME[1]}
+
+    printf "${green}${func} PASS:${end} %s\n" "$@"
+}
+
+function assertFile() {
     local file=$1
     local maxwait=${2:-20}
 
@@ -14,12 +32,28 @@ function awaitFile() {
     done
 
     if [[ ! -e $file ]]; then
-        echo "timeout reached waiting for $file"
+        fail "timeout reached waiting for $file"
         return 1
     fi
+
+    pass "$file exists"
 }
 
-function checkHttp() {
+function assertEqual() {
+    local left=$1
+    local right=$2
+
+    if [[ $left != $right ]]; then
+        fail "$left != $right"
+        return 1
+    fi
+
+    pass "$left == $right"
+    return 0
+}
+
+
+function assertHttp() {
     local uri=$1
     local status=${2:-200}
 
@@ -31,13 +65,13 @@ function checkHttp() {
         return $?
     fi
 
-    echo "Checked: $req"
-    echo "Expected: $status"
-    echo "Returned: $ret"
-    [[ $ret == $status ]] && echo success
+    assertEqual "$status" "$ret" && pass "$req returned $status"
 }
 
-awaitFile $PWD/app/public/index.php
+echo the app is instantiated
+{
+    assertFile $PWD/app/public/index.php
+}
 
 echo can we run docker-compose
 {
@@ -57,19 +91,18 @@ echo can we run wp-cli commands locally too
     wp @local plugin status
     cd -
 }
+
 echo is wordpress up and running?
 {
-    checkHttp /
-    checkHttp /wp-login.php
+    assertHttp /
+    assertHttp /wp-login.php
 }
 
 echo we are overriding the siteurl correctly
 {
     cd app/public
     url=$(wp @docker option get siteurl)
-    if [[ $url != http://localhost:8080 ]]; then
-        echo "Bad siteurl: $url"
-    fi
+    assertEqual "http://localhost:8080" "$url"
     cd -
 }
 
@@ -79,5 +112,11 @@ echo permalinks work
     wp @local rewrite structure '/%year%/%monthnum%/%postname%/'
     url=$(wp @docker post list --post__in=1 --field=url)
     url=${url/http:\/\/localhost:8080/}
-    checkHttp "$url" 200
+    assertHttp "$url" 200
+    cd -
+}
+
+echo my user name is intact
+{
+    assertEqual "$NORTHSTACK_USER" "$(id -un)"
 }

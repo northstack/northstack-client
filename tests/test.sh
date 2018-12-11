@@ -10,15 +10,22 @@ source "$BDIR/bin/lib.sh"
 
 buildDockerImage .
 
+user=$USER
+uid=$UID
+group=$(id -gn)
+gid=$(id -g)
+docker_group=$(stat /var/run/docker.sock --printf='%G') \
+docker_gid=$(stat /var/run/docker.sock --printf='%g') \
+
 docker build \
     -t northstack-test \
     -f Dockerfile-test \
-    --build-arg NORTHSTACK_USER=$USER \
-    --build-arg NORTHSTACK_UID=$UID \
-    --build-arg NORTHSTACK_GROUP=$(id -gn) \
-    --build-arg NORTHSTACK_GID=$(id -g) \
-    --build-arg DOCKER_GROUP=$(stat /var/run/docker.sock --printf='%G') \
-    --build-arg DOCKER_GID=$(stat /var/run/docker.sock --printf='%g') \
+    --build-arg NORTHSTACK_USER=$user \
+    --build-arg NORTHSTACK_UID=$uid \
+    --build-arg NORTHSTACK_GROUP=$group \
+    --build-arg NORTHSTACK_GID=$gid \
+    --build-arg DOCKER_GROUP=$docker_group \
+    --build-arg DOCKER_GID=$docker_gid \
     .
 
 NS_PWD="$BDIR"
@@ -31,12 +38,17 @@ docker run \
     -e NS_PWD="$NS_PWD" \
     -e NS_LIB="$BDIR" \
     -e PAUSE=$PAUSE \
+    -e NORTHSTACK_USER=$user \
+    -e NORTHSTACK_UID=$uid \
+    -e NORTHSTACK_GROUP=$group \
+    -e NORTHSTACK_GID=$gid \
+    -e DOCKER_GROUP=$docker_group \
+    -e DOCKER_GID=$docker_gid \
     --network host \
     --volume /var/run/docker.sock:/var/run/docker.sock \
     --volume "$NS_PWD:$NS_PWD" \
     --volume "$BDIR/.tmp:/app/.tmp" \
     --workdir "/app" \
-    --user=$UID:$(stat /var/run/docker.sock --printf='%g') \
     --init \
     northstack-test \
     /app/tests/run-all.sh

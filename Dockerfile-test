@@ -9,6 +9,7 @@ RUN apk add \
         py-pip \
         mysql-client \
         shadow \
+        sudo \
     && curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
         && chmod +x wp-cli.phar \
         && mv wp-cli.phar /usr/local/bin/wp \
@@ -24,23 +25,5 @@ ARG NORTHSTACK_GID
 ARG DOCKER_GROUP
 ARG DOCKER_GID
 
-RUN set -u && \
-    if getent group "$NORTHSTACK_GID" > /dev/null; then \
-        grp=$(getent group "$NORTHSTACK_GID" | cut -d: -f 1); \
-        groupdel -f "$grp"; \
-    fi \
-    && groupadd \
-        --force \
-        --gid "$NORTHSTACK_GID" \
-        "$NORTHSTACK_GROUP" \
-    && useradd \
-        --uid "$NORTHSTACK_UID" \
-        --no-create-home \
-        --key MAIL_DIR=/tmp \
-        --gid "$DOCKER_GID" \
-        --no-user-group \
-        "$NORTHSTACK_USER"
-#    && chgrp "$DOCKER_GROUP" "$(which docker)" \
-#    && chmod 2755 "$(which docker)"
-
-ENTRYPOINT ["/bin/sh", "-c"]
+COPY entrypoint-test.sh /entrypoint.sh
+ENTRYPOINT ["/entrypoint.sh"]
