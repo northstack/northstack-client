@@ -17,7 +17,7 @@ services:
       - STACK
       - EXPOSE_HTTP_PORT
 
-  wordpress-init:
+  wordpress:
     build:
       context: ./images/wordpress
     volumes:
@@ -39,6 +39,7 @@ services:
       WORDPRESS_DB_USER: wordpress
       WORDPRESS_DB_NAME: wordpress
       WORDPRESS_DB_PASSWORD: password
+      EXPOSE_MYSQL_PORT: ${EXPOSE_MYSQL_PORT}
     depends_on:
       - mysql
     networks:
@@ -57,7 +58,7 @@ services:
     volumes:
       - "${APP_PUBLIC}:/app/public"
     depends_on:
-      - wordpress-init
+      - wordpress
     healthcheck:
       test: 'curl -s -o /dev/null -D - --unix /var/run/control.unit.sock http://localhost/config || exit 1'
       start_period: 5s
@@ -66,6 +67,7 @@ services:
       - NORTHSTACK_GID
       - NORTHSTACK_USER
       - NORTHSTACK_GROUP
+      - WORDPRESS_DB_HOST=mysql
     networks:
       northstack_local_dev: {}
     labels:

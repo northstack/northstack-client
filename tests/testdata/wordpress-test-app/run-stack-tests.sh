@@ -44,13 +44,19 @@ echo can we run docker-compose
     docker-compose ps
 }
 
-#echo can we run a wp-cli command
-#{
-#    cd app/public
-#    wp plugin status
-#    cd -
-#}
+echo can we run wp-cli commands against the running docker container
+{
+    cd app/public
+    wp @docker plugin status
+    cd -
+}
 
+echo can we run wp-cli commands locally too
+{
+    cd app/public
+    wp @local plugin status
+    cd -
+}
 echo is wordpress up and running?
 {
     checkHttp /

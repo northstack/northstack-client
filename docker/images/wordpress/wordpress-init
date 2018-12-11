@@ -10,16 +10,20 @@ else
 fi
 
 if [[ ! -e wp-config.php ]]; then
+    echo "Creating wp-config file"
     wp config create \
         --dbname="$WORDPRESS_DB_NAME" \
         --dbuser="$WORDPRESS_DB_USER" \
         --dbpass="$WORDPRESS_DB_PASSWORD" \
         --dbhost="$WORDPRESS_DB_HOST"
+
+    wp config set --raw DB_HOST "getenv('WORDPRESS_DB_HOST') ?: '127.0.0.1:$EXPOSE_MYSQL_PORT'"
 fi
 
 if wp core is-installed ; then
     echo "WordPress is already installed"
 else
+    echo "Installing WordPress"
     wp core install \
         --url="$WORDPRESS_URL" \
         --title="$WORDPRESS_TITLE" \
@@ -53,7 +57,10 @@ echo "Creating wp-cli config file"
 # want wp-cli to use it when we're running in docker
 cat << EOF > /APP_ROOT/app/wp-cli.yml
 ---
-ssh: "docker:$(hostname)"
+@docker:
+  ssh: "docker:$(hostname)"
+@local:
+  ssh: ~
 
 EOF
 
