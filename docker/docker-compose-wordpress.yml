@@ -11,7 +11,7 @@ volumes:
 services:
   web:
     depends_on:
-      - nginx-unit
+      - nginx-unit-php
     environment:
       - PRIMARY_DOMAIN
       - STACK
@@ -50,10 +50,10 @@ services:
       com.northstack.app.id: "${APP_ID}"
     healthcheck:
       test: 'test -f index.php || exit 1'
-      start_period: 10s
+      start_period: 5s
+      interval: 5s
 
-  nginx-unit:
-    container_name: nginx-unit-php
+  nginx-unit-php:
     image: nginx-unit-php
     build:
       context: ./images/nginx-unit-php
@@ -64,6 +64,7 @@ services:
     healthcheck:
       test: 'curl -s -o /dev/null -D - --unix /var/run/control.unit.sock http://localhost/config || exit 1'
       start_period: 5s
+      interval: 5s
     environment:
       - NORTHSTACK_UID
       - NORTHSTACK_GID
@@ -72,13 +73,14 @@ services:
       - WORDPRESS_DB_HOST=mysql
       - EXPOSE_HTTP_PORT
     networks:
-      northstack_local_dev: {}
+      northstack_local_dev:
+        aliases:
+          - nginx-unit-php
     labels:
       com.northstack.localdev: 1
       com.northstack.app.id: "${APP_ID}"
 
   mysql:
-    container_name: mysql
     image: mysql:5
     volumes:
       - type: volume
@@ -93,10 +95,13 @@ services:
       MYSQL_USER: wordpress
       MYSQL_PASSWORD: password
     networks:
-      northstack_local_dev: {}
+      northstack_local_dev:
+        aliases:
+          - mysql
     labels:
       com.northstack.localdev: 1
       com.northstack.app.id: "${APP_ID}"
     healthcheck:
       test: 'mysql -u "wordpress" -p"password" "wordpress" -e "SELECT NOW();" || exit 1'
       start_period: 5s
+      interval: 5s

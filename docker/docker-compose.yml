@@ -25,3 +25,5 @@ services:
       com.northstack.app.id: "${APP_ID}"
     healthcheck:
       test: 'wget -qO- http://localhost/nginx_status || exit 1'
+      interval: 1s
+      start_period: 5s
