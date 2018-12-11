@@ -5,12 +5,13 @@ RUN apk add \
         jq \
         rsync \
         docker \
-        bash
-
-RUN curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
-    && chmod +x wp-cli.phar \
-    && mv wp-cli.phar /usr/local/bin/wp
-
-ARG UID
-ARG GID
-RUN set -u && chown -R "$UID:$GID" /app
+        bash \
+        py-pip \
+        mysql-client \
+    && curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
+        && chmod +x wp-cli.phar \
+        && mv wp-cli.phar /usr/local/bin/wp \
+    && pip install docker-compose \
+    && docker-php-ext-install \
+        mysqli \
+        pdo_mysql
