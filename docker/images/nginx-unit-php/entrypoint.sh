@@ -19,6 +19,7 @@ echo "Adding user $NORTHSTACK_USER"
 useradd \
     --uid "$NORTHSTACK_UID" \
     --no-create-home \
+    --key MAIL_DIR=/tmp \
     --gid "$NORTHSTACK_GID" \
     "$NORTHSTACK_USER"
 
@@ -36,6 +37,7 @@ max=10
 tries=0
 while [[ ! -f $waitFor ]] && [[ $tries -lt $max ]]; do
     sleep 1
+    tries=$(( tries + 1))
 done
 
 [[ -f $waitFor ]] || {
