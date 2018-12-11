@@ -93,16 +93,3 @@ services:
     healthcheck:
       test: 'mysql -u "wordpress" -p"password" "wordpress" -e "SELECT NOW();" || exit 1'
       start_period: 5s
-
-  mailcatcher:
-    container_name: mailcatcher
-    image: schickling/mailcatcher
-    ports:
-      - "1025:1025"
-      - "1080:1080"
-    environment:
-      MAILCATCHER_PORT: 1025
-    networks:
-      northstack_local_dev: {}
-    labels:
-      com.northstack.localdev: 1
