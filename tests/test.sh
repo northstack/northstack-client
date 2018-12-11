@@ -8,7 +8,12 @@ cd $BDIR
 export DEBUG=1
 source "$BDIR/bin/lib.sh"
 buildDockerImage .
-docker build -t northstack-test -f Dockerfile-test .
+docker build \
+    -t northstack-test \
+    -f Dockerfile-test \
+    --build-arg UID="$UID" \
+    --build-arg GID="$(id -g)" \
+    .
 
 NS_PWD="$BDIR"
 
