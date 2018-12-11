@@ -7,7 +7,9 @@ cd $BDIR
 
 export DEBUG=1
 source "$BDIR/bin/lib.sh"
+
 buildDockerImage .
+
 docker build \
     -t northstack-test \
     -f Dockerfile-test \
@@ -16,6 +18,7 @@ docker build \
     --build-arg NORTHSTACK_GROUP=$(id -gn) \
     --build-arg NORTHSTACK_GID=$(id -g) \
     --build-arg DOCKER_GROUP=$(stat /var/run/docker.sock --printf='%G') \
+    --build-arg DOCKER_GID=$(stat /var/run/docker.sock --printf='%g') \
     .
 
 NS_PWD="$BDIR"
@@ -33,8 +36,7 @@ docker run \
     --volume "$NS_PWD:$NS_PWD" \
     --volume "$BDIR/.tmp:/app/.tmp" \
     --workdir "/app" \
-    --user=$UID:$(id -g) \
-    --userns=host \
+    --user=$UID:$(stat /var/run/docker.sock --printf='%g') \
     --init \
     northstack-test \
     /app/tests/run-all.sh
