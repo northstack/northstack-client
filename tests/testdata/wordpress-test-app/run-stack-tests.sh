@@ -63,3 +63,12 @@ echo is wordpress up and running?
     checkHttp /wp-login.php
 }
 
+echo we are overriding the siteurl correctly
+{
+    cd app/public
+    url=$(wp @docker option get siteurl)
+    if [[ $url != http://localhost:8080 ]]; then
+        echo "Bad siteurl: $url"
+    fi
+    cd -
+}
