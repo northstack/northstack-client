@@ -48,9 +48,12 @@ ns="$BDIR/bin/northstack -vvv"
 for app in $tmp/*; do
     echo "Testing $app"
     cd "$app"
-    $ns app:localdev:run config | tee docker-compose.yml
-    sed -i -e "s|/northstack/docker/|$BDIR/docker/|g" docker-compose.yml
+    $ns app:localdev:run build
+    $ns app:localdev:run config > docker-compose.yml
+    sed -e "s|/northstack/docker/|$BDIR/docker/|g" -i -- docker-compose.yml
     $ns app:localdev:start -d
+    echo "Running stack-specific tests in: $app"
+    sleep 300
     ./run-stack-tests.sh
     $ns app:localdev:stop
     cd -
