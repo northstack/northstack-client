@@ -23,7 +23,6 @@ docker run \
     --volume /var/run/docker.sock:/var/run/docker.sock \
     --volume "$NS_PWD:$NS_PWD" \
     --volume "$HOME:$HOME" \
-    --volume "$BDIR:/app" \
     --entrypoint /app/tests/run-all.sh \
     --user=$UID:$(id -g) \
     --volume "/etc/passwd:/etc/passwd:ro" \
