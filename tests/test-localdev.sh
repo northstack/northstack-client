@@ -7,9 +7,10 @@ cd $BDIR
 
 . ./bin/lib.sh
 
+NS_PWD=${NS_PWD:-$BDIR}
 
 mkdir -p $PWD/.tmp
-tmp=$(mktemp --directory --tmpdir="$PWD/.tmp")
+tmp=$(mktemp -d -p "$PWD/.tmp")
 
 prune() {
     local resource=$1
@@ -59,6 +60,7 @@ checkContainer() {
             echo
             echo "Reached timeout waiting for container to be up and healthy"
             echo "ID: $id, Status: $status, Health: $health"
+            docker container logs "$id"
             exit 1
         fi
         sleep 1
@@ -78,18 +80,26 @@ checkServices() {
 
 rsync -a "$PWD/tests/testdata/" "$tmp"
 
-ns="$BDIR/bin/northstack -vvv"
+ns="$BDIR/bin/northstack -vvv "
 
 for app in $tmp/*; do
     cd "$app"
+
+    tmpdir=$(basename "$tmp")
+    appdir=$(basename "$app")
+    export NS_PWD="${NS_PWD}/.tmp/$tmpdir/$appdir"
 
     appId=$(jq -r .prod < config/environment.json)
     echo "Testing $app $appId"
 
     $ns app:localdev:run build
-    $ns app:localdev:run config > docker-compose.yml
+    $ns app:localdev:run config | tee docker-compose.yml
     sed -e "s|/northstack/docker/|$BDIR/docker/|g" -i -- docker-compose.yml
     $ns app:localdev:start -d
+
+    if [[ ${PAUSE:-0} == 1 ]]; then
+        read -n1 -r -p "Press space to continue..." key
+    fi
 
     echo "Validating that services are up and running"
     checkServices "$appId"
