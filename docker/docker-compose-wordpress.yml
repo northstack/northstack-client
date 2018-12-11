@@ -40,6 +40,7 @@ services:
       WORDPRESS_DB_NAME: wordpress
       WORDPRESS_DB_PASSWORD: password
       EXPOSE_MYSQL_PORT: ${EXPOSE_MYSQL_PORT}
+      EXPOSE_HTTP_PORT: ${EXPOSE_HTTP_PORT}
     depends_on:
       - mysql
     networks:
@@ -68,6 +69,7 @@ services:
       - NORTHSTACK_USER
       - NORTHSTACK_GROUP
       - WORDPRESS_DB_HOST=mysql
+      - EXPOSE_HTTP_PORT
     networks:
       northstack_local_dev: {}
     labels:

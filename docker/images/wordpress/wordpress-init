@@ -11,11 +11,18 @@ fi
 
 if [[ ! -e wp-config.php ]]; then
     echo "Creating wp-config file"
+
+    cp /wp-config-overrides.php wp-config-overrides.php
+
     wp config create \
         --dbname="$WORDPRESS_DB_NAME" \
         --dbuser="$WORDPRESS_DB_USER" \
         --dbpass="$WORDPRESS_DB_PASSWORD" \
-        --dbhost="$WORDPRESS_DB_HOST"
+        --dbhost="$WORDPRESS_DB_HOST" \
+        --extra-php \
+<< EOF
+include __DIR__ . '/wp-config-overrides.php';
+EOF
 
     wp config set --raw DB_HOST "getenv('WORDPRESS_DB_HOST') ?: '127.0.0.1:$EXPOSE_MYSQL_PORT'"
 fi
