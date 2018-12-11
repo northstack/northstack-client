@@ -7,6 +7,22 @@ cd $BDIR
 
 . ./bin/lib.sh
 
+
+sock=$(dockerSocket)
+
+echo current user info:
+echo username $(id -un)
+echo uid $(id -u)
+echo group $(id -gn)
+echo gid $(id -g)
+echo extra groups $(id -Gn)
+echo extra group ids $(id -G)
+
+stat "$sock"
+
+checkDocker
+
+
 NS_LIB=${NS_LIB:-$BDIR}
 NS_PWD=${NS_PWD:-$BDIR}
 
