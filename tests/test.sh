@@ -34,6 +34,7 @@ docker run \
     --volume "$BDIR/.tmp:/app/.tmp" \
     --workdir "/app" \
     --user=$UID:$(id -g) \
+    --userns=host \
     --init \
     northstack-test \
     /app/tests/run-all.sh
