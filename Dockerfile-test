@@ -40,4 +40,4 @@ RUN set -u && \
         --groups "$DOCKER_GROUP" \
         "$NORTHSTACK_USER"
 
-ENTRYPOINT ["/usr/bin/sg", "docker", "-c"]
+ENTRYPOINT ["/bin/sh", "-c"]
