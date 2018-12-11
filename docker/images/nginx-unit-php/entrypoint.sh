@@ -2,12 +2,20 @@
 
 set -eu
 
+
+if getent group "$NORTHSTACK_GID" > /dev/null; then
+    grp=$(getent group "$NORTHSTACK_GID" | cut -d: -f 1)
+    echo "Remvoing duplicate group $grp with gid $NORTHSTACK_GID"
+    groupdel -f "$grp"
+fi
+
+echo "Adding group $NORTHSTACK_GROUP"
 groupadd \
     --force \
-    --non-unique \
     --gid "$NORTHSTACK_GID" \
     "$NORTHSTACK_GROUP"
 
+echo "Adding user $NORTHSTACK_USER"
 useradd \
     --uid "$NORTHSTACK_UID" \
     --no-create-home \
@@ -21,5 +29,18 @@ sed \
 > /usr/local/unit-state/conf.json
 
 cat /usr/local/unit-state/conf.json
+
+
+waitFor=/app/public/index.php
+max=10
+tries=0
+while [[ ! -f $waitFor ]] && [[ $tries -lt $max ]]; do
+    sleep 1
+done
+
+[[ -f $waitFor ]] || {
+    echo "Timeout reached waiting for file to exist: $waitFor"
+    exit 1;
+}
 
 exec "$@"
