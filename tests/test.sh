@@ -47,7 +47,6 @@ docker run \
     --volume /var/run/docker.sock:/var/run/docker.sock \
     --volume "$NS_PWD:$NS_PWD" \
     --volume "$BDIR/.tmp:/app/.tmp" \
-    --volume "$BDIR/tests:/app/tests" \
     --workdir "/app" \
     --init \
     northstack-test \
