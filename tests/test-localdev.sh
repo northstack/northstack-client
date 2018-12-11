@@ -7,10 +7,11 @@ cd $BDIR
 
 . ./bin/lib.sh
 
+NS_LIB=${NS_LIB:-$BDIR}
 NS_PWD=${NS_PWD:-$BDIR}
 
-mkdir -p $PWD/.tmp
-tmp=$(mktemp -d -p "$PWD/.tmp")
+mkdir -p $BDIR/.tmp
+tmp=$(mktemp -d -p "$BDIR/.tmp")
 
 prune() {
     local resource=$1
@@ -78,7 +79,7 @@ checkServices() {
     done
 }
 
-rsync -a "$PWD/tests/testdata/" "$tmp"
+rsync -av "$BDIR/tests/testdata/" "$tmp"
 
 ns="$BDIR/bin/northstack -vvv "
 
@@ -94,7 +95,8 @@ for app in $tmp/*; do
 
     $ns app:localdev:run build
     $ns app:localdev:run config | tee docker-compose.yml
-    sed -e "s|/northstack/docker/|$BDIR/docker/|g" -i -- docker-compose.yml
+    sed -e "s|/northstack/docker/|$NS_LIB/docker/|g" -i -- docker-compose.yml
+    sed -e "s|/app/docker/|$NS_LIB/docker/|g" -i -- docker-compose.yml
     $ns app:localdev:start -d
 
     if [[ ${PAUSE:-0} == 1 ]]; then

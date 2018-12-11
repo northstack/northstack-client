@@ -11,11 +11,10 @@ buildDockerImage .
 docker build \
     -t northstack-test \
     -f Dockerfile-test \
-    --build-arg UID="$UID" \
-    --build-arg GID="$(id -g)" \
     .
 
 NS_PWD="$BDIR"
+mkdir -p "$BDIR/.tmp"
 
 docker run \
     --rm \
@@ -25,9 +24,11 @@ docker run \
     -e NS_PWD="$NS_PWD" \
     -e NS_LIB="$BDIR" \
     -e PAUSE=$PAUSE \
+    --network host \
     --volume /var/run/docker.sock:/var/run/docker.sock \
     --volume "$NS_PWD:$NS_PWD" \
-    --volume "$HOME:$HOME" \
+    --volume "$BDIR/.tmp:/app/.tmp" \
+    --workdir "/app" \
     --entrypoint /app/tests/run-all.sh \
     --user=$UID:$(id -g) \
     --volume "/etc/passwd:/etc/passwd:ro" \
