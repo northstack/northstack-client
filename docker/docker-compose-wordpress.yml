@@ -48,6 +48,7 @@ services:
     labels:
       com.northstack.localdev: 1
       com.northstack.app.id: "${APP_ID}"
+      com.northstack.localdev.role: web
     healthcheck:
       test: 'test -f index.php || exit 1'
       start_period: 5s
@@ -79,6 +80,7 @@ services:
     labels:
       com.northstack.localdev: 1
       com.northstack.app.id: "${APP_ID}"
+      com.northstack.localdev.role: nginx-unit
 
   mysql:
     image: mysql:5
@@ -101,6 +103,7 @@ services:
     labels:
       com.northstack.localdev: 1
       com.northstack.app.id: "${APP_ID}"
+      com.northstack.localdev.role: mysql
     healthcheck:
       test: 'mysql -u "wordpress" -p"password" "wordpress" -e "SELECT NOW();" || exit 1'
       start_period: 5s
