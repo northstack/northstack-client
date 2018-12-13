@@ -83,4 +83,21 @@ class OrgsClient extends BaseApiClient
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
             ->get("/orgs");
     }
+
+    // 2fa
+    public function requestTwoFactor(string $accessToken, string $orgUserId, string $phone)
+    {
+        return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
+            ->get("/orgs/user/{$orgUserId}/2fa", [
+                'query' => ['phone' => $phone],
+            ]);
+    }
+
+    public function enableTwoFactor(string $accessToken, string $orgUserId, string $code)
+    {
+        return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
+            ->post("/orgs/user/{$orgUserId}/2fa", [
+                'json' => ['code' => $code],
+            ]);
+    }
 }
