@@ -1,10 +1,6 @@
 #!/usr/bin/env bash
 
 set -eu
-
-NET_ID=$(docker network ls --filter=label=com.docker.compose.network=northstack_local_dev --format '{{ .ID }}')
-NET_GW=$(docker network inspect "$NET_ID" --format '{{ json .IPAM.Config }}' | jq '.[0].Gateway' -r)
-
 fail() {
     local red=$'\e[1;91m'
     local end=$'\e[0m'
@@ -71,9 +67,51 @@ function assertHttp() {
     assertEqual "$status" "$ret" && pass "$req returned $status"
 }
 
+function appId() {
+    jq -r .prod < config/environment.json
+}
+
+function setMySQLIP() {
+    local app=$(appId)
+    local mysqlId=$(docker container ls \
+        --filter "label=com.northstack.app.id=$app" \
+        --filter "label=com.northstack.localdev.role=mysql" \
+        --format '{{ .ID }}')
+
+    local longId=$(docker container inspect "$mysqlId" --format '{{ .ID }}')
+    docker network connect bridge "$mysqlId"
+
+    local cidr=$(docker network inspect bridge --format '{{ json .Containers }}' | jq -r --arg c "$longId" '.[$c].IPv4Address')
+
+    MYSQL_IP=${cidr%/*}
+}
+
+function sed_i() {
+    if [[ $OSTYPE =~ darwin ]]; then
+        sed -i '' $@
+    else
+        sed -i'' $@
+    fi
+}
+
+patch_env_for_docker() {
+    if [[ ${RUNNING_IN_DOCKER:-0} == 1 ]]; then
+        setMySQLIP
+        NET_ID=$(docker network ls --filter=label=com.docker.compose.network=northstack_local_dev --format '{{ .ID }}')
+        NET_GW=$(docker network inspect "$NET_ID" --format '{{ json .IPAM.Config }}' | jq '.[0].Gateway' -r)
+        NORTHSTACK_USER=$NORTHSTACK_USER
+    else
+        MYSQL_IP=127.0.0.1
+        NET_GW=127.0.0.1
+        NORTHSTACK_USER=$(id -un)
+    fi
+}
+
+patch_env_for_docker
+
 echo the app is instantiated
 {
-    assertFile $PWD/app/public/index.php
+    assertFile ./app/wp-cli.yml
 }
 
 echo can we run docker-compose
@@ -91,7 +129,7 @@ echo can we run wp-cli commands against the running docker container
 echo can we run wp-cli commands locally too
 {
     cd app/public
-    sed -i -e "s/127.0.0.1/${NET_GW}/g" wp-config.php
+    sed_i -e "s/127.0.0.1/${MYSQL_IP}/g" wp-config.php
     wp @local plugin status
     cd -
 }
@@ -122,5 +160,6 @@ echo permalinks work
 
 echo my user name is intact
 {
-    assertEqual "$NORTHSTACK_USER" "$(id -un)"
+    userInDocker=$(docker-compose exec wordpress id -un)
+    assertEqual "$NORTHSTACK_USER" "$userInDocker"
 }
