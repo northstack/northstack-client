@@ -5,6 +5,7 @@ networks:
   northstack_local_dev:
     labels:
       com.northstack.localdev: 1
+      com.northstack.app.id: "${APP_ID}"
 
 services:
   web:
@@ -23,6 +24,7 @@ services:
     labels:
       com.northstack.localdev: 1
       com.northstack.app.id: "${APP_ID}"
+      com.northstack.localdev.role: web
     healthcheck:
       test: 'wget -qO- http://localhost/nginx_status || exit 1'
       interval: 1s
