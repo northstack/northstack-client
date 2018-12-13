@@ -2,7 +2,6 @@
 namespace NorthStack\NorthStackClient\Command\Auth;
 
 use NorthStack\NorthStackClient\API\Orgs\OrgsClient;
-use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\API\AuthApi;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -46,6 +45,8 @@ class LoginCommand extends AbstractAuthCmd
             $this->api->setDebug(true);
         }
 
+        $helper = $this->getHelper('question');
+
         $username = $input->getArgument('username');
         if (empty($username))
         {
@@ -58,7 +59,6 @@ class LoginCommand extends AbstractAuthCmd
                     return $answer;
                 })
                 ->setMaxAttempts(3);
-            $helper = $this->getHelper('question');
             $username = $helper->ask($input, $output, $question);
         }
 
@@ -73,8 +73,10 @@ class LoginCommand extends AbstractAuthCmd
             })
             ->setMaxAttempts(3);
 
-        $helper = $this->getHelper('question');
         $password = $helper->ask($input, $output, $question);
+
+        $question = new Question('Two Factor Code (if enabled): ');
+        $mfa = $helper->ask($input, $output, $question);
 
         $this->api->setResponseHandler(401,
             function (ResponseInterface $response) use ($output) {
@@ -88,7 +90,7 @@ class LoginCommand extends AbstractAuthCmd
         $r = $this->api->login(
             $username,
             $password,
-            null,
+            $mfa ?: null,
             $input->getOption('scope'),
             'org'
         );
