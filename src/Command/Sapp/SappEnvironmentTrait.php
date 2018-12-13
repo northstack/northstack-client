@@ -61,7 +61,7 @@ trait SappEnvironmentTrait
 
         // the gateway file doesn't have to exist at all
         if (file_exists("{$appFolder}/config/gateway.json")) {
-            $configs['gateway.json'] = file_get_contents("{$appFolder}/config/gateway.json");
+            $configs['gateway'] = file_get_contents("{$appFolder}/config/gateway.json");
         }
 
         foreach ($configs as $file => $json) {

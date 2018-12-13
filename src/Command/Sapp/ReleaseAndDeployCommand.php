@@ -52,18 +52,18 @@ class ReleaseAndDeployCommand extends AbstractDeployCmd
         $environment = $input->getArgument('environment');
         $configs = $this->mergeConfigs($appFolder, $environment);
 
-        $appType = json_decode($configs['config.json'])->{'app-type'};
+        $appType = json_decode($configs['config'])->{'app-type'};
 
         // update configs
         $output->writeln('Updating Sapp configs...');
         $update = [
-            'configBuild' => $configs['build.json'],
-            'domains' => $configs['domains.json'],
-            'config' => $configs['config.json'],
+            'configBuild' => $configs['build'],
+            'domains' => $configs['domains'],
+            'config' => $configs['config'],
         ];
         // Since gateway configs are optional...
-        if (isset($configs['gateway.json'])) {
-            $update['gateway'] = $configs['gateway.json'];
+        if (isset($configs['gateway'])) {
+            $update['configGatewayCust'] = $configs['gateway'];
         }
         $this->sappClient->update($this->token->token, $sappId, $update);
 
