@@ -95,6 +95,13 @@ checkServices() {
     done
 }
 
+sed_i() {
+    if [[ $OSTYPE =~ darwin ]]; then
+        sed -i '' $@
+    else
+        sed -i'' $@
+    fi
+}
 rsync -av "$BDIR/tests/testdata/" "$tmp"
 
 ns="$BDIR/bin/northstack -vvv "
@@ -111,8 +118,8 @@ for app in $tmp/*; do
 
     $ns app:localdev:run build
     $ns app:localdev:run config | tee docker-compose.yml
-    sed -e "s|/northstack/docker/|$NS_LIB/docker/|g" -i -- docker-compose.yml
-    sed -e "s|/app/docker/|$NS_LIB/docker/|g" -i -- docker-compose.yml
+    sed_i -e "s|/northstack/docker/|$NS_LIB/docker/|g" docker-compose.yml
+    sed_i -e "s|/app/docker/|$NS_LIB/docker/|g" docker-compose.yml
     $ns app:localdev:start -d
 
     if [[ ${PAUSE:-0} == 1 ]]; then
