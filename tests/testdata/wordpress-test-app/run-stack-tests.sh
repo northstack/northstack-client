@@ -39,11 +39,18 @@ function assertFile() {
 }
 
 function assertEqual() {
-    local left=$1
-    local right=$2
+    left=$1
+    right=$2
+    local trim=${3:-1}
+
+    if [[ $trim == 1 ]]; then
+        trim left
+        trim right
+    fi
 
     if [[ $left != $right ]]; then
-        fail "$left != $right"
+        local msg=$(printf "'%s' != '%s'\n" "$left" "$right")
+        fail "$msg"
         return 1
     fi
 
@@ -105,6 +112,26 @@ patch_env_for_docker() {
         NET_GW=127.0.0.1
         NORTHSTACK_USER=$(id -un)
     fi
+}
+
+trim() {
+    local name=$1
+    local var=${!name}
+    while true; do
+        local len=${#var}
+        var=${var##$'\r'}
+        var=${var%%$'\r'}
+        var=${var##$'\n'}
+        var=${var%%$'\n'}
+        var=${var##$'\t'}
+        var=${var%%$'\t'}
+        var=${var## }
+        var=${var%% }
+        if [[ $len -eq ${#var} ]]; then
+            break
+        fi
+    done
+    printf -v "$name" "%s" "$var"
 }
 
 patch_env_for_docker
