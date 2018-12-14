@@ -29,9 +29,9 @@ class ListCommand extends Command
         parent::__construct($name);
         $this
             ->setDescription('List Sapp Secrets')
-            ->addArgument('sappName', InputArgument::REQUIRED)
-            ->addArgument('environment', InputArgument::OPTIONAL, 'dev')
+            ->addArgument('environment', InputArgument::OPTIONAL, 'Environment', 'dev')
             ->addOption('show', null, InputOption::VALUE_NONE, 'Show Secret Values')
+            ->addOauthOptions()
         ;
 
         $this->setecAstronomy = $setecAstronomy;
@@ -39,9 +39,9 @@ class ListCommand extends Command
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        [$id] = $this->getSappIdAndFolderByOptions($input->getArgument('sappName'), $input->getArgument('environment'));
+        ['id' => $id] = $this->getSappFromWorkingDir($input->getArgument('environment'));
         $result = $this->setecAstronomy->listSecrets($this->token->token, $id);
-        $secrets = json_decode($result->getBody()->getContents())['data'];
+        $secrets = json_decode($result->getBody()->getContents())->data;
 
         $io = new SymfonyStyle($input, $output);
         $show = $input->getOption('show');
