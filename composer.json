@@ -25,10 +25,17 @@
         "eloquent/enumeration": "^5.1",
         "ratchet/pawl": "^0.3.2",
         "giggsey/libphonenumber-for-php": "^8.9",
-        "alchemy/zippy": "0.4.8",
-        "docker-php/docker-php": "^2.0"
+        "docker-php/docker-php": "^2.0",
+        "alchemy/zippy": "dev-master"
     },
     "require-dev": {
         "phpstan/phpstan": "^0.10.5"
-    }
+    },
+    "repositories": [
+        {
+            "type": "vcs",
+            "package": {"name": "alchemy/zippy"},
+            "url": "https://github.com/pagely/Zippy"
+        }
+    ]
 }
