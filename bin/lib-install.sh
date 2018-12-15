@@ -1,7 +1,7 @@
 . ./bin/lib.sh
 
 readonly MIN_DOCKER_VERSION=17.09
-readonly MIN_PHP_VERSION=7.30
+readonly MIN_PHP_VERSION=7.2
 
 declare -Ag INSTALL_ERRORS
 
@@ -155,13 +155,6 @@ dockerInstallOK() {
     return 0
 }
 
-canInstall() {
-    if nativeInstallOK || dockerInstallOK; then
-        return 0
-    fi
-    return 1
-}
-
 selectInstallMethod() {
     nativeInstallOK && {
         printf -v INSTALL_METHOD "native"
@@ -176,11 +169,40 @@ selectInstallMethod() {
 }
 
 doNativeInstall() {
-    echo installing native
+    local cxt=$1
+
+    log info "Installing natively"
+
+    local install_path=$(setInstallPrefix)
+    installComposerDeps "$ctx"
+
+    local dest="${install_path}/northstack"
+
+    mkdirP "$dest"
+    copyFiles "$ctx" "$dest"
+    lnS "$dest/bin/northstack" "${install_path}/bin/northstack"
 }
 
 doDockerInstall() {
-    echo installing docker
+    local ctx=$1
+    local isDev=$2
+
+    log info "Installing with docker"
+
+    checkDocker
+    [[ $isDev == 1 ]] && installComposerDeps "$ctx"
+    buildDockerImage "$ctx"
+
+    local wrapperFile=$(mktemp)
+
+    trap "rm '$wrapperFile'" EXIT
+
+    local install_path=$(setInstallPrefix)
+
+    "$ctx"/bin/build-wrapper.sh "$wrapperFile" "$BASE" "$isDev"
+
+    copyFiles "$wrapperFile" "${install_path}/bin/northstack"
+    copyFiles "${ctx}/docker" "${install_path}/lib/northstack/docker"
 }
 
 complain() {
@@ -190,12 +212,15 @@ complain() {
 }
 
 install() {
+    local ctx=$1
+    local isDev=${2:-0}
+
     selectInstallMethod
     case $INSTALL_METHOD in
         native)
-            doNativeInstall;;
+            doNativeInstall "$ctx";;
         docker)
-            doDockerInstall;;
+            doDockerInstall "$ctx" "$isDev";;
         *)
             complain;;
     esac

@@ -81,6 +81,11 @@ copyFiles() {
     local src=$1
     local dest=$2
 
+    if [[ -d "$src" ]]; then
+        rsyncDirs "$src" "$dest"
+        return
+    fi
+
     dest_dir=$(dirname "$dest")
     if [[ -w $dest_dir ]] && [[ -w $dest ]]; then
         log "info" "cp -av "$src" "$dest""
@@ -94,6 +99,55 @@ copyFiles() {
         log "info" "sudo cp -av "$src" "$dest""
         sudo cp -av "$src" "$dest" | debug -
     fi
+}
+
+rsyncDirs() {
+    local src=$1
+    local dest=$2
+
+    src=${src%/}; dest=${dest%/}
+    src=${src}/; dest=${dest}/
+
+    debug "Rsync from $src -> $dest"
+
+    if [[ ! -d $dest ]]; then
+        mkdirP "$dest"
+    fi
+
+    local rsync="rsync -HavzuP --exclude=.git --exclude=.tmp"
+
+    if [[ ! -w $dest ]]; then
+        log "warn" "$dest is not writeable by your shell user; using sudo to copy files"
+        rsync="sudo ${rsync}"
+    fi
+
+    $rsync "$src" "$dest"
+}
+
+mkdirP() {
+    local dir=$1
+    local parent=$dir
+    while [[ ! -d $parent ]]; do
+        parent=$(dirname "$dir")
+    done
+    if [[ -w $parent ]]; then
+        mkdir -pv "$dir"
+    else
+        log "warn" "$parent is not writeable by your shell user. Using sudo to mkdir"
+        sudo mkdir -pv "$dir"
+    fi
+
+}
+
+lnS() {
+    local target=$1
+    local link=$2
+    ln -vfs "$target" "$link"
+}
+
+rmFile() {
+    local f=$1
+
 }
 
 checkDocker() {
@@ -191,6 +245,8 @@ buildDockerImage() {
 
 installComposerDeps() {
     local ctx=$1
+
+    log debug "Installing dependencies in $ctx"
 
     docker run --rm \
         --volume "${ctx}:/app" \

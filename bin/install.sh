@@ -7,34 +7,13 @@ BASE="$( dirname "$CDIR")"
 . "$CDIR"/lib.sh
 . "$CDIR"/lib-install.sh
 
-install
-exit 0
-
-checkDocker
-buildDockerImage "$BASE"
-
-wrapperFile=$(mktemp)
-
-cleanup() {
-    rm "$wrapperFile"
-}
-
-trap cleanup EXIT
-
-isDev=0
 
 if [[ ${0##*/} == "install-dev.sh" ]]; then
-    log "info" "Installing in DEV mode"
     isDev=1
-
-    log "info" "Installing dependencies with composer"
-    installComposerDeps "$BASE"
+else
+    isDev=0
 fi
 
-install_path="$(setInstallPrefix)"
+install "$BASE" "$isDev"
 
-"$CDIR"/build-wrapper.sh "$wrapperFile" "$BASE" "$isDev"
-
-
-copyFiles "$wrapperFile" "${install_path}/bin/northstack"
-copyFiles "${BASE}/docker" "${install_path}/lib/northstack/docker"
+log info "NorthStack client installed!"
