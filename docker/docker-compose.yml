@@ -9,13 +9,13 @@ networks:
 
 services:
   web:
-    image: web
-    build:
-      context: ./images/web
+    image: nginx
     ports:
       - '${EXPOSE_HTTP_PORT}:80'
     volumes:
       - "${APP_PUBLIC}:/app/public"
+      - '${COMPOSE_ROOT_HOST}/assets/nginx/main.conf:/etc/nginx/nginx.conf:ro'
+      - '${COMPOSE_ROOT_HOST}/assets/nginx/${STACK}.nginx.conf:/etc/nginx/stack.conf:ro'
     environment:
       - STACK
       - EXPOSE_HTTP_PORT
