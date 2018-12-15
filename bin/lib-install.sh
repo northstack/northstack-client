@@ -10,6 +10,15 @@ setError() {
     local msg=$2
 
     local val=${INSTALL_ERRORS[$ns]:-}
+    local ifs=$IFS
+    IFS=$'\n'
+    for current in $val; do
+        if [[ $current == $msg ]]; then
+            # duplicate
+            return
+        fi
+    done
+    IFS=$ifs
     [[ ! -z $val ]] && val="${val}\n"
     val=${val}${msg}
     INSTALL_ERRORS[$ns]=$val
@@ -37,24 +46,29 @@ iHave() {
 getVersion() {
     local name=$1
     local dest=$2
-    local version
-    local status
 
+    local cmd
     case $name in
         php)
-            version=$(php -r 'echo phpversion();')
-            status=$?;;
-
+            cmd=(php -r 'echo phpversion();');;
         docker)
-            version=$(docker info --format '{{ .ServerVersion }}')
-            status=$?;;
+            cmd=(docker info --format '{{ .ServerVersion }}');;
         *)
             log error "Can't get version for $name"
             return 1
     esac
 
+    local version=$("${cmd[@]}")
+    local status=$?
+
+    local strCmd=${cmd[@]}
+    if [[ $status -ne 0 ]]; then
+        log error "Failed to check the installed version of $name" \
+            "Command \`$strCmd\` returned $status"
+        version=0
+    fi
     printf -v "$dest" "$version"
-    return "$status"
+    return $status
 }
 
 versionCompare() {
