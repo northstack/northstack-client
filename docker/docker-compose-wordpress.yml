@@ -22,7 +22,6 @@ services:
       context: ./images/wordpress
     volumes:
       - "${APP_PUBLIC}:${APP_PUBLIC}"
-      - "${APP_ROOT}:/APP_ROOT"
       - "/etc/passwd:/etc/passwd:ro"
       - "/etc/group:/etc/group:ro"
     working_dir: "${APP_PUBLIC}"
