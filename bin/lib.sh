@@ -77,6 +77,21 @@ getInstallPrefix() {
     printf $(dirname "$binDir")
 }
 
+askForSudo() {
+    local cmd=$@
+
+    [[ ${NORTHSTACK_ALLOW_SUDO:-0} == 1 ]] && return 0
+    echo "Asking permission to run the following command with sudo:"
+    echo "$cmd"
+    echo "You can disable this check by setting NORTHSTACK_ALLOW_SUDO=1"
+
+    read -p "Enter y/n : " answer
+
+    [[ $answer == y ]] && return 0
+
+    return 1
+}
+
 copyFiles() {
     local src=$1
     local dest=$2
@@ -91,7 +106,7 @@ copyFiles() {
         debugCmd cp -av "$src" "$dest"
     else
         log "warn" "$dest is not writeable by your shell user. Using sudo to copy"
-
+        askForSudo mkdir -pv "$dest_dir" \; cp -av "$src" "$dest"
         debugCmd sudo mkdir -pv "$dest_dir"
         debugCmd sudo cp -av "$src" "$dest"
     fi
@@ -114,6 +129,7 @@ rsyncDirs() {
 
     if [[ ! -w $dest ]]; then
         log "warn" "$dest is not writeable by your shell user; using sudo to copy files"
+        askForSudo $rsync "$src" "$dest"
         rsync="sudo ${rsync}"
     fi
 
@@ -129,7 +145,8 @@ mkdirP() {
     if [[ -w $parent ]]; then
         debugCmd mkdir -pv "$dir"
     else
-        log "warn" "$parent is not writeable by your shell user. Using sudo to mkdir"
+        log "warn" "$parent is not writeable by your shell user. Using sudo to create $dir"
+        askForSudo mkdir -pv "$dir"
         debugCmd sudo mkdir -pv "$dir"
     fi
 
@@ -138,12 +155,30 @@ mkdirP() {
 lnS() {
     local target=$1
     local link=$2
-    debugCmd ln -vfs "$target" "$link"
+
+    if [[ -f $link ]] && [[ ! -h $link ]]; then
+        rmFile "$link"
+    fi
+
+    local ln="ln -vfs"
+    local parent=$(dirname "$link")
+    if [[ ! -w $parent ]]; then
+        askForSudo "$ln" "$target" "$link" && ln="sudo $ln"
+    fi
+    debugCmd "$ln" "$target" "$link"
 }
 
 rmFile() {
-    local f=$1
+    local file=$1
 
+    local rm="rm -v "
+
+    [[ -w $file ]] || {
+        log "warn" "$file is not writeable by your shell user. Using sudo to delete"
+        askForSudo $rm "$file"
+        rm="sudo ${rm}"
+    }
+    debugCmd $rm "$file"
 }
 
 debugCmd() {
