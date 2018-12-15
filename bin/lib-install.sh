@@ -181,6 +181,7 @@ doNativeInstall() {
     mkdirP "$dest"
     copyFiles "$ctx" "$dest"
     lnS "$dest/bin/northstack" "${install_path}/bin/northstack"
+    log info "NorthStack client installed at $install_path/bin/northstack"
 }
 
 doDockerInstall() {
@@ -203,6 +204,8 @@ doDockerInstall() {
 
     copyFiles "$wrapperFile" "${install_path}/bin/northstack"
     copyFiles "${ctx}/docker" "${install_path}/lib/northstack/docker"
+
+    log info "NorthStack client installed at $install_path/bin/northstack"
 }
 
 complain() {

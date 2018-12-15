@@ -15,5 +15,3 @@ else
 fi
 
 install "$BASE" "$isDev"
-
-log info "NorthStack client installed!"
