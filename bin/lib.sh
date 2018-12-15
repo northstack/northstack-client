@@ -306,7 +306,7 @@ buildDockerImage() {
 installComposerDeps() {
     local ctx=$1
 
-    log debug "Installing dependencies in $ctx"
+    debug "Installing dependencies in $ctx"
 
     docker run --rm \
         --volume "${ctx}:/app" \
