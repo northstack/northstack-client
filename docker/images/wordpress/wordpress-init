@@ -9,6 +9,23 @@ else
         --version="$WORDPRESS_VERSION"
 fi
 
+echo -n "Waiting for MySQL to be up and reachable"
+while [[ ${tries:=0} -lt 10 ]]; do
+    {
+    mysql \
+        -h "$WORDPRESS_DB_HOST" \
+        -u "$WORDPRESS_DB_USER" \
+        -p"$WORDPRESS_DB_PASSWORD" \
+        -e 'SELECT NOW();' \
+        "$WORDPRESS_DB_NAME" \
+    &> /dev/null && break
+    } || true
+    tries=$((tries + 1))
+    echo -n .
+    sleep 1
+done
+echo
+
 if [[ ! -e wp-config.php ]]; then
     echo "Creating wp-config file"
 
