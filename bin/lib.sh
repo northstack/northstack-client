@@ -88,16 +88,12 @@ copyFiles() {
 
     dest_dir=$(dirname "$dest")
     if [[ -w $dest_dir ]] && [[ -w $dest ]]; then
-        log "info" "cp -av "$src" "$dest""
-        cp -av "$src" "$dest" | debug -
+        debugCmd cp -av "$src" "$dest"
     else
         log "warn" "$dest is not writeable by your shell user. Using sudo to copy"
 
-        log "info" "sudo mkdir -pv "$dest_dir""
-        sudo mkdir -pv "$dest_dir" | debug -
-
-        log "info" "sudo cp -av "$src" "$dest""
-        sudo cp -av "$src" "$dest" | debug -
+        debugCmd sudo mkdir -pv "$dest_dir"
+        debugCmd sudo cp -av "$src" "$dest"
     fi
 }
 
@@ -121,7 +117,7 @@ rsyncDirs() {
         rsync="sudo ${rsync}"
     fi
 
-    $rsync "$src" "$dest"
+    debugCmd $rsync "$src" "$dest"
 }
 
 mkdirP() {
@@ -131,10 +127,10 @@ mkdirP() {
         parent=$(dirname "$dir")
     done
     if [[ -w $parent ]]; then
-        mkdir -pv "$dir"
+        debugCmd mkdir -pv "$dir"
     else
         log "warn" "$parent is not writeable by your shell user. Using sudo to mkdir"
-        sudo mkdir -pv "$dir"
+        debugCmd sudo mkdir -pv "$dir"
     fi
 
 }
@@ -142,12 +138,41 @@ mkdirP() {
 lnS() {
     local target=$1
     local link=$2
-    ln -vfs "$target" "$link"
+    debugCmd ln -vfs "$target" "$link"
 }
 
 rmFile() {
     local f=$1
 
+}
+
+debugCmd() {
+    local cmd="$@"
+
+    log info "Running: $cmd"
+
+    local tmp=$(mktemp -d)
+
+    set +e
+    $cmd > "$tmp/stdout" 2> "$tmp/stderr"
+
+    local status=$?
+
+    set -e
+
+    if [[ $status -ne 0 ]]; then
+        log error "Command returned non-zero: $status"
+        log error "stdout:"
+        cat "$tmp/stdout" | log error -
+        log error "stderr:"
+        cat "$tmp/stderr" | log error -
+    else
+        debug - < "$tmp/stdout"
+        debug - < "$tmp/stderr"
+    fi
+    rm -rf "$tmp"
+
+    return $status
 }
 
 checkDocker() {
