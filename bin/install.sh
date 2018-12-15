@@ -4,7 +4,11 @@ set -eu
 CDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 BASE="$( dirname "$CDIR")"
 
-source "$CDIR"/lib.sh
+. "$CDIR"/lib.sh
+. "$CDIR"/lib-install.sh
+
+install
+exit 0
 
 checkDocker
 buildDockerImage "$BASE"

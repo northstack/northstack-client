@@ -1,5 +1,5 @@
 log() {
-    local level="$(echo "$1" | tr '[:upper:]' '[:lower:]')"
+    declare -l level=$1
 
     local red=$'\e[1;91m'
     local green=$'\e[1;32m'
