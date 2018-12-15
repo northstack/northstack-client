@@ -59,8 +59,8 @@ debug() {
 }
 
 setInstallPrefix() {
-    local default=/usr/local
-    local INSTALL_PATH=${INSTALL_PATH:-}
+    local default=$HOME/.local
+    ${INSTALL_PATH:=}
 
     if [[ -z $INSTALL_PATH ]]; then
         log "Using default install prefix ($default)"
