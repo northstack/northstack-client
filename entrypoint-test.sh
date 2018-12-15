@@ -4,7 +4,6 @@ set -eu
 
 if getent group "$DOCKER_GID" > /dev/null; then
     grp=$(getent group "$DOCKER_GID" | cut -d: -f 1)
-    echo "Remvoing duplicate group $grp with gid $DOCKER_GID"
     groupdel -f "$grp"
 fi
 
@@ -17,7 +16,6 @@ groupadd \
 
 if getent group "$NORTHSTACK_GID" > /dev/null; then
     grp=$(getent group "$NORTHSTACK_GID" | cut -d: -f 1)
-    echo "Remvoing duplicate group $grp with gid $NORTHSTACK_GID"
     groupdel -f "$grp"
 fi
 
