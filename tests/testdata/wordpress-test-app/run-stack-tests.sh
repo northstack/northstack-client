@@ -27,7 +27,7 @@ function assertFile() {
     while [[ ! -e $file ]] && (( tries < maxwait )); do
         echo "Waiting for $file to exist"
         sleep 1
-        tries=$((tries++))
+        tries=$((tries + 1))
     done
 
     if [[ ! -e $file ]]; then
@@ -138,7 +138,7 @@ patch_env_for_docker
 
 echo the app is instantiated
 {
-    assertFile ./app/wp-cli.yml
+    assertFile ./app/public/wp-cli.yml
 }
 
 echo can we run docker-compose

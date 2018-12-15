@@ -10,7 +10,7 @@ else
 fi
 
 echo -n "Waiting for MySQL to be up and reachable"
-while [[ ${tries:=0} -lt 10 ]]; do
+while [[ ${tries:=0} -lt 30 ]]; do
     {
     mysql \
         -h "$WORDPRESS_DB_HOST" \
@@ -77,9 +77,7 @@ wp option update siteurl "$WORDPRESS_URL"
 
 echo "Creating wp-cli config file"
 
-# We can't put this in the webroot because we don't
-# want wp-cli to use it when we're running in docker
-cat << EOF > /APP_ROOT/app/wp-cli.yml
+cat << EOF > wp-cli.yml
 ---
 @docker:
   ssh: "docker:$(hostname)"
