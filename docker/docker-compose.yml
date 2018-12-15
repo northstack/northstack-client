@@ -9,7 +9,7 @@ networks:
 
 services:
   web:
-    image: nginx
+    image: nginx:alpine
     ports:
       - '${EXPOSE_HTTP_PORT}:80'
     volumes:
