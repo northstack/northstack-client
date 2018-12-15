@@ -8,6 +8,8 @@ cd $BDIR
 export DEBUG=1
 source "$BDIR/bin/lib.sh"
 
+./tests/test-native.sh
+
 buildDockerImage .
 
 user=$USER
