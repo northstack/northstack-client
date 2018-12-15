@@ -6,5 +6,3 @@ BDIR=$(dirname $CDIR)
 cd $BDIR
 
 ./vendor/bin/phpstan analyze --level 0 src
-
-./tests/test-localdev.sh
