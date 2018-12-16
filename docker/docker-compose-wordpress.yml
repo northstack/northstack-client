@@ -22,10 +22,7 @@ services:
       context: ./images/wordpress
     volumes:
       - "${APP_PUBLIC}:${APP_PUBLIC}"
-      - "/etc/passwd:/etc/passwd:ro"
-      - "/etc/group:/etc/group:ro"
     working_dir: "${APP_PUBLIC}"
-    userns_mode: host
     user: "${NORTHSTACK_UID}:${NORTHSTACK_GID}"
     environment:
       WORDPRESS_VERSION: ${WORDPRESS_VERSION}
@@ -47,7 +44,7 @@ services:
     labels:
       com.northstack.localdev: 1
       com.northstack.app.id: "${APP_ID}"
-      com.northstack.localdev.role: web
+      com.northstack.localdev.role: wordpress
     healthcheck:
       test: 'test -f index.php || exit 1'
       start_period: 5s
