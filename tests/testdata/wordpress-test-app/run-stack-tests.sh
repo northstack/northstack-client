@@ -141,11 +141,6 @@ echo the app is instantiated
     assertFile ./app/public/wp-cli.yml
 }
 
-echo can we run docker-compose
-{
-    docker-compose ps
-}
-
 echo can we run wp-cli commands against the running docker container
 {
     cd app/public
@@ -183,10 +178,4 @@ echo permalinks work
     url=${url/http:\/\/localhost:8080/}
     assertHttp "$url" 200
     cd -
-}
-
-echo my user name is intact
-{
-    userInDocker=$(docker-compose exec wordpress id -un)
-    assertEqual "$NORTHSTACK_USER" "$userInDocker"
 }
