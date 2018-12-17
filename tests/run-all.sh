@@ -6,3 +6,7 @@ BDIR=$(dirname $CDIR)
 cd $BDIR
 
 ./vendor/bin/phpstan analyze --level 0 src
+
+if [[ ${TEST_LOCALDEV:-0} == 0 ]]; then
+    ./tests/test-localdev.sh
+fi
