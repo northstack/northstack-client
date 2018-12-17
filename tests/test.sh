@@ -46,6 +46,7 @@ docker run \
     -e DOCKER_GROUP=$docker_group \
     -e DOCKER_GID=$docker_gid \
     -e RUNNING_IN_DOCKER=1 \
+    -e TEST_LOCALDEV=${TEST_LOCALDEV:-0} \
     --volume /var/run/docker.sock:/var/run/docker.sock \
     --volume "$NS_PWD:$NS_PWD" \
     --volume "$BDIR/.tmp:/app/.tmp" \
