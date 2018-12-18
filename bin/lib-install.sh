@@ -185,6 +185,17 @@ selectInstallMethod() {
     printf -v INSTALL_METHOD "none"
 }
 
+afterInstall() {
+    local path=$1
+    local bindir=$path/bin
+
+    log info "NorthStack client installed at $path/bin/northstack"
+
+    log info "Remember to add $bindir to your \$PATH if it's not already present. Example:"
+
+    printf 'echo "%s" >> ~/.bashrc\n' "PATH=${bindir}:\$PATH"
+}
+
 doNativeInstall() {
     local cxt=$1
 
@@ -198,7 +209,7 @@ doNativeInstall() {
     mkdirP "$dest"
     copyFiles "$ctx" "$dest"
     lnS "$dest/bin/northstack" "${install_path}/bin/northstack"
-    log info "NorthStack client installed at $install_path/bin/northstack"
+    afterInstall "$install_path"
 }
 
 doDockerInstall() {
@@ -222,7 +233,7 @@ doDockerInstall() {
     copyFiles "$wrapperFile" "${install_path}/bin/northstack"
     copyFiles "${ctx}/docker" "${install_path}/lib/northstack/docker"
 
-    log info "NorthStack client installed at $install_path/bin/northstack"
+    afterInstall "$install_path"
 }
 
 complain() {
