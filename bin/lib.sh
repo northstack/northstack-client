@@ -1,5 +1,15 @@
+strToUpper() {
+    tr '[:lower:]' '[:upper:]' <<< "$@"
+}
+
+strToLower() {
+    tr '[:upper:]' '[:lower:]' <<< "$@"
+}
+
+
 log() {
-    declare -l level=$1
+    local level=$1
+    level=$(strToLower "$level")
 
     local red=$'\e[1;91m'
     local green=$'\e[1;32m'
