@@ -179,6 +179,8 @@ abstract class BaseAction
             return;
         }
 
+        $this->docker->pullImage(self::$image);
+
         $conf = $this->getContainerConfig();
         $labels = $this->getLabels();
         $labels->offsetSet(
