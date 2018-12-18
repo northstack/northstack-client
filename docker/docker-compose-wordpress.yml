@@ -51,9 +51,7 @@ services:
       interval: 5s
 
   nginx-unit-php:
-    image: nginx-unit-php
-    build:
-      context: ./images/nginx-unit-php
+    image: northstack/nginx-unit-php:7.2-2018.12.18
     volumes:
       - "${APP_PUBLIC}:/app/public"
     depends_on:
