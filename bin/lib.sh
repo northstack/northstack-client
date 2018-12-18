@@ -172,6 +172,11 @@ lnS() {
 
     local ln="ln -vfs"
     local parent=$(dirname "$link")
+
+    if [[ ! -d $parent ]]; then
+        mkdirP "$parent"
+    fi
+
     if [[ ! -w $parent ]]; then
         askForSudo "$ln" "$target" "$link" && ln="sudo $ln"
     fi
