@@ -323,9 +323,8 @@ installComposerDeps() {
 
     debug "Installing dependencies in $ctx"
 
-    docker run --rm \
+    debugCmd docker run --rm \
         --volume "${ctx}:/app" \
-        composer install --ignore-platform-reqs \
-        2>&1 \
-    | debug -
+        --user "$UID:$(getGid)" \
+        composer install --ignore-platform-reqs
 }
