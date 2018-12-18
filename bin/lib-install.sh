@@ -3,13 +3,14 @@
 readonly MIN_DOCKER_VERSION=17.09
 readonly MIN_PHP_VERSION=7.2
 
-declare -Ag INSTALL_ERRORS
-
 setError() {
-    declare -u ns=$1
+    local ns=$1
     local msg=$2
 
-    local val=${INSTALL_ERRORS[$ns]:-}
+    ns=$(strToUpper "$ns")
+
+    local var=INSTALL_ERRORS_${ns}
+    local val=${!var:=}
     local ifs=$IFS
     IFS=$'\n'
     for current in $val; do
@@ -21,12 +22,14 @@ setError() {
     IFS=$ifs
     [[ ! -z $val ]] && val="${val}\n"
     val=${val}${msg}
-    INSTALL_ERRORS[$ns]=$val
+    printf -v "$var" "$val"
 }
 
 showErrors() {
-    for ns in ${!INSTALL_ERRORS[@]}; do
-        local var=${INSTALL_ERRORS[$ns]};
+    for e in ${!INSTALL_ERRORS_*}; do
+        local ns=${e#INSTALL_ERRORS_}
+        local name=INSTALL_ERRORS_${ns}
+        local var=${!name}
         printf "$ns errors:\n"
         local ifs=$IFS
         IFS=$'\n'
