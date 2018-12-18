@@ -4,13 +4,18 @@ CLI Client and PHP Library to access the NorthStack NorthStack APIs
 # Installation
 
 ## Requirements
-*A working docker install*
+
+There are two ways to install and run the NorthStack CLI. The primary means is a native install (which requires you to have PHP 7.2 installed) and a docker-based wrapper which does not. Both installation methods require you to have docker installed.
+
+| requirement | native | docker |
+|--|---|---|
+| docker | 17.09+ | 17.09+ |
+| php | 7.2+ | N/A |
+| OS | Linux or OSX | Linux |
+
+The native install method is preferred and more performant, so it's best if you're able to install PHP >= 7.2 for your operating system. If you're running a modern Linux distro chances are you can just `$packageManager install php72`. If you're using on OSX the easiest way to do this is use [homebrew](https://brew.sh/).
 
 ## Install
-You will run the client in docker, so that takes care of the majority of the work.
-
-However, configuration is required on each run (current path info volume mapping etc), 
-so a wrapper install is installed into `/usr/local/bin/northstack` to handle that.
 
 ```
 git clone git@github.com:pagely/northstack.git
@@ -18,10 +23,19 @@ cd northstack
 ./bin/install.sh
 ```
 
-## OS Support
+## Post-install
 
-Our goal is to support this client anywhere that docker can run.  Currently the
-wrapper scripts only work Linux and Mac.  Windows wrappers scripts on the roadmap.
+By default the installation script installs the CLI to `~/.local/bin`, so you'll want to add this directory to your `$PATH`:
+
+```bash
+$ echo "PATH=\$HOME/.local/bin:\$PATH" >> ~/.bashrc
+```
+
+The CLI also supports tab-completion. The process for enabling this varies from platform to platform, but in a pinch you can also just add the completion hook to your bashrc:
+
+```bash
+$ ~/.local/bin/northstack _completion --generate-hook --program northstack >> ~/.bashrc
+```
 
 # Using the client
 
