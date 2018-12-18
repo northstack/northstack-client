@@ -80,7 +80,7 @@ cat /usr/local/unit-state/conf.json
 
 
 waitFor=/app/public/index.php
-max=10
+max=30
 tries=0
 while [[ ! -f $waitFor ]] && [[ $tries -lt $max ]]; do
     sleep 1
