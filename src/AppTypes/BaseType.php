@@ -57,7 +57,7 @@ abstract class BaseType
         $this->writePerEnvConfigs();
         $this->writePerEnvBuildConfigs();
     }
-    
+
     protected function writePerEnvBuildConfigs()
     {
     }
@@ -186,8 +186,8 @@ abstract class BaseType
 
             $prompt .= " ";
 
-            $question = null; 
-            if ($arg['type'] === 'bool')
+            $question = null;
+            if (isset($arg['type']) && $arg['type'] === 'bool')
             {
                 $question = new ConfirmationQuestion(
                     $prompt,
