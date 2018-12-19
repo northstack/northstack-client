@@ -110,3 +110,6 @@ COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
 CMD ["/usr/local/sbin/unitd", "--no-daemon", "--control", "unix:/var/run/control.unit.sock"]
+
+LABEL com.northstack=1
+LABEL com.northstack.localdev=1
