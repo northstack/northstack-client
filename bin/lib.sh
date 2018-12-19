@@ -299,6 +299,7 @@ buildDockerImage() {
         --build-arg DOCKER_GID="$gid" \
         --build-arg DOCKER_GROUP="$group" \
         -t "$tag" \
+        --label "com.northstack=1" \
         "$ctx" \
     &> "$outfile"
 

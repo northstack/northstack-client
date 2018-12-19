@@ -26,6 +26,7 @@ docker build \
     --build-arg NORTHSTACK_GID=$gid \
     --build-arg DOCKER_GROUP=$docker_group \
     --build-arg DOCKER_GID=$docker_gid \
+    --label "com.northstack=1" \
     .
 
 NS_PWD="$BDIR"
@@ -47,6 +48,7 @@ docker run \
     -e DOCKER_GID=$docker_gid \
     -e RUNNING_IN_DOCKER=1 \
     -e TEST_LOCALDEV=${TEST_LOCALDEV:-0} \
+    --label "com.northstack=1" \
     --volume /var/run/docker.sock:/var/run/docker.sock \
     --volume "$NS_PWD:$NS_PWD" \
     --volume "$BDIR/.tmp:/app/.tmp" \

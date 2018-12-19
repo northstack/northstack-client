@@ -1,0 +1,107 @@
+#!/bin/bash
+
+ALL=(
+    container
+    volume
+    image
+    network
+)
+
+LABEL=com.northstack
+DRY_RUN=0
+
+usage() {
+    cat << HERE
+Usage:
+
+  $(basename "$0") [-d] [-f <filter>] [-l <label>]
+
+Options:
+
+  -h            show help text
+  -d            dry run; don't actually remove anything
+  -f <filter>   only purge \$filter resources (options: container, volume, image, network)
+  -l <label>    purge resources matching this label (default: $LABEL)
+
+HERE
+}
+
+getName() {
+    local ns=$1
+    local id=$2
+
+    docker $ns inspect --format '{{ .Name }}' $id
+}
+
+while getopts "f:l:dh" opt; do
+  case $opt in
+    f)
+        echo "Filtering by $OPTARG"
+        ALL=($OPTARG)
+        ;;
+    l)
+        echo "Selecting by label $OPTARG"
+        LABEL=$OPTARG
+        ;;
+    d)
+        echo "dry run only"
+        DRY_RUN=1
+        ;;
+    h)
+        usage
+        exit 1
+        ;;
+  esac
+done
+
+for resource in ${ALL[@]}; do
+    plural=${resource}s
+
+    set -- docker "$resource" ls
+
+    case $resource in
+        image|container)
+            set -- $@ -a;;
+        *)
+    esac
+
+    set -- $@ --filter="label='$LABEL'"
+
+    echo $plural to delete:
+    echo ---
+    eval $@
+    echo ---
+
+    if [[ $DRY_RUN == 1 ]]; then
+        echo "Dry run, not deleting anything"
+        continue
+    fi
+
+    if [[ $resource == "volume" ]]; then
+        set -- $@ --format "'{{ .Name }}'"
+    else
+        set -- $@ --format "'{{ .ID }}'"
+    fi
+
+    eval $@ | while read id; do
+        if [[ $resource == "container" ]]; then
+            name=$(getName container $id)
+            echo "Stopping container $name"
+            docker container stop -t 0 "$id" > /dev/null
+            docker container wait "$id" > /dev/null
+        fi
+
+        set -- docker "$resource" rm
+        case $resource in
+            container)
+                set -- $@ -f -v;;
+            volume|image)
+                set -- $@ -f;;
+            *)
+        esac
+
+        set -- $@ "$id"
+        echo $@
+        eval $@
+    done
+done
