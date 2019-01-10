@@ -1,0 +1,7 @@
+#!/bin/bash
+
+pushd /app/public
+
+wp option update northstack_build 1
+
+popd

@@ -179,3 +179,11 @@ echo permalinks work
     assertHttp "$url" 200
     cd -
 }
+
+echo build scripts work
+{
+    cd app/public
+    build=$(wp @local option get northstack_build)
+    assertEqual "$build" "1"
+    cd -
+}
