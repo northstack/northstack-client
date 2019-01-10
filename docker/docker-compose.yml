@@ -20,6 +20,7 @@ services:
     environment:
       - STACK
       - EXPOSE_HTTP_PORT
+      - PRIMARY_DOMAIN
     networks:
       northstack_local_dev: {}
     labels:

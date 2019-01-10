@@ -1,0 +1,13 @@
+#!/bin/bash
+
+echo "Builder starting up"
+
+if [[ -x build ]]; then
+    echo "Executing user build script"
+    ./build
+    code=$?
+fi
+
+touch /tmp/.finished
+
+exit ${code:-0}

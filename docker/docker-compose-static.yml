@@ -2,4 +2,27 @@
 version: '3.4'
 
 services:
+
+  builder:
+    image: northstack-static-builder
+    build:
+      context: ./images/builder
+      labels:
+        com.northstack.localdev: 1
+        com.northstack: 1
+    volumes:
+      - "${APP_ROOT}/app:/app"
+    labels:
+      com.northstack: 1
+      com.northstack.localdev: 1
+      com.northstack.localdev.role: builder
+      com.northstack.app.id: "${APP_ID}"
+    user: "${NORTHSTACK_UID}:${NORTHSTACK_GID}"
+    environment:
+      - PRIMARY_DOMAIN
+      - STACK
+      - EXPOSE_HTTP_PORT
+
   web:
+    depends_on:
+      - builder
