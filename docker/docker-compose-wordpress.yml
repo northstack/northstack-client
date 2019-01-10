@@ -26,8 +26,8 @@ services:
         com.northstack.localdev: 1
         com.northstack: 1
     volumes:
-      - "${APP_PUBLIC}:${APP_PUBLIC}"
-    working_dir: "${APP_PUBLIC}"
+      - "${APP_ROOT}:${APP_ROOT}"
+    working_dir: "${APP_ROOT}/app/public"
     user: "${NORTHSTACK_UID}:${NORTHSTACK_GID}"
     environment:
       WORDPRESS_VERSION: ${WORDPRESS_VERSION}
@@ -52,7 +52,7 @@ services:
       com.northstack.localdev.role: wordpress
       com.northstack: 1
     healthcheck:
-      test: 'test -f index.php || exit 1'
+      test: 'test -f /tmp/.finished || exit 1'
       start_period: 5s
       interval: 5s
 
