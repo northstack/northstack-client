@@ -26,6 +26,7 @@ services:
         com.northstack.localdev: 1
         com.northstack: 1
     volumes:
+      - "${APP_ROOT}/app:/app"
       - "${APP_ROOT}:${APP_ROOT}"
     working_dir: "${APP_ROOT}/app/public"
     user: "${NORTHSTACK_UID}:${NORTHSTACK_GID}"
