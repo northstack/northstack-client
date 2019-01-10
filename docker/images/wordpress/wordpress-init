@@ -86,4 +86,22 @@ cat << EOF > wp-cli.yml
 
 EOF
 
+pushd ..
+if [[ -x build ]]; then
+    echo "Executing user build script"
+    set +eu
+    ./build
+    set -eu
+    code=$?
+    if [[ $code -ne 0 ]]; then
+        echo "User build script exited non-zero: $code"
+        exit $code
+    fi
+else
+    echo "No user build script found; we're all done!"
+fi
+popd
+
+touch /tmp/.finished
+
 while true; do sleep 1; done
