@@ -9,6 +9,7 @@ use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
 use NorthStack\NorthStackClient\JSON\Merger;
 use NorthStack\NorthStackClient\LogFormat\LogFormat;
+use NorthStack\NorthStackClient\LogFormat\LogFormatInterface;
 use Ratchet\RFC6455\Messaging\Message;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -71,10 +72,14 @@ class LogsCommand extends Command
 
         $formatHint = $options['json'] ? 'json' : $args['topic'];
         $format = LogFormat::getFormat($formatHint);
+        /** @var LogFormatInterface $formatter */
         $formatter = new $format($output);
 
         if ($args['topic'] === 'build')
         {
+            if (!isset($sappId)) {
+                throw new \RuntimeException('Sapp not determined for build logs');
+            }
             $this->showBuildLog($sappId, $formatter);
             exit;
         }
@@ -84,7 +89,7 @@ class LogsCommand extends Command
         }, $topic, $output);
     }
 
-    protected function showBuildLog(string $sappId, $formatter)
+    protected function showBuildLog(string $sappId, LogFormatInterface $formatter)
     {
         $resp = $this->api->getBuildLog(
             $this->token->token,

@@ -45,7 +45,7 @@ class InfoCommand extends Command
     {
         if ($output->isDebug())
         {
-            $this->api->setDebug(true);
+            $this->api->setDebug();
         }
 
         $args = $input->getArguments();

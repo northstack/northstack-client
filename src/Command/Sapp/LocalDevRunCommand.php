@@ -3,12 +3,9 @@
 
 namespace NorthStack\NorthStackClient\Command\Sapp;
 
-
-use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Docker\Action\RunCmdAction;
 
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -38,6 +35,7 @@ class LocalDevRunCommand extends AbstractLocalDevCmd
     {
         parent::execute($input, $output);
 
+        /** @var RunCmdAction $action */
         $action = $this->getAction();
         $action->setCmd($input->getArgument('run'));
         $action->run();

@@ -10,7 +10,6 @@ use NorthStack\NorthStackClient\API\Sapp\SappClient;
 use NorthStack\NorthStackClient\Build\Archiver;
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
-use NorthStack\NorthStackClient\JSON\Merger;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -70,7 +69,7 @@ abstract class AbstractDeployCmd extends Command
     protected function uploadApp(InputInterface $input, OutputInterface $output): array
     {
         if ($output->isDebug()) {
-            $this->sappClient->setDebug(true);
+            $this->sappClient->setDebug();
         }
 
         $args = $input->getArguments();

@@ -2,6 +2,7 @@
 
 namespace NorthStack\NorthStackClient\AppTypes;
 
+use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Helper\HelperInterface;
@@ -13,15 +14,19 @@ abstract class BaseType
 {
     protected $input;
     protected $output;
+    /**
+     * @var HelperInterface|QuestionHelper
+     */
     protected $questionHelper;
 
-    protected $directories = [
+    protected static $directories = [
         'config',
+        'scripts',
         'app',
         'app/public'
     ];
 
-    protected $perEnvDirectories = [
+    protected static $perEnvDirectories = [
         'config/{{env}}'
     ];
 
@@ -58,9 +63,7 @@ abstract class BaseType
         $this->writePerEnvBuildConfigs();
     }
 
-    protected function writePerEnvBuildConfigs()
-    {
-    }
+    abstract protected function writePerEnvBuildConfigs();
 
     protected function writeEnvironmentFile()
     {
@@ -74,9 +77,9 @@ abstract class BaseType
 
     protected function createSkeleton()
     {
-        $this->mkdirRecursive($this->directories);
+        $this->mkdirRecursive(self::$directories);
         $paths = [];
-        foreach ($this->perEnvDirectories as $dir)
+        foreach (self::$perEnvDirectories as $dir)
         {
             foreach ($this->sapps as $sapp)
             {
@@ -94,7 +97,9 @@ abstract class BaseType
             if (!file_exists($mkPath))
             {
                 $this->output->writeln("Creating directory {$mkPath}");
-                mkdir($mkPath, 0775, true);
+                if (!mkdir($mkPath, 0775, true) && !is_dir($mkPath)) {
+                    throw new \RuntimeException(sprintf('Directory "%s" was not created', $mkPath));
+                }
             }
         }
     }

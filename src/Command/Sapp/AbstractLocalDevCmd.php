@@ -6,9 +6,7 @@ namespace NorthStack\NorthStackClient\Command\Sapp;
 
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Docker;
-use NorthStack\NorthStackClient\Docker\Action;
 
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -30,9 +28,9 @@ abstract class AbstractLocalDevCmd extends Command
         parent::__construct($this->commandName());
     }
 
-    protected abstract function commandName(): string;
+    abstract protected function commandName(): string;
 
-    protected abstract function getDockerAction();
+    abstract protected function getDockerAction();
 
     public function configure()
     {
@@ -68,7 +66,6 @@ abstract class AbstractLocalDevCmd extends Command
     {
         $config = $this->appData['config'];
         $build = $this->appData['build'];
-        $domains = $this->appData['domains'];
         $appName = $this->appData['name'];
         $appId = $this->appData['id'];
         $stack = $config->{'app-type'};
