@@ -70,7 +70,7 @@ class CreateCommand extends Command
     {
         if ($output->isDebug())
         {
-            $this->api->setDebug(true);
+            $this->api->setDebug();
         }
 
         $args = $input->getArguments();
@@ -140,7 +140,7 @@ class CreateCommand extends Command
         $this->printSuccess($input, $output, $data, $appPath);
     }
 
-    function printSuccess($input, $output, $data, $appPath)
+    function printSuccess($input, $output, $data, string $appPath)
     {
         $io = new SymfonyStyle($input, $output);
         $sapps = $data->data;
@@ -167,7 +167,7 @@ class CreateCommand extends Command
         $io->table(
             ['location', 'path'],
             [
-                ['root', "{$appPath}"],
+                ['root', $appPath],
                 ['code', "{$appPath}/app"],
                 ['webroot', "{$appPath}/app/public"],
                 ['configuration', "{$appPath}/config"]

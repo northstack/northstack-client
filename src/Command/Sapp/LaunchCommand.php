@@ -7,7 +7,6 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
-use GuzzleHttp\Client;
 use GuzzleHttp\Exception\ClientException;
 
 use NorthStack\NorthStackClient\API\AuthApi;
@@ -24,21 +23,15 @@ class LaunchCommand extends Command
      * @var NorthstackClient
      */
     protected $api;
-    /**
-     * @var Client
-     */
-    private $guzzle;
 
     public function __construct(
         NorthstackClient $api,
-        AuthApi $authApi,
-        Client $guzzle
+        AuthApi $authApi
     )
     {
         parent::__construct('app:debug:launch-worker');
         $this->api = $api;
         $this->authClient = $authApi;
-        $this->guzzle = $guzzle;
     }
 
     public function configure()
@@ -57,12 +50,12 @@ class LaunchCommand extends Command
     {
         if ($output->isDebug())
         {
-            $this->api->setDebug(true);
+            $this->api->setDebug();
         }
 
         $args = $input->getArguments();
 
-        [$sappId, $appFolder] = $this->getSappIdAndFolderByOptions(
+        [$sappId] = $this->getSappIdAndFolderByOptions(
             $args['name'],
             $args['environment']
         );
@@ -80,6 +73,6 @@ class LaunchCommand extends Command
         }
 
         $output->writeln("Launch finished code: ".$r->getStatusCode());
-        print_r(json_decode($r->getBody()->getContents()));
+        $output->writeln($r->getBody()->getContents());
     }
 }

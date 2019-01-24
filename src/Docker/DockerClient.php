@@ -3,15 +3,13 @@
 namespace NorthStack\NorthStackClient\Docker;
 
 use Docker\Docker;
-use Docker\API\Model\ContainersCreatePostBody;
-use Docker\API\Model\ContainersIdExecPostBody;
-use Docker\API\Exception\ContainerInspectNotFoundException;
 
 use Docker\API\Exception\ContainerCreateNotFoundException;
 use Docker\API\Exception\ContainerCreateConflictException;
 use Docker\API\Exception\ContainerWaitNotFoundException;
 use Docker\API\Exception\ContainerDeleteConflictException;
 use Docker\API\Exception\ContainerStopNotFoundException;
+use Docker\Stream\DockerRawStream;
 
 class DockerClient
 {
@@ -104,6 +102,10 @@ class DockerClient
         return $this->docker->containerStart($name);
     }
 
+    /**
+     * @param $name
+     * @return \Psr\Http\Message\ResponseInterface|null|DockerRawStream
+     */
     public function attachOutput($name)
     {
         return $this->docker->containerAttach(
@@ -121,21 +123,14 @@ class DockerClient
     public function stop($name, $destroy = false, $timeout = 10)
     {
         try {
-            return $this->docker->containerStop($name, ['t' => $timeout]);
+            $return = $this->docker->containerStop($name, ['t' => $timeout]);
+            if ($destroy) {
+                return $this->deleteContainer($name);
+            }
+            return $return;
         } catch (ContainerStopNotFoundException $e)
         {
             return true;
-        }
-
-        try {
-            $this->wait($name);
-        } catch (ContainerWaitNotFoundException $e)
-        {
-            return true;
-        }
-
-        if ($destroy) {
-            return $this->deleteContainer($name, false);
         }
     }
 

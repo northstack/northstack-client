@@ -2,8 +2,6 @@
 
 namespace NorthStack\NorthStackClient\AppTypes;
 
-use NorthStack\NorthStackClient\AppTypes\BaseType;
-
 
 class WordPressType extends BaseType
 {

@@ -12,8 +12,6 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
 use Docker\API\Exception\ContainerInspectNotFoundException;
-use Docker\API\Model\ErrorResponse;
-use Docker\Stream\AttachWebsocketStream;
 
 abstract class BaseAction
 {
@@ -70,28 +68,28 @@ abstract class BaseAction
 
     protected function attachOutput()
     {
-        if (!$this->watchOutput) {
-            return;
+        if ($this->watchOutput) {
+            $stream = $this->docker->attachOutput($this->getContainerName());
+
+            return new DockerStreamHandler(
+                $stream,
+                $this->output,
+                $this->handleSignals
+            );
         }
 
-        $stream = $this->docker->attachOutput($this->getContainerName());
-
-        return new DockerStreamHandler(
-            $stream,
-            $this->output,
-            $this->handleSignals
-        );
+        return null;
     }
 
     protected function followOutput($stream)
     {
-        if (!$this->watchOutput) {
-            return;
-        }
-        $ret = $stream->watch();
-        if ($ret === $stream::$signaled) {
-            $this->output->writeln('');
-            $this->cleanup();
+        /** @var DockerStreamHandler $stream */
+        if ($this->watchOutput && $stream) {
+            $ret = $stream->watch();
+            if ($ret === $stream::$signaled) {
+                $this->output->writeln('');
+                $this->cleanup();
+            }
         }
     }
 
@@ -101,7 +99,7 @@ abstract class BaseAction
         $this->docker->signal($name, 'SIGINT');
     }
 
-    abstract protected function getCmd(): Array;
+    abstract protected function getCmd(): array;
 
     protected function finish()
     {
@@ -119,10 +117,10 @@ abstract class BaseAction
     {
         $conf = new Container();
         $conf
+            ->setBindMounts($this->getMounts())
             ->setImage(self::$image)
             ->setCmd($this->getCmd())
             ->setEnv($this->getEnv())
-            ->setBindMounts($this->getMounts())
             ->setWorkingDir($this->getWorkingDir())
             ->setAttachStdout($this->watchOutput)
             ->setAttachStderr($this->watchOutput)
@@ -237,6 +235,11 @@ abstract class BaseAction
         return new \ArrayObject(['com.northstack.localdev' => '1']);
     }
 
+    /**
+     * @param $name
+     * @return BaseAction
+     * @throws \Exception
+     */
     protected function getAction($name)
     {
         $actions = [

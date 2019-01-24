@@ -3,7 +3,6 @@
 
 namespace NorthStack\NorthStackClient\Command\Sapp;
 
-use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Docker\Action\StartAction;
 
 use Symfony\Component\Console\Input\InputOption;
@@ -35,6 +34,7 @@ class LocalDevStartCommand extends AbstractLocalDevCmd
     {
         parent::execute($input, $output);
 
+        /** @var StartAction $action */
         $action = $this->getAction();
         $background = $input->getOption('detach') ?: false;
 
