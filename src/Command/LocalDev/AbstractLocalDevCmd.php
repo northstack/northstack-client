@@ -1,12 +1,12 @@
 <?php
 
 
-namespace NorthStack\NorthStackClient\Command\Sapp;
+namespace NorthStack\NorthStackClient\Command\LocalDev;
 
 
 use NorthStack\NorthStackClient\Command\Command;
+use NorthStack\NorthStackClient\Command\Sapp\SappEnvironmentTrait;
 use NorthStack\NorthStackClient\Docker;
-
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -14,17 +14,22 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 abstract class AbstractLocalDevCmd extends Command
 {
-    protected $skipLoginCheck = true;
+    protected static $defaultEnv = 'local';
+
     protected $commandDescription;
 
     protected $appData;
 
+    /**
+     * @var Docker\Action\BaseAction
+     */
     protected $action;
 
     use SappEnvironmentTrait;
 
     public function __construct()
     {
+        $this->skipLoginCheck = true;
         parent::__construct($this->commandName());
     }
 
@@ -37,7 +42,7 @@ abstract class AbstractLocalDevCmd extends Command
         parent::configure();
         $this
             ->setDescription($this->commandDescription)
-            ->addOption('env', 'e', InputOption::VALUE_REQUIRED, 'Environment (prod, test, or dev)', 'prod')
+            ->addOption('env', 'e', InputOption::VALUE_REQUIRED, 'Environment (prod, test, dev, or local)', self::$defaultEnv)
         ;
     }
 
@@ -47,13 +52,14 @@ abstract class AbstractLocalDevCmd extends Command
         $this->appData = $this->getSappFromWorkingDir($env);
 
         $docker = new Docker\DockerClient();
-        $Action = $this->getDockerAction();
-        $this->action = new $Action(
+        $action = $this->getDockerAction();
+        $this->action = new $action(
             $this->appData['config']->{'app-type'},
             $docker,
             $input,
             $output,
-            $this->buildEnvVars()
+            $this->buildEnvVars(),
+            $this->appData
         );
     }
 

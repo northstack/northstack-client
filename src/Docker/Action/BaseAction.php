@@ -15,6 +15,8 @@ use Docker\API\Exception\ContainerInspectNotFoundException;
 
 abstract class BaseAction
 {
+    const DOCKER_IMAGE = 'docker/compose';
+    const DOCKER_IMAGE_TAG = '1.23.3';
 
     /**
      * @var DockerClient
@@ -23,12 +25,17 @@ abstract class BaseAction
     protected $input;
     protected $output;
 
-    private static $image = 'docker/compose:1.23.2';
     private static $label = 'com.northstack.localdev.version';
+    private static $actions = [
+        'start' => StartAction::class,
+        'stop' => StopAction::class,
+        'build' => BuildAction::class,
+    ];
 
     protected $stack;
 
     protected $watchOutput = true;
+    protected $attachInput = false;
     protected $handleSignals = false;
     protected $stopContainerOnExit = false;
     protected $destroyContainerOnExit = false;
@@ -37,13 +44,22 @@ abstract class BaseAction
 
     protected $env = [];
     protected $name;
+    /**
+     * @var array
+     */
+    protected $appData;
+    /**
+     * @var DockerStreamHandler|null
+     */
+    protected $outputStream;
 
     public function __construct(
         string $stack,
         DockerClient $docker,
         InputInterface $input,
         OutputInterface $output,
-        Array $env
+        array $env,
+        array $appData
     )
     {
         $this->stack = $stack;
@@ -51,15 +67,16 @@ abstract class BaseAction
         $this->input = $input;
         $this->output = $output;
         $this->env = $env;
+        $this->appData = $appData;
     }
 
     public function run()
     {
         try {
             $this->createContainer();
-            $outputStream = $this->attachOutput();
+            $this->outputStream = $this->attachOutput();
             $this->startContainer();
-            $this->followOutput($outputStream);
+            $this->followOutput($this->outputStream);
             $this->finish();
         } catch (\Exception $e) {
             throw DockerActionException::fromException($e);
@@ -69,7 +86,7 @@ abstract class BaseAction
     protected function attachOutput()
     {
         if ($this->watchOutput) {
-            $stream = $this->docker->attachOutput($this->getContainerName());
+            $stream = $this->docker->attachOutput($this->getContainerName(), $this->attachInput);
 
             return new DockerStreamHandler(
                 $stream,
@@ -101,6 +118,11 @@ abstract class BaseAction
 
     abstract protected function getCmd(): array;
 
+    protected function getImage()
+    {
+        return $this::DOCKER_IMAGE.':'.$this::DOCKER_IMAGE_TAG;
+    }
+
     protected function finish()
     {
         if (!$this->stopContainerOnExit) {
@@ -118,7 +140,7 @@ abstract class BaseAction
         $conf = new Container();
         $conf
             ->setBindMounts($this->getMounts())
-            ->setImage(self::$image)
+            ->setImage($this->getImage())
             ->setCmd($this->getCmd())
             ->setEnv($this->getEnv())
             ->setWorkingDir($this->getWorkingDir())
@@ -177,7 +199,7 @@ abstract class BaseAction
             return;
         }
 
-        $this->docker->pullImage(self::$image);
+        $this->docker->pullImage($this->getImage());
 
         $conf = $this->getContainerConfig();
         $labels = $this->getLabels();
@@ -242,15 +264,11 @@ abstract class BaseAction
      */
     protected function getAction($name)
     {
-        $actions = [
-            'start' => StartAction::class,
-            'stop' => StopAction::class
-        ];
-        if (!array_key_exists($name, $actions)) {
+        if (!array_key_exists($name, self::$actions)) {
             throw new \Exception("Unknown action: {$name}");
         }
 
-        $action = $actions[$name];
+        $action = self::$actions[$name];
         return new $action(
             $this->stack,
             $this->docker,

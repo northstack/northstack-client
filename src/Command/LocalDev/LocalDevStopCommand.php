@@ -1,10 +1,9 @@
 <?php
 
 
-namespace NorthStack\NorthStackClient\Command\Sapp;
+namespace NorthStack\NorthStackClient\Command\LocalDev;
 
 use NorthStack\NorthStackClient\Docker\Action\StopAction;
-
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 

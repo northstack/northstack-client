@@ -2,6 +2,9 @@
 
 namespace NorthStack\NorthStackClient\Docker;
 
+use Docker\API\Exception\ImageInspectNotFoundException;
+use Docker\API\Model\ContainersIdExecPostBody;
+use Docker\API\Model\ExecIdStartPostBody;
 use Docker\Docker;
 
 use Docker\API\Exception\ContainerCreateNotFoundException;
@@ -9,6 +12,7 @@ use Docker\API\Exception\ContainerCreateConflictException;
 use Docker\API\Exception\ContainerWaitNotFoundException;
 use Docker\API\Exception\ContainerDeleteConflictException;
 use Docker\API\Exception\ContainerStopNotFoundException;
+use Docker\Stream\CreateImageStream;
 use Docker\Stream\DockerRawStream;
 
 class DockerClient
@@ -86,15 +90,36 @@ class DockerClient
         }
     }
 
-    public function pullImage($name)
+    public function pullImage($name, $force = false)
     {
         [$image, $tag] = explode(':', $name, 2);
-        $this->docker->imageCreate('',
-            [
-                'fromImage' => $image,
-                'tag' => $tag,
-            ]
-        );
+
+        if ($force) {
+            // remove old image if it is found
+            try {
+                $this->docker->imageInspect($name);
+                $this->docker->imageDelete($name);
+            } catch (ImageInspectNotFoundException $e) {}
+
+            /** @var CreateImageStream $createImageStream */
+            $createImageStream = $this->docker->imageCreate(
+                '',
+                ['fromImage' => $image, 'tag' => $tag]
+            );
+            $createImageStream->wait();
+            return;
+        }
+
+        try {
+            $this->docker->imageInspect($name);
+        } catch (ImageInspectNotFoundException $e) {
+            /** @var CreateImageStream $createImageStream */
+            $createImageStream = $this->docker->imageCreate(
+                '',
+                ['fromImage' => $image, 'tag' => $tag]
+            );
+            $createImageStream->wait();
+        }
     }
 
     public function run($name)
@@ -102,17 +127,47 @@ class DockerClient
         return $this->docker->containerStart($name);
     }
 
+    public function exec($name, array $cmd)
+    {
+        $execConfig = new ContainersIdExecPostBody();
+        $execConfig->setTty(true);
+        $execConfig->setAttachStdout(true);
+        $execConfig->setAttachStderr(true);
+        $execConfig->setAttachStdin(true);
+        $execConfig->setCmd($cmd);
+
+        $execid = $this->docker->containerExec($name, $execConfig)->getId();
+        $execStartConfig = new ExecIdStartPostBody();
+        $execStartConfig->setDetach(false);
+        // Execute the command
+
+        $stream = $this->docker->execStart($execid,$execStartConfig);
+        //var_dump($stream);die();
+        // To see the output stream of the 'exec' command
+
+        $stdoutText = "";
+        $stderrText = "";
+        $stream->onStdout(function ($stdout) use (&$stdoutText) {
+            echo $stdout;
+        });
+        $stream->onStderr(function ($stderr) use (&$stderrText) {
+            echo "err: ".$stderr."\n";
+        });
+        $stream->wait();
+    }
+
     /**
      * @param $name
+     * @param bool $attachInput
      * @return \Psr\Http\Message\ResponseInterface|null|DockerRawStream
      */
-    public function attachOutput($name)
+    public function attachOutput($name, $attachInput = false)
     {
         return $this->docker->containerAttach(
             $name,
             [
                 'stream' => true,
-                'stdin'  => false,
+                'stdin'  => $attachInput,
                 'stdout' => true,
                 'stderr' => true,
                 'logs'   => false,

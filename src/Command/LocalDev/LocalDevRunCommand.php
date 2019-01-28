@@ -1,7 +1,7 @@
 <?php
 
 
-namespace NorthStack\NorthStackClient\Command\Sapp;
+namespace NorthStack\NorthStackClient\Command\LocalDev;
 
 use NorthStack\NorthStackClient\Docker\Action\RunCmdAction;
 
