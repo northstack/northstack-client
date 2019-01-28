@@ -20,7 +20,7 @@ trait LoginRequiredTrait
 
     public function run(InputInterface $input, OutputInterface $output)
     {
-        if ($input->isInteractive() && !$this->skipLoginCheck) {
+        if (!$this->skipLoginCheck && $input->isInteractive()) {
             $this->checkLogin($output);
         }
         parent::run($input, $output);

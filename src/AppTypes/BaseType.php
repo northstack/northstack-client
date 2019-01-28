@@ -85,6 +85,7 @@ abstract class BaseType
             {
                 $paths[] = str_replace('{{env}}', $sapp->environment, $dir);
             }
+            $paths[] = str_replace('{{env}}', 'local', $dir);
         }
         $this->mkdirRecursive($paths);
     }
@@ -146,7 +147,7 @@ abstract class BaseType
             'dev' => [
                 'environment' => 'development',
                 'auth-type' => 'standard'
-            ]
+            ],
         ];
 
         foreach ($this->sapps as $sapp)
@@ -156,6 +157,10 @@ abstract class BaseType
                 $defaults[$sapp->environment]
             );
         }
+        $this->writeConfigFile(
+            "config/local/config.json",
+            $defaults['dev']
+        );
     }
 
     protected function askQuestion($question)

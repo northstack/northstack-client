@@ -46,7 +46,11 @@ trait SappEnvironmentTrait
         $conf = $this->mergeConfigs($cwd, $env, true);
         $environments = json_decode(file_get_contents("{$cwd}/config/environment.json"));
         $conf['name'] = $name;
-        $conf['id'] = $environments->{$env};
+        if ($env !== 'local') {
+            $conf['id'] = $environments->{$env};
+        } else {
+            $conf['id'] = 'local';
+        }
         $conf['env'] = $env;
         return $conf;
     }

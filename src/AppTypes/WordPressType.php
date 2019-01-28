@@ -56,6 +56,13 @@ class WordPressType extends BaseType
                 "config/{$sapp->environment}/build.json",
                 $this->buildWpInstallArgs($sapp)
             );
+
+            if ($sapp->environment === 'dev') {
+                $this->writeConfigFile(
+                    "config/local/build.json",
+                    $this->buildWpInstallArgs($sapp)
+                );
+            }
         }
 
         $this->writeConfigFile(
