@@ -51,7 +51,7 @@ abstract class BaseAction
     /**
      * @var DockerStreamHandler|null
      */
-    protected $outputStream;
+    protected $containerStreamHandler;
 
     public function __construct(
         string $stack,
@@ -74,9 +74,9 @@ abstract class BaseAction
     {
         try {
             $this->createContainer();
-            $this->outputStream = $this->attachOutput();
+            $this->containerStreamHandler = $this->attachOutput();
             $this->startContainer();
-            $this->followOutput($this->outputStream);
+            $this->followOutput($this->containerStreamHandler);
             $this->finish();
         } catch (\Exception $e) {
             throw DockerActionException::fromException($e);
