@@ -8,9 +8,9 @@ use Eloquent\Enumeration\AbstractEnumeration;
 
 class BuildScriptType extends AbstractEnumeration
 {
-    const PHP = 'PHP';
-    const NODE = 'NODE';
-    const BASH = 'BASH';
-    const PYTHON = 'PYTHON';
-    const RUBY = 'RUBY';
+    const PHP = 'php';
+    const NODE = 'node';
+    const BASH = 'bash';
+    const PYTHON = 'python';
+    const RUBY = 'ruby';
 }

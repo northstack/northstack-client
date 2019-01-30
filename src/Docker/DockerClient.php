@@ -127,9 +127,12 @@ class DockerClient
         return $this->docker->containerStart($name);
     }
 
-    public function exec($name, array $cmd)
+    public function exec($name, array $cmd, array $env = [])
     {
         $execConfig = new ContainersIdExecPostBody();
+        if ($env) {
+            $execConfig->setEnv($env);
+        }
         $execConfig->setTty(true);
         $execConfig->setAttachStdout(true);
         $execConfig->setAttachStderr(true);
@@ -141,6 +144,7 @@ class DockerClient
         $execStartConfig->setDetach(false);
         // Execute the command
 
+        /** @var DockerRawStream $stream */
         $stream = $this->docker->execStart($execid,$execStartConfig);
         //var_dump($stream);die();
         // To see the output stream of the 'exec' command
@@ -148,12 +152,20 @@ class DockerClient
         $stdoutText = "";
         $stderrText = "";
         $stream->onStdout(function ($stdout) use (&$stdoutText) {
+            $stdoutText .= $stdout."\n";
             echo $stdout;
         });
         $stream->onStderr(function ($stderr) use (&$stderrText) {
+            $stderrText .= $stderr."\n";
             echo "err: ".$stderr."\n";
         });
         $stream->wait();
+
+        $result = $this->docker->execInspect($execid);
+
+        if ($result->getExitCode() !== 0) {
+            throw new \RuntimeException('Build failed');
+        }
     }
 
     /**
