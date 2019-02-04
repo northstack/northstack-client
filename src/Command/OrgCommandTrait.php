@@ -47,7 +47,7 @@ trait OrgCommandTrait
         $orgs = $this->getOrgs();
 
         if (array_key_exists('default', $orgs)) {
-            return $orgs['default'];
+            return $orgs[$orgs['default']];
         }
 
         if (count($orgs) === 1) {
