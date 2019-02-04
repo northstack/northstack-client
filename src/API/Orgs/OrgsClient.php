@@ -50,6 +50,24 @@ class OrgsClient extends BaseApiClient
             ->get("/orgs/$orgId/users");
     }
 
+    public function addUser($accessToken, $orgId, $firstName, $lastName, array $permissions, $email = null)
+    {
+        $data = [
+            'firstName' => $firstName,
+            'lastName' => $lastName,
+            'permissions' => $permissions,
+        ];
+
+        if ($email) {
+            $data['email'] = $email;
+        }
+
+        return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
+            ->post("/orgs/$orgId/users", [
+                'json' => $data,
+            ]);
+    }
+
     public function getUser($accessToken, $userId)
     {
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
