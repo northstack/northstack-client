@@ -91,4 +91,21 @@ class SappClient extends BaseApiClient
                 ],
             ]);
     }
+
+    public function accessStats($accessToken, string $sappId, \DateTimeInterface $start, \DateTimeInterface $end, array $filters = [])
+    {
+        $query = $filters;
+
+        if ($start) {
+            $query['fromDate'] = $start->format('c');
+        }
+        if ($end) {
+            $query['toDate'] = $end->format('c');
+        }
+
+        return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
+            ->get("/bank/stats/access/sapp/{$sappId}", [
+                'query' => $query,
+            ]);
+    }
 }
