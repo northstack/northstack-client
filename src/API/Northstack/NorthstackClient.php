@@ -1,6 +1,4 @@
 <?php
-
-
 namespace NorthStack\NorthStackClient\API\Northstack;
 
 
