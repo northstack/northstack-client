@@ -27,7 +27,8 @@ class ReleaseAndDeployCommand extends AbstractDeployCmd
         Client $guzzle,
         Archiver $archiver,
         DeployClient $deployClient
-    ) {
+    )
+    {
         parent::__construct($api, $authApi, $guzzle, $archiver);
         $this->deployClient = $deployClient;
     }
@@ -78,7 +79,7 @@ class ReleaseAndDeployCommand extends AbstractDeployCmd
             $output->writeln('Building container...');
             $result = $this->deployClient->build($this->token->token, $sappId, $input->getArgument('title'), $notes);
         } catch (ClientException $e) {
-            $output->writeln('Could not generate an initial build. - '.$e->getMessage());
+            $output->writeln('Could not generate an initial build. - ' . $e->getMessage());
             exit(1);
         }
 
@@ -88,7 +89,7 @@ class ReleaseAndDeployCommand extends AbstractDeployCmd
             $output->writeln('Updating Gateway...');
             $this->deployClient->gateway($this->token->token, $release->id);
         } catch (ClientException $e) {
-            $output->writeln('Could not update gateway. - '.$e->getMessage());
+            $output->writeln('Could not update gateway. - ' . $e->getMessage());
             exit(1);
         }
 
@@ -102,7 +103,7 @@ class ReleaseAndDeployCommand extends AbstractDeployCmd
             $output->writeln('Running Single Worker...');
             $this->deployClient->run($this->token->token, $release->id);
         } catch (ClientException $e) {
-            $output->writeln('Failed to start worker. - '.$e->getMessage());
+            $output->writeln('Failed to start worker. - ' . $e->getMessage());
             exit(1);
         }
 
@@ -134,19 +135,19 @@ class ReleaseAndDeployCommand extends AbstractDeployCmd
             $output->writeln('Stopping old workers...');
             $this->deployClient->stopOld($this->token->token, $release->id);
         } catch (ClientException $e) {
-            $output->writeln('Failed to stop all old workers. - '.$e->getMessage());
+            $output->writeln('Failed to stop all old workers. - ' . $e->getMessage());
             exit(1);
         }
 
         $output->writeln('Release and Deploy Finished!');
     }
 
-    protected function testWorker(string $releaseId) {
+    protected function testWorker(string $releaseId)
+    {
         try {
             $result = $this->deployClient->test($this->token->token, $releaseId);
             $status = json_decode($result->getBody()->getContents());
-            if ($status === 'PASSING')
-            {
+            if ($status === 'PASSING') {
                 return 'HEALTHY';
             }
             return $status;

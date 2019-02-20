@@ -36,15 +36,13 @@ class InfoCommand extends Command
         $this
             ->setDescription('Show details about an App')
             ->addArgument('name', InputArgument::REQUIRED, 'App name')
-            ->addArgument('environment', InputArgument::REQUIRED, 'Environment (prod, test, or dev)')
-        ;
+            ->addArgument('environment', InputArgument::REQUIRED, 'Environment (prod, test, or dev)');
         $this->addOauthOptions();
     }
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        if ($output->isDebug())
-        {
+        if ($output->isDebug()) {
             $this->api->setDebug();
         }
 

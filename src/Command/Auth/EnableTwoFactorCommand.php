@@ -1,4 +1,5 @@
 <?php
+
 namespace NorthStack\NorthStackClient\Command\Auth;
 
 use GuzzleHttp\Exception\ClientException;
@@ -30,15 +31,13 @@ class EnableTwoFactorCommand extends Command
     {
         parent::configure();
         $this
-            ->setDescription('Enable Two-Factor Authentication')
-        ;
+            ->setDescription('Enable Two-Factor Authentication');
         $this->addOauthOptions();
     }
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        if ($output->isDebug())
-        {
+        if ($output->isDebug()) {
             $this->api->setDebug(true);
         }
 

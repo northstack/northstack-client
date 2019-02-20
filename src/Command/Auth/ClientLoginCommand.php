@@ -1,4 +1,5 @@
 <?php
+
 namespace NorthStack\NorthStackClient\Command\Auth;
 
 use NorthStack\NorthStackClient\Command\Command;
@@ -13,6 +14,7 @@ use NorthStack\NorthStackClient\OauthToken;
 class ClientLoginCommand extends AbstractAuthCmd
 {
     protected $api;
+
     public function __construct(AuthApi $api)
     {
         parent::__construct('auth:client-login');
@@ -27,14 +29,12 @@ class ClientLoginCommand extends AbstractAuthCmd
             ->addArgument('clientId', InputArgument::REQUIRED)
             ->addArgument('clientSecret', InputArgument::REQUIRED)
             ->addOption('scope', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Scope keys', [])
-            ->addOption('show', 's', InputOption::VALUE_NONE, 'Just show the token, do not save it!')
-        ;
+            ->addOption('show', 's', InputOption::VALUE_NONE, 'Just show the token, do not save it!');
     }
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        if ($output->isDebug())
-        {
+        if ($output->isDebug()) {
             $this->api->setDebug(true);
         }
 

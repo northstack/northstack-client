@@ -56,8 +56,7 @@ abstract class AbstractDeployCmd extends Command
         parent::configure();
         $this
             ->addArgument('name', InputArgument::REQUIRED, 'App name')
-            ->addArgument('environment', InputArgument::REQUIRED, 'Environment (prod, test, or dev)')
-        ;
+            ->addArgument('environment', InputArgument::REQUIRED, 'Environment (prod, test, or dev)');
         $this->addOauthOptions();
     }
 

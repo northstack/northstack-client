@@ -1,4 +1,5 @@
 <?php
+
 namespace NorthStack\NorthStackClient\Command\Auth;
 
 use NorthStack\NorthStackClient\Command\Command;

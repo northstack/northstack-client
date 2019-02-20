@@ -41,15 +41,13 @@ class LaunchCommand extends Command
             ->setDescription('Launch a worker for an App')
             ->setHelp('Northstack will launch additional workers for you as needed.  This command can be used for debugging, or to prime additional capacity.  Note that unused capacity will shutoff after the inactivity period.')
             ->addArgument('name', InputArgument::REQUIRED, 'App name')
-            ->addArgument('environment', InputArgument::REQUIRED, 'Environment (prod, test, or dev)')
-        ;
+            ->addArgument('environment', InputArgument::REQUIRED, 'Environment (prod, test, or dev)');
         $this->addOauthOptions();
     }
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        if ($output->isDebug())
-        {
+        if ($output->isDebug()) {
             $this->api->setDebug();
         }
 
@@ -60,19 +58,16 @@ class LaunchCommand extends Command
             $args['environment']
         );
 
-        try
-        {
+        try {
             $r = $this->api->launchWorker(
                 $this->token->token,
                 $sappId
             );
-        }
-        catch(ClientException $e)
-        {
+        } catch (ClientException $e) {
             $r = $e->getResponse();
         }
 
-        $output->writeln("Launch finished code: ".$r->getStatusCode());
+        $output->writeln("Launch finished code: " . $r->getStatusCode());
         $output->writeln($r->getBody()->getContents());
     }
 }

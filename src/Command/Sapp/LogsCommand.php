@@ -50,8 +50,7 @@ class LogsCommand extends Command
             ->addArgument('environment', InputArgument::REQUIRED, 'Environment (prod, test, or dev)')
             ->addArgument('topic', InputArgument::REQUIRED, 'Log type (access, error, build)')
             ->addOption('topicOverride', 't', InputOption::VALUE_REQUIRED, 'Override Topic (You should know what you are doing if you are using this)')
-            ->addOption('json', null, InputOption::VALUE_NONE, 'Output raw json', null)
-        ;
+            ->addOption('json', null, InputOption::VALUE_NONE, 'Output raw json', null);
         $this->addOauthOptions();
     }
 
@@ -75,8 +74,7 @@ class LogsCommand extends Command
         /** @var LogFormatInterface $formatter */
         $formatter = new $format($output);
 
-        if ($args['topic'] === 'build')
-        {
+        if ($args['topic'] === 'build') {
             if (!isset($sappId)) {
                 throw new \RuntimeException('Sapp not determined for build logs');
             }
@@ -84,7 +82,7 @@ class LogsCommand extends Command
             exit;
         }
         $this->api->streamTopic($this->token->token, function (Message $message) use ($formatter) {
-            $data = json_decode((string) $message);
+            $data = json_decode((string)$message);
             $formatter->render($data);
         }, $topic, $output);
     }
@@ -96,12 +94,11 @@ class LogsCommand extends Command
             $sappId
         );
         $data = json_decode($resp->getBody()->getContents());
-        foreach ($data->data as $msg)
-        {
+        foreach ($data->data as $msg) {
             // Massaging things a bit to get the events into the same format as the streaming API
-            $msg->{'@timestamp'} = $msg->timestamp/1000;
+            $msg->{'@timestamp'} = $msg->timestamp / 1000;
             $formatter->render(
-                (object) [
+                (object)[
                     'type' => 'log',
                     'message' => json_encode($msg)
                 ]

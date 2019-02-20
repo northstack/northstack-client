@@ -1,4 +1,5 @@
 <?php
+
 namespace NorthStack\NorthStackClient\Command\Auth;
 
 use NorthStack\NorthStackClient\Command\Command;
@@ -23,25 +24,21 @@ class WhoAmICommand extends AbstractAuthCmd
     {
         parent::configure();
         $this
-            ->setDescription('Details about the currently logged in user')
-        ;
+            ->setDescription('Details about the currently logged in user');
         $this->addOauthOptions();
     }
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        if ($output->isDebug())
-        {
+        if ($output->isDebug()) {
             $this->api->setDebug(true);
         }
 
         $io = new SymfonyStyle($input, $output);
-        if (!empty($this->token->token))
-        {
+        if (!empty($this->token->token)) {
             $user = $this->requireLogin($this->api);
 
-            if ($user)
-            {
+            if ($user) {
                 $io->writeln("Currently logged in as {$user->type}:{$user->id}");
                 $io = new SymfonyStyle($input, $output);
 
@@ -59,8 +56,7 @@ class WhoAmICommand extends AbstractAuthCmd
                 $permissions = json_decode($r->getBody()->getContents());
                 $headers = ['Org Id', 'Permission', 'Added By', 'Updated'];
                 $rows = [];
-                foreach($permissions->data as $org)
-                {
+                foreach ($permissions->data as $org) {
                     $rows[] = [$org->orgId, $org->permissions, $org->addedByUser, $org->updated];
                 }
                 $io->table($headers, $rows);

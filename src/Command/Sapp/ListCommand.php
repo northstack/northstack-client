@@ -45,8 +45,7 @@ class ListCommand extends Command
         parent::configure();
         $this->setDescription('List Northstack Apps')
             ->addOption('name', null, InputOption::VALUE_REQUIRED, 'App name to filter by')
-            ->addOption('orgId', null, InputOption::VALUE_REQUIRED, 'Only needed if you have access to multiple organizations')
-        ;
+            ->addOption('orgId', null, InputOption::VALUE_REQUIRED, 'Only needed if you have access to multiple organizations');
         $this->addOauthOptions();
     }
 
@@ -65,8 +64,7 @@ class ListCommand extends Command
         $io = new SymfonyStyle($input, $output);
 
         $headers = ['Type', 'Name', 'Primary Domain', 'Env', 'Id'];
-        foreach($body->data as $sapp)
-        {
+        foreach ($body->data as $sapp) {
             $rows[] = [
                 $sapp->appType,
                 $sapp->name,

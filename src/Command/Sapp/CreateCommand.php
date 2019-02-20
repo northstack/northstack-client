@@ -51,12 +51,12 @@ class CreateCommand extends Command
             ->addArgument('primaryDomain', InputArgument::REQUIRED, 'Primary Domain')
             ->addOption('cluster', null, InputOption::VALUE_REQUIRED, 'Deployment location', 'dev-us-east-1')
             ->addOption('orgId', null, InputOption::VALUE_REQUIRED, 'Only needed if you have access to multiple organizations')
-            ->addOption('stack', null, InputOption::VALUE_REQUIRED, 'Application stack type (one of: [wordpress, static])', 'wordpress')
-        ;
+            ->addOption('stack', null, InputOption::VALUE_REQUIRED, 'Application stack type (one of: [wordpress, static])', 'wordpress');
         $this->addOauthOptions();
     }
 
-    protected function mkDirIfNotExists($path) {
+    protected function mkDirIfNotExists($path)
+    {
         if (
             !file_exists($path) &&
             !mkdir($concurrentDirectory = $path) && !is_dir($concurrentDirectory)
@@ -68,8 +68,7 @@ class CreateCommand extends Command
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        if ($output->isDebug())
-        {
+        if ($output->isDebug()) {
             $this->api->setDebug();
         }
 
@@ -103,7 +102,7 @@ class CreateCommand extends Command
         $questionHelper = $this->getHelper('question');
 
         // TODO: move this logic somewhere else
-        switch($options['stack']) {
+        switch ($options['stack']) {
             case 'wordpress':
                 $appTemplate = new WordPressType($input, $output, $questionHelper, $templateArgs);
                 break;
@@ -150,8 +149,7 @@ class CreateCommand extends Command
 
         $headers = ['id', 'environment', 'fqdn', 'config path'];
         $rows = [];
-        foreach ($sapps as $sapp)
-        {
+        foreach ($sapps as $sapp) {
             $rows[] = [
                 $sapp->id,
                 $sapp->environment,
@@ -160,7 +158,7 @@ class CreateCommand extends Command
                     : "ns-{$sapp->id}.{$sapp->cluster}-northstack.com",
                 "{$appPath}/config/{$sapp->environment}"
             ];
-       }
+        }
         $io->table($headers, $rows);
 
         $io->writeln("Paths:");
