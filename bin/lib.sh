@@ -150,7 +150,8 @@ mkdirP() {
     local dir=$1
     local parent=$dir
     while [[ ! -d $parent ]]; do
-        parent=$(dirname "$dir")
+        debug "Parent dir not found, making dir: ${parent}"
+        parent=$(dirname "$parent")
     done
     if [[ -w $parent ]]; then
         debugCmd mkdir -pv "$dir"
@@ -328,4 +329,6 @@ installComposerDeps() {
         --volume "${ctx}:/app" \
         --user "$UID:$(getGid)" \
         composer install --ignore-platform-reqs
+
+    debug "Completed all of the composer install stuff. Onward!"
 }

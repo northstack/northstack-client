@@ -204,6 +204,7 @@ doNativeInstall() {
     local install_path=$(setInstallPrefix)
     installComposerDeps "$ctx"
 
+    debug "Install path: ${install_path}"
     local dest="${install_path}/northstack"
 
     mkdirP "$dest"
