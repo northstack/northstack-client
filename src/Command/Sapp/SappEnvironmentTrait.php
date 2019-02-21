@@ -60,7 +60,7 @@ trait SappEnvironmentTrait
         $configs = [
             'config' => file_get_contents("{$appFolder}/config/config.json"),
             'build' => file_get_contents("{$appFolder}/config/build.json"),
-            'domains' => '{}',
+            'domains' => '[]',
         ];
 
         // the gateway file doesn't have to exist at all
@@ -71,9 +71,19 @@ trait SappEnvironmentTrait
         foreach ($configs as $file => $json) {
             $envFile = "{$appFolder}/config/{$environment}/{$file}.json";
             if (file_exists($envFile)) {
+                // fix domains if they are in the old format
+                if ($file === 'domains') {
+                    $domains = json_decode(file_get_contents($envFile));
+                    if (!is_array($domains)) {
+                        if (is_object($domains) && $domains->domains) {
+                            $json = json_encode($domains->domains);
+                            file_put_contents($envFile, $json);
+                        } else {
+                            throw new \RuntimeException('Invalid structure in: '.$envFile);
+                        }
+                    }
+                }
                 $configs[$file] = Merger::merge($json, file_get_contents($envFile));
-            } else {
-                $configs[$file] = Merger::merge($json, '{}');
             }
 
             if ($decode) {
