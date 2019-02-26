@@ -61,13 +61,17 @@ class InfoCommand extends Command
         $headers = ['Field', 'Value'];
         $rows = [
             ['Name', $app->name],
+            ['Type', $app->appType],
             ['Cluster', $app->cluster],
             ['Id', $app->id],
             ['OrgId', $app->orgId],
+            ['Created', $app->created],
             ['Parent', $app->parentSapp],
             ['Env', $app->environment],
             ['Stack', $app->appType],
+            ['Primary Domain', $app->primaryDomain],
             ['Domains', implode("\n", $app->domains)],
+            ['Current Release', $app->currentRelease ?: 'No releases found'],
         ];
 
         $io->table($headers, $rows);
