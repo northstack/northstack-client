@@ -29,6 +29,7 @@ class Merger
                 }
             } elseif (is_array($merge)) {
                 array_push($new, ...$merge);
+                $new  = array_unique($new);
             }
         }
 
