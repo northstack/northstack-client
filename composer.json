@@ -2,7 +2,7 @@
     "name": "northstack/northstack-client",
     "description": "Commands for serverless environment management",
     "type": "library",
-    "license": "GPL3",
+    "license": "GPL-3.0-only",
     "bin": [
         "bin/northstack"
     ],
