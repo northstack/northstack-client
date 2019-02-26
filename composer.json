@@ -1,5 +1,5 @@
 {
-    "name": "pagely/northstack-client",
+    "name": "northstack/northstack-client",
     "description": "Commands for serverless environment management",
     "type": "library",
     "license": "GPL3",
