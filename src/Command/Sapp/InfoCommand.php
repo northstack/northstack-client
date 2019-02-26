@@ -67,7 +67,7 @@ class InfoCommand extends Command
             ['Parent', $app->parentSapp],
             ['Env', $app->environment],
             ['Stack', $app->appType],
-            ['Domains', implode("\n", $app->domains->domains)],
+            ['Domains', implode("\n", $app->domains)],
         ];
 
         $io->table($headers, $rows);
