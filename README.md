@@ -18,7 +18,7 @@ The native install method is preferred and more performant, so it's best if you'
 ## Install
 
 ```
-git clone git@github.com:pagely/northstack.git
+git clone git@github.com:northstack/northstack-client.git
 cd northstack
 ./bin/install.sh
 ```
