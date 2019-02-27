@@ -7,6 +7,22 @@ BASE="$( dirname "$CDIR")"
 . "$CDIR"/lib.sh
 . "$CDIR"/lib-install.sh
 
+echo ""
+echo "NorthStack Client Installer"
+echo ""
+echo "||========================||"
+echo "||                    .   ||"
+echo "||                 φ▒╬▌   ||"
+echo "||   ▓▓▓▓▓▓▓▓▓▓▀,#╬╬╬╬▌   ||"
+echo "||   ▓▓▓▓▓▓▓▓╨╓╣╬╬╬╬╬╬▌   ||"
+echo "||   ▓▓▓▓▓▀╙╓▒╬╬╬╬╬╬╬╬▌   ||"
+echo "||   ▓▓▓▀ ╔▒╬╬╬╬╬╬╬╬╬╬▌   ||"
+echo "||   ▓▀.φ▒╬╬╬╬╬╬╬╬╬╬╬╬▌   ||"
+echo "||                        ||"
+echo "||========================||"
+echo ""
+
+
 
 if [[ ${0##*/} == "install-dev.sh" ]]; then
     isDev=1
@@ -15,3 +31,4 @@ else
 fi
 
 install "$BASE" "$isDev"
+

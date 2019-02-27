@@ -189,39 +189,67 @@ afterInstall() {
     local path=$1
     local bindir=$path/bin
 
+    # We're just going to attempt to update all of the potential bash profiles that might be used. Everyone is different!
+    log info "Attempting to update all possible bash profiles -- sometimes we've just gotta do that."
+    updateBashProfile ~/.bash_profile
+    updateBashProfile ~/.bashrc
+    updateBashProfile ~/.zshrc
+
     log info "NorthStack client installed at $path/bin/northstack"
+}
 
-    log info "Remember to add $bindir to your \$PATH if it's not already present. Example:"
+updateBashProfile() {
+    local bashFile=$1
 
-    printf 'echo "%s" >> ~/.bashrc\n' "PATH=${bindir}:\$PATH"
+    if grep --quiet $bindir $bashFile; then
+        log info "NorthStack path found in ${bashFile}, continuing without update."
+    else
+        log info "NorthStack path not found in ${bashFile}, verifying that the file is writeable."
+        if [ -w $bashFile ]; then
+            log info "${bashFile} is writeable."
+            # Add to the bashrc file so the command can be run
+            echo "# NorthStack path: " >> $bashFile
+            echo "export PATH=${bindir}:\$PATH" >> $bashFile
+
+            # The user still needs to refresh their terminal window to use the new source
+            echo ""
+            log warn "**** New path added to your bash profile, please start a new terminal session. ****"
+            echo ""
+        else
+            log error "Looks like ${bashFile} is not writeable. Please add the following to it and then open a new terminal session: "
+            log error "export PATH=${bindir}:\$PATH"
+            showErrors
+        fi
+    fi
 }
 
 doNativeInstall() {
-    local cxt=$1
+    local context=$1
 
     log info "Installing natively"
 
     local install_path=$(setInstallPrefix)
-    installComposerDeps "$ctx"
+    installComposerDeps "$context"
 
     debug "Install path: ${install_path}"
     local dest="${install_path}/northstack"
 
     mkdirP "$dest"
-    copyFiles "$ctx" "$dest"
+    copyFiles "$context" "$dest"
     lnS "$dest/bin/northstack" "${install_path}/bin/northstack"
+
     afterInstall "$install_path"
 }
 
 doDockerInstall() {
-    local ctx=$1
+    local context=$1
     local isDev=$2
 
     log info "Installing with docker"
 
     checkDocker
-    [[ $isDev == 1 ]] && installComposerDeps "$ctx"
-    buildDockerImage "$ctx"
+    [[ $isDev == 1 ]] && installComposerDeps "$context"
+    buildDockerImage "$context"
 
     local wrapperFile=$(mktemp)
 
@@ -229,10 +257,10 @@ doDockerInstall() {
 
     local install_path=$(setInstallPrefix)
 
-    "$ctx"/bin/build-wrapper.sh "$wrapperFile" "$BASE" "$isDev"
+    "$context"/bin/build-wrapper.sh "$wrapperFile" "$BASE" "$isDev"
 
     copyFiles "$wrapperFile" "${install_path}/bin/northstack"
-    copyFiles "${ctx}/docker" "${install_path}/lib/northstack/docker"
+    copyFiles "${context}/docker" "${install_path}/lib/northstack/docker"
 
     afterInstall "$install_path"
 }
@@ -244,15 +272,15 @@ complain() {
 }
 
 install() {
-    local ctx=$1
+    local context=$1
     local isDev=${2:-0}
 
     selectInstallMethod
     case $INSTALL_METHOD in
         native)
-            doNativeInstall "$ctx";;
+            doNativeInstall "$context";;
         docker)
-            doDockerInstall "$ctx" "$isDev";;
+            doDockerInstall "$context" "$isDev";;
         *)
             complain;;
     esac
