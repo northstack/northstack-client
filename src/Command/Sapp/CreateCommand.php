@@ -153,10 +153,8 @@ class CreateCommand extends Command
             $rows[] = [
                 $sapp->id,
                 $sapp->environment,
-                ($sapp->parentSapp === null)
-                    ? $sapp->primaryDomain
-                    : "ns-{$sapp->id}.{$sapp->cluster}-northstack.com",
-                "{$appPath}/config/{$sapp->environment}"
+                $sapp->primaryDomain,
+                "{$appPath}/config/{$sapp->environment}",
             ];
         }
         $io->table($headers, $rows);
