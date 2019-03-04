@@ -3,8 +3,6 @@
 namespace NorthStack\NorthStackClient\AppTypes;
 
 
-use Pagely\Model\Sapps\Sapp;
-
 class WordPressType extends BaseType
 {
     protected $args = [
@@ -93,7 +91,7 @@ class WordPressType extends BaseType
     }
 
     /**
-     * @param Sapp $sapp
+     * @param $sapp
      * @return array
      */
     protected function buildWpInstallArgs($sapp)
