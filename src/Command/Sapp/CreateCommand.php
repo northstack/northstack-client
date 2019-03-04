@@ -49,9 +49,10 @@ class CreateCommand extends Command
             ->setDescription('NorthStack App Create')
             ->addArgument('name', InputArgument::REQUIRED, 'App name')
             ->addArgument('primaryDomain', InputArgument::REQUIRED, 'Primary Domain')
+            ->addArgument('stack', null, InputArgument::REQUIRED, 'Application stack type (one of: [wordpress, static])')
             ->addOption('cluster', null, InputOption::VALUE_REQUIRED, 'Deployment location', 'dev-us-east-1')
             ->addOption('orgId', null, InputOption::VALUE_REQUIRED, 'Only needed if you have access to multiple organizations')
-            ->addOption('stack', null, InputOption::VALUE_REQUIRED, 'Application stack type (one of: [wordpress, static])', 'wordpress');
+            ;
         $this->addOauthOptions();
     }
 
@@ -101,8 +102,7 @@ class CreateCommand extends Command
         ];
         $questionHelper = $this->getHelper('question');
 
-        // TODO: move this logic somewhere else
-        switch ($options['stack']) {
+        switch ($args['stack']) {
             case 'wordpress':
                 $appTemplate = new WordPressType($input, $output, $questionHelper, $templateArgs);
                 break;
@@ -110,7 +110,7 @@ class CreateCommand extends Command
                 $appTemplate = new StaticType($input, $output, $questionHelper, $templateArgs);
                 break;
             default:
-                throw new \Exception("Invalid stack {$options['stack']}");
+                throw new \Exception("Invalid stack {$args['stack']}");
         }
         $appTemplate->promptForArgs();
 
@@ -121,7 +121,7 @@ class CreateCommand extends Command
                 $orgId,
                 $options['cluster'],
                 $args['primaryDomain'],
-                strtoupper($options['stack'])
+                strtoupper($args['stack'])
             );
         } catch (ClientException $e) {
             $i = $e->getResponse()->getStatusCode();

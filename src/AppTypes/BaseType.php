@@ -115,23 +115,17 @@ abstract class BaseType
     {
         foreach ($this->sapps as $sapp)
         {
+            if ('prod' === $sapp->environment) {
+                $sapp->domains[] = $sapp->primaryDomain;
+            }
+
             $this->writeConfigFile(
                 "config/{$sapp->environment}/domains.json",
                 [
-                    'domains' => [$this->domainForSapp($sapp)]
+                    'domains' => $sapp->domains,
                 ]
             );
         }
-    }
-
-    protected function domainForSapp($sapp)
-    {
-        if ($sapp->environment === 'prod')
-        {
-            return $this->config['primaryDomain'];
-        }
-
-        return "ns-{$sapp->id}.{$sapp->cluster}-northstack.com";
     }
 
     protected function writePerEnvConfigs()

@@ -3,6 +3,8 @@
 namespace NorthStack\NorthStackClient\AppTypes;
 
 
+use Pagely\Model\Sapps\Sapp;
+
 class WordPressType extends BaseType
 {
     protected $args = [
@@ -90,11 +92,15 @@ class WordPressType extends BaseType
         );
     }
 
+    /**
+     * @param Sapp $sapp
+     * @return array
+     */
     protected function buildWpInstallArgs($sapp)
     {
         return [
             'wordpress-install' => [
-                'url'         => $this->domainForSapp($sapp),
+                'url'         => $sapp->primaryDomain,
                 'title'       => $this->config['wpTitle'],
                 'admin_user'  => $this->config['wpAdminUser'],
                 'admin_pass'  => $this->config['wpAdminPass'],
