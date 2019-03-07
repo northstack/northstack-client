@@ -8,6 +8,7 @@ use NorthStack\NorthStackClient\API\Sapp\SappClient;
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
 
+use NorthStack\NorthStackClient\Command\UserSettingsCommandTrait;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -17,6 +18,7 @@ class InfoCommand extends Command
 {
     use OauthCommandTrait;
     use SappEnvironmentTrait;
+    use UserSettingsCommandTrait;
     /**
      * @var SappClient
      */
@@ -49,6 +51,7 @@ class InfoCommand extends Command
         $args = $input->getArguments();
 
         [$sappId] = $this->getSappIdAndFolderByOptions(
+            $this->findDefaultAppsDir($input, $output, $this->getHelper('question')),
             $args['name'],
             $args['environment']
         );

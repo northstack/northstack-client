@@ -8,21 +8,25 @@ use NorthStack\NorthStackClient\API\Sapp\SappClient;
 use NorthStack\NorthStackClient\API\Orgs\OrgsClient;
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
+use NorthStack\NorthStackClient\Command\UserSettingsCommandTrait;
 use NorthStack\NorthStackClient\OrgAccountHelper;
 
 use NorthStack\NorthStackClient\AppTypes\StaticType;
 use NorthStack\NorthStackClient\AppTypes\WordPressType;
 
+use NorthStack\NorthStackClient\UserSettingsHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Command\HelpCommand;
 
 class CreateCommand extends Command
 {
     use OauthCommandTrait;
+    use UserSettingsCommandTrait;
     /**
      * @var SappClient
      */
@@ -34,7 +38,11 @@ class CreateCommand extends Command
      */
     private $orgAccountHelper;
 
-    public function __construct(SappClient $api, OrgsClient $orgs, OrgAccountHelper $orgAccountHelper)
+    public function __construct(
+        SappClient $api,
+        OrgsClient $orgs,
+        OrgAccountHelper $orgAccountHelper
+    )
     {
         parent::__construct('app:create');
         $this->api = $api;
@@ -49,22 +57,12 @@ class CreateCommand extends Command
             ->setDescription('NorthStack App Create')
             ->addArgument('name', InputArgument::REQUIRED, 'App name')
             ->addArgument('primaryDomain', InputArgument::REQUIRED, 'Primary Domain')
-            ->addArgument('stack', null, InputArgument::REQUIRED, 'Application stack type (one of: [wordpress, static])')
+            ->addArgument('stack', InputArgument::REQUIRED, 'Application stack type (one of: [wordpress, static])')
             ->addOption('cluster', null, InputOption::VALUE_REQUIRED, 'Deployment location', 'dev-us-east-1')
             ->addOption('orgId', null, InputOption::VALUE_REQUIRED, 'Only needed if you have access to multiple organizations')
-            ;
+            ->addOption('useDefaultLocation', null, InputOption::VALUE_REQUIRED, 'Only needed if you have access to multiple organizations')
+        ;
         $this->addOauthOptions();
-    }
-
-    protected function mkDirIfNotExists($path)
-    {
-        if (
-            !file_exists($path) &&
-            !mkdir($concurrentDirectory = $path) && !is_dir($concurrentDirectory)
-        ) {
-            throw new \RuntimeException(sprintf('Directory "%s" was not created',
-                $concurrentDirectory));
-        }
     }
 
     public function execute(InputInterface $input, OutputInterface $output)
@@ -76,9 +74,8 @@ class CreateCommand extends Command
         $args = $input->getArguments();
         $options = $input->getOptions();
 
-        // create folder structure
-
-        $nsdir = getcwd();
+        $questionHelper = $this->getHelper('question');
+        $nsdir = $this->findDefaultAppsDir($input, $output, $questionHelper);
 
         $appPath = "{$nsdir}/{$args['name']}";
 
@@ -100,7 +97,7 @@ class CreateCommand extends Command
             'accountUsername' => $user->username,
             'accountEmail' => $user->email
         ];
-        $questionHelper = $this->getHelper('question');
+
 
         switch ($args['stack']) {
             case 'wordpress':

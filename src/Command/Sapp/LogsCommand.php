@@ -7,6 +7,7 @@ use GuzzleHttp\Client;
 use NorthStack\NorthStackClient\API\Logs\LogsClient;
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
+use NorthStack\NorthStackClient\Command\UserSettingsCommandTrait;
 use NorthStack\NorthStackClient\JSON\Merger;
 use NorthStack\NorthStackClient\LogFormat\LogFormat;
 use NorthStack\NorthStackClient\LogFormat\LogFormatInterface;
@@ -20,6 +21,7 @@ class LogsCommand extends Command
 {
     use OauthCommandTrait;
     use SappEnvironmentTrait;
+    use UserSettingsCommandTrait;
     /**
      * @var LogsClient
      */
@@ -32,6 +34,8 @@ class LogsCommand extends Command
      * @var Merger
      */
     private $merger;
+
+    const LOG_TOPICS = ['access', 'error', 'build'];
 
     public function __construct(
         LogsClient $api
@@ -61,9 +65,15 @@ class LogsCommand extends Command
 
         if (!$options['topicOverride']) {
             [$sappId] = $this->getSappIdAndFolderByOptions(
+                $this->findDefaultAppsDir($input, $output, $this->getHelper('question')),
                 $args['name'],
                 $args['environment']
             );
+
+            if (!in_array($args['topic'], self::LOG_TOPICS)) {
+                $output->writeln('<error>Log topic must be one of the following: ' . implode(',', self::LOG_TOPICS) . '</error>');
+                return;
+            }
             $topic = "{$sappId}_{$args['topic']}";
         } else {
             $topic = $options['topicOverride'];

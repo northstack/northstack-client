@@ -6,7 +6,6 @@ strToLower() {
     tr '[:upper:]' '[:lower:]' <<< "$@"
 }
 
-
 log() {
     local level=$1
     level=$(strToLower "$level")
@@ -331,4 +330,54 @@ installComposerDeps() {
         composer install --ignore-platform-reqs
 
     debug "Completed all of the composer install stuff. Onward!"
+}
+
+# Display text in a chosen color
+# @param $color text color
+# @param $message
+# param bool $newline return at the end of the line(defaults to true)
+#param $backgroundColor optional, defaults to transparent
+colorText() {
+    local color=$1
+    local prefix=$'\e['
+    local end=$'\e[0m'
+    local background=${4:-""}
+
+    local textPrefix="38;5;"
+
+    local red="196"
+    local orange="208"
+    local yellow="226"
+    local green="82"
+    local cyan="45"
+    local blue="27"
+    local purple="129"
+    local magenta="199"
+    local black="0"
+    local white="255"
+    local grey="242"
+
+    eval color=\$$color # ʕノ•ᴥ•ʔノ ︵ ┻━┻ variable variables
+
+    if [ -z "$background" ] # if no bg color is defined
+    then
+        color=${prefix}${textPrefix}${color}m
+    else
+        local bgPrefix="48;5;"
+        eval background=\$$background # ʕノ•ᴥ•ʔノ ︵ ┻━┻ use the same colors but for text bg
+        color=${prefix}${textPrefix}${color}m${prefix}${bgPrefix}${background}m
+    fi
+
+    local defaultMSG="";
+    local defaultNewLine=true;
+
+    local message=${2:-$defaultMSG};   # Defaults to default message.
+    local newLine=${3:-$defaultNewLine};
+
+    echo -en "${color}${message}${end}";
+    if [ "$newLine" = true ] ; then
+        echo;
+    fi
+
+    return;
 }

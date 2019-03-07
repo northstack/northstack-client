@@ -5,12 +5,13 @@ namespace NorthStack\NorthStackClient\Command\Sapp;
 
 
 use NorthStack\NorthStackClient\JSON\Merger;
+use NorthStack\NorthStackClient\UserSettingsHelper;
 
 trait SappEnvironmentTrait
 {
-    protected function getSappIdAndFolderByOptions($name, $environment)
+    protected function getSappIdAndFolderByOptions($appDir, $name, $environment)
     {
-        $appFolder = getcwd() . '/' . $name;
+        $appFolder = $appDir . '/' . $name;
 
         if (!file_exists($appFolder)) {
             throw new \RuntimeException("<error>Folder {$appFolder} not found</error>");
@@ -22,14 +23,18 @@ trait SappEnvironmentTrait
         return [$envConfig[$environment], $appFolder];
     }
 
-    protected function getSappFromWorkingDir($env = 'prod')
+    protected function getSapp($name, $env = 'prod')
     {
-        $cwd = getcwd();
-        $name = basename($cwd);
+        $dir = UserSettingsHelper::get(UserSettingsHelper::KEY_LOCAL_APPS_DIR);
+        if (!$dir) {
+            throw new \Exception('No local apps directory set. ', 400);
+        }
+
+        $dir = $dir . "/$name";
 
         array_map(
-            function ($path) use ($cwd) {
-                $path = $cwd . $path;
+            function ($path) use ($dir) {
+                $path = $dir . $path;
                 if (!file_exists($path)) {
                     throw new \Exception("Command must be executed inside an app directory (missing: {$path})");
                 }
@@ -43,8 +48,8 @@ trait SappEnvironmentTrait
             ]
         );
 
-        $conf = $this->mergeConfigs($cwd, $env, true);
-        $environments = json_decode(file_get_contents("{$cwd}/config/environment.json"));
+        $conf = $this->mergeConfigs($dir, $env, true);
+        $environments = json_decode(file_get_contents("{$dir}/config/environment.json"));
         $conf['name'] = $name;
         if ($env !== 'local') {
             $conf['id'] = $environments->{$env};
@@ -79,7 +84,7 @@ trait SappEnvironmentTrait
                             $json = json_encode($domains->domains);
                             file_put_contents($envFile, $json);
                         } else {
-                            throw new \RuntimeException('Invalid structure in: '.$envFile);
+                            throw new \RuntimeException('Invalid structure in: ' . $envFile);
                         }
                     }
                 }

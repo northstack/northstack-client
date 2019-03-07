@@ -27,6 +27,7 @@ class SetCommand extends Command
         parent::__construct($name);
         $this
             ->setDescription('Set Sapp Secret. You can optionally pipe a value to this command')
+            ->addArgument('name', InputArgument::REQUIRED)
             ->addArgument('key', InputArgument::REQUIRED)
             ->addArgument('value', InputArgument::REQUIRED)
             ->addArgument('environment', InputArgument::OPTIONAL, 'Environment', 'dev')
@@ -38,7 +39,7 @@ class SetCommand extends Command
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        ['id' => $id] = $this->getSappFromWorkingDir($input->getArgument('environment'));
+        ['id' => $id] = $this->getSapp($input->getArgument('name'), $input->getArgument('environment'));
 
         $key = $input->getArgument('key');
         $value = null;

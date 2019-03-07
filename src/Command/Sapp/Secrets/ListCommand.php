@@ -29,6 +29,7 @@ class ListCommand extends Command
         parent::__construct($name);
         $this
             ->setDescription('List Sapp Secrets')
+            ->addArgument('name', InputArgument::REQUIRED)
             ->addArgument('environment', InputArgument::OPTIONAL, 'Environment', 'dev')
             ->addOption('show', null, InputOption::VALUE_NONE, 'Show Secret Values')
             ->addOauthOptions()
@@ -39,7 +40,7 @@ class ListCommand extends Command
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        ['id' => $id] = $this->getSappFromWorkingDir($input->getArgument('environment'));
+        ['id' => $id] = $this->getSapp($input->getArgument('name'), $input->getArgument('environment'));
         $result = $this->setecAstronomy->listSecrets($this->token->token, $id);
         $secrets = json_decode($result->getBody()->getContents())->data;
 

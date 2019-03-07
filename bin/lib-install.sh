@@ -191,30 +191,35 @@ afterInstall() {
 
     # We're just going to attempt to update all of the potential bash profiles that might be used. Everyone is different!
     log info "Attempting to update all possible bash profiles -- sometimes we've just gotta do that."
-    updateBashProfile ~/.bash_profile
-    updateBashProfile ~/.bashrc
-    updateBashProfile ~/.zshrc
+    updateBashProfile $bindir $HOME/.bash_profile
+    updateBashProfile $bindir $HOME/.bashrc
+    updateBashProfile $bindir $HOME/.zshrc
 
-    log info "NorthStack client installed at $path/bin/northstack"
+    echo ""
+
+    setUserOptions
+    colorText "green" "NorthStack client successfully installed at $path/bin/northstack ✅"
 }
 
 updateBashProfile() {
-    local bashFile=$1
+    local bindir=$1
+    local bashFile=$2
 
     if grep --quiet $bindir $bashFile; then
-        log info "NorthStack path found in ${bashFile}, continuing without update."
+        # The user still needs to refresh their terminal window to use the new source
+        colorText grey "NorthStack path found in ${bashFile}, continuing without update."
     else
-        log info "NorthStack path not found in ${bashFile}, verifying that the file is writeable."
+        colorText grey "NorthStack path not found in ${bashFile}, verifying that the file is writeable."
         if [ -w $bashFile ]; then
-            log info "${bashFile} is writeable."
+            colorText grey "${bashFile} is writeable."
             # Add to the bashrc file so the command can be run
             echo "# NorthStack path: " >> $bashFile
             echo "export PATH=${bindir}:\$PATH" >> $bashFile
 
             # The user still needs to refresh their terminal window to use the new source
-            echo ""
+            colorText "white" "                                                                 " true "red"
             log warn "**** New path added to your bash profile, please start a new terminal session. ****"
-            echo ""
+            colorText "white" "                                                                 " true "red"
         else
             log error "Looks like ${bashFile} is not writeable. Please add the following to it and then open a new terminal session: "
             log error "export PATH=${bindir}:\$PATH"
@@ -265,6 +270,73 @@ doDockerInstall() {
     afterInstall "$install_path"
 }
 
+setUserOptions() {
+    local appDir="$HOME/northstack/apps"
+
+    echo "Use the default recommended directory to store your apps?"
+    read -p "($HOME/northstack/apps) (y/N)? " choice
+
+    case "$choice" in
+        y|Y )
+             colorText grey "Default directory selected";;
+        n|N )
+            echo "Please enter the full path of the directory where you'd like to store your local NorthStack apps"
+            read customAppDir
+            appDir=${customAppDir/#~/$HOME};;
+        * )
+            colorText yellow "No choice selected, continuing with default apps directory";;
+    esac
+
+    colorText grey "Selected directory: $appDir"
+
+    # Check to see if the dir already exists -- if not, try to create it
+    if [ -d "$appDir" ]
+    then
+        colorText grey "Chosen directory found, continuing"
+    else
+        colorText grey "Chosen directory not found, attempting to create it"
+        if ! mkdir -p "$appDir";
+        then
+            log error "There was an issue creating the directory $appDir, please manually create the directory and try again."
+        else
+            colorText "green" "NorthStack apps dir successfully created at $appDir"
+        fi
+    fi
+
+    # Save that directory path to a new user settings file
+    updateUserSettings "$appDir"
+}
+
+updateUserSettings() {
+    local settingsDir="$HOME"
+    local settingsFile=".northstack-settings.json"
+    local fullPath="$settingsDir/$settingsFile"
+
+    colorText grey "Checking to make sure there's not an existing settings file (if there is, a backup will be saved).";
+
+    if [[ -e $fullPath ]];
+    then
+        colorText yellow "Existing settings file found, backing it up before we proceed."
+        local backupDate=$(date '+%Y-%m-%d_%H%M')
+        local backupFullPath="$settingsDir/.northstack-settings--backup-$backupDate.json"
+        cp $fullPath $backupFullPath
+        rm $fullPath
+    fi
+
+    local json="{\"local_apps_dir\":\"$1\"}"
+
+    echo "$json"> $fullPath
+
+    if [ ! -w $fullPath ]; then
+        chmod
+        log error "Looks like $fullPath is not writeable. Please save the following contents to it:"
+        log error "$json"
+        showErrors
+    fi
+
+    colorText grey "User settings update complete"
+}
+
 complain() {
     log error "Could not verify the minimum installation requirements for your system"
     showErrors
@@ -284,5 +356,4 @@ install() {
         *)
             complain;;
     esac
-
 }

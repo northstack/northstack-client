@@ -10,6 +10,7 @@ use NorthStack\NorthStackClient\API\Sapp\SappClient;
 use NorthStack\NorthStackClient\Build\Archiver;
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
+use NorthStack\NorthStackClient\Command\UserSettingsCommandTrait;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -18,6 +19,7 @@ abstract class AbstractDeployCmd extends Command
 {
     use SappEnvironmentTrait;
     use OauthCommandTrait;
+    use UserSettingsCommandTrait;
     /**
      * @var SappClient
      */
@@ -74,6 +76,7 @@ abstract class AbstractDeployCmd extends Command
         $args = $input->getArguments();
 
         [$sappId, $appFolder] = $this->getSappIdAndFolderByOptions(
+            $this->findDefaultAppsDir($input, $output, $this->getHelper('question')),
             $args['name'],
             $args['environment']
         );

@@ -3,6 +3,7 @@
 
 namespace NorthStack\NorthStackClient\Command\Sapp;
 
+use NorthStack\NorthStackClient\Command\UserSettingsCommandTrait;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -19,6 +20,7 @@ class LaunchCommand extends Command
 {
     use OauthCommandTrait;
     use SappEnvironmentTrait;
+    use UserSettingsCommandTrait;
     /**
      * @var NorthstackClient
      */
@@ -54,6 +56,7 @@ class LaunchCommand extends Command
         $args = $input->getArguments();
 
         [$sappId] = $this->getSappIdAndFolderByOptions(
+            $this->findDefaultAppsDir($input, $output, $this->getHelper('question')),
             $args['name'],
             $args['environment']
         );

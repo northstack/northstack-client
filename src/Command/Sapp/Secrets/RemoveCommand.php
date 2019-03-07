@@ -27,6 +27,7 @@ class RemoveCommand extends Command
         parent::__construct($name);
         $this
             ->setDescription('Remove Sapp Secret')
+            ->addArgument('name', InputArgument::REQUIRED)
             ->addArgument('key', InputArgument::REQUIRED)
             ->addArgument('environment', InputArgument::OPTIONAL, 'Environment', 'dev')
             ->addOauthOptions()
@@ -37,7 +38,7 @@ class RemoveCommand extends Command
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        ['id' => $id] = $this->getSappFromWorkingDir($input->getArgument('environment'));
+        ['id' => $id] = $this->getSapp($input->getArgument('name')  , $input->getArgument('environment'));
 
         $key = $input->getArgument('key');
 

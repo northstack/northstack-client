@@ -7,17 +7,19 @@ BASE="$( dirname "$CDIR")"
 . "$CDIR"/lib.sh
 . "$CDIR"/lib-install.sh
 
+NS_RED='\033[0;31m'
+NS_NC='\033[0m' # No Color
 echo ""
 echo "NorthStack Client Installer"
 echo ""
 echo "||========================||"
-echo "||                    .   ||"
-echo "||                 φ▒╬▌   ||"
-echo "||   ▓▓▓▓▓▓▓▓▓▓▀,#╬╬╬╬▌   ||"
-echo "||   ▓▓▓▓▓▓▓▓╨╓╣╬╬╬╬╬╬▌   ||"
-echo "||   ▓▓▓▓▓▀╙╓▒╬╬╬╬╬╬╬╬▌   ||"
-echo "||   ▓▓▓▀ ╔▒╬╬╬╬╬╬╬╬╬╬▌   ||"
-echo "||   ▓▀.φ▒╬╬╬╬╬╬╬╬╬╬╬╬▌   ||"
+echo -e "||                    ${NS_RED}.${NS_NC}   ||"
+echo -e "||                 ${NS_RED}φ▒╬▌${NS_NC}   ||"
+echo -e "||   ▓▓▓▓▓▓▓▓▓▓▀${NS_RED},#╬╬╬╬▌${NS_NC}   ||"
+echo -e "||   ▓▓▓▓▓▓▓▓╨${NS_RED}╓╣╬╬╬╬╬╬▌${NS_NC}   ||"
+echo -e "||   ▓▓▓▓▓▀╙${NS_RED}╓▒╬╬╬╬╬╬╬╬▌${NS_NC}   ||"
+echo -e "||   ▓▓▓▀ ${NS_RED}╔▒╬╬╬╬╬╬╬╬╬╬▌${NS_NC}   ||"
+echo -e "||   ▓▀${NS_RED}.φ▒╬╬╬╬╬╬╬╬╬╬╬╬▌${NS_NC}   ||"
 echo "||                        ||"
 echo "||========================||"
 echo ""
