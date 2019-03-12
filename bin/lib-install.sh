@@ -274,7 +274,7 @@ setUserOptions() {
     local appDir="$HOME/northstack/apps"
 
     echo "Use the default recommended directory to store your apps?"
-    read -p "($HOME/northstack/apps) (y/N)? " choice
+    read -p "($HOME/northstack/apps) (Y/n)? " choice
 
     case "$choice" in
         y|Y )
@@ -284,7 +284,7 @@ setUserOptions() {
             read customAppDir
             appDir=${customAppDir/#~/$HOME};;
         * )
-            colorText yellow "No choice selected, continuing with default apps directory";;
+            colorText yellow "Default choice selected, continuing with default apps directory";;
     esac
 
     colorText grey "Selected directory: $appDir"
