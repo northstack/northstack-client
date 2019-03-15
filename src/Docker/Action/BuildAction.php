@@ -6,10 +6,13 @@ namespace NorthStack\NorthStackClient\Docker\Action;
 
 use NorthStack\NorthStackClient\Build\ScriptConfig;
 use NorthStack\NorthStackClient\Docker\Builder;
+use NorthStack\NorthStackClient\Docker\Container;
 use NorthStack\NorthStackClient\Docker\DockerClient;
 use NorthStack\NorthStackClient\Enumeration\BuildScriptType;
+use RuntimeException;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Throwable;
 
 class BuildAction extends BaseAction
 {
@@ -79,7 +82,7 @@ class BuildAction extends BaseAction
     {
         try {
             $this->docker->deleteContainer($this->getContainerName(), true);
-        } catch (\Throwable $e) {}
+        } catch (Throwable $e) {}
 
         parent::createContainer();
     }
@@ -88,7 +91,7 @@ class BuildAction extends BaseAction
     {
         $this->docker->run($this->getContainerName());
 
-        foreach ($this->appData['config']->{'build-scripts'} as $script) {
+        foreach ($this->appData['build']->{'build-scripts'} as $script) {
             try {
                 $type = BuildScriptType::memberByValue($script->type);
 
@@ -103,9 +106,46 @@ class BuildAction extends BaseAction
                 $total = time() - $start;
 
                 $this->output->writeln($config->getScript().' took '.$total.' seconds');
-            } catch (\Throwable $e) {
-                throw new \RuntimeException($e->getMessage(), 0, $e);
+            } catch (Throwable $e) {
+                throw new RuntimeException($e->getMessage(), 0, $e);
             }
+        }
+
+        switch ($this->appData['config']->{'app-type'}) {
+            case 'static':
+                break;
+            case 'wordpress':
+                break;
+            case 'jekyll':
+                $containerName = $this->getContainerName().'-jekyll';
+
+                try {
+                    $this->docker->deleteContainer($containerName);
+                } catch (\Exception $e) {}
+
+                $mounts = ['src' => $this->getRoot(), 'dest' => '/srv/jekyll'];
+                /** @var Container $containerConfig */
+                $containerConfig = (new Container())
+                    ->setBindMounts([
+                        $mounts,
+                    ])
+                    ->setImage('jekyll/jekyll:'.$this->appData['build']->{'framework-version'})
+                    ->setCmd(['jekyll', 'build'])
+                    ->setAttachStdout($this->watchOutput)
+                    ->setAttachStderr($this->watchOutput)
+                    ->setLabels($this->getLabels())
+                    ;
+
+                $this->docker->createContainer(
+                    $containerName,
+                    $containerConfig
+                );
+                $this->docker->run($containerName);
+
+                try {
+                    $this->docker->deleteContainer($containerName);
+                } catch (\Exception $e) {}
+                break;
         }
     }
 

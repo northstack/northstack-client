@@ -2,20 +2,20 @@ FROM php:7-cli-alpine3.8 AS build
 
 # build php embed prep
 RUN set -xe \
-	&& apk add --no-cache --virtual .build-deps \
-		$PHPIZE_DEPS \
-		coreutils \
-		curl-dev \
-		libedit-dev \
-		libressl-dev \
-		libsodium-dev \
-		libxml2-dev \
-		sqlite-dev \
+    && apk add --no-cache --virtual .build-deps \
+        $PHPIZE_DEPS \
+        coreutils \
+        curl-dev \
+        libedit-dev \
+        libressl-dev \
+        libsodium-dev \
+        libxml2-dev \
+        sqlite-dev \
         icu-dev \
         argon2-dev \
-	\
-	&& export CFLAGS="$PHP_CFLAGS" \
-		CPPFLAGS="$PHP_CPPFLAGS" \
+    \
+    && export CFLAGS="$PHP_CFLAGS" \
+        CPPFLAGS="$PHP_CPPFLAGS" \
     LDFLAGS="$PHP_LDFLAGS"
 
 RUN docker-php-source extract
@@ -83,10 +83,10 @@ COPY --from=build /usr/local /usr/local
 ENV PHP_INI_DIR /usr/local/etc/php
 
 RUN apk add --no-cache --virtual .persistent-deps \
-		ca-certificates \
-		curl \
-		tar \
-		xz \
+        ca-certificates \
+        curl \
+        tar \
+        xz \
         libressl \
         \
         && runDeps="$( \

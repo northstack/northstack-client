@@ -6,6 +6,7 @@ namespace NorthStack\NorthStackClient\Command\Sapp;
 use GuzzleHttp\Exception\ClientException;
 use NorthStack\NorthStackClient\API\Sapp\SappClient;
 use NorthStack\NorthStackClient\API\Orgs\OrgsClient;
+use NorthStack\NorthStackClient\AppTypes\JekyllType;
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
 use NorthStack\NorthStackClient\Command\UserSettingsCommandTrait;
@@ -20,7 +21,6 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Command\HelpCommand;
 
@@ -58,7 +58,7 @@ class CreateCommand extends Command
             ->setDescription('NorthStack App Create')
             ->addArgument('name', InputArgument::REQUIRED, 'App name')
             ->addArgument('primaryDomain', InputArgument::REQUIRED, 'Primary Domain')
-            ->addArgument('stack', InputArgument::REQUIRED, 'Application stack type (one of: [wordpress, static])')
+            ->addArgument('stack', InputArgument::REQUIRED, 'Application stack type (one of: [wordpress, static, jekyll])')
             ->addOption('cluster', null, InputOption::VALUE_REQUIRED, 'Deployment location', 'dev-us-east-1')
             ->addOption('orgId', null, InputOption::VALUE_REQUIRED, 'Only needed if you have access to multiple organizations')
             ->addOption('useDefaultLocation', null, InputOption::VALUE_REQUIRED, 'Only needed if you have access to multiple organizations')
@@ -106,6 +106,9 @@ class CreateCommand extends Command
                 break;
             case 'static':
                 $appTemplate = new StaticType($input, $output, $questionHelper, $templateArgs);
+                break;
+            case 'jekyll':
+                $appTemplate = new JekyllType($input, $output, $questionHelper, $templateArgs);
                 break;
             default:
                 throw new \Exception("Invalid stack {$args['stack']}");
