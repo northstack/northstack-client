@@ -22,9 +22,9 @@ class DockerClient
      */
     private $docker;
 
-    public function __construct()
+    public function __construct(Docker $docker = null)
     {
-        $this->docker = Docker::create();
+        $this->docker = $docker ?: Docker::create();
     }
 
     public function getClient()
