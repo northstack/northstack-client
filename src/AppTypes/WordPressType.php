@@ -50,8 +50,7 @@ class WordPressType extends BaseType
             $this->config['wpMultisiteSubdomains'] = false;
         }
 
-        foreach ($this->sapps as $sapp)
-        {
+        foreach ($this->sapps as $sapp) {
             $this->writeConfigFile(
                 "config/{$sapp->environment}/build.json",
                 $this->buildWpInstallArgs($sapp)
@@ -73,7 +72,7 @@ class WordPressType extends BaseType
                     'version' => $this->config['wpVersion']
                 ],
                 'build-type' => 'builder',
-                'wordpress-version' => '^'.$this->config['wpVersion']
+                'wordpress-version' => '^' . $this->config['wpVersion']
             ]
         );
 
@@ -98,13 +97,13 @@ class WordPressType extends BaseType
     {
         return [
             'wordpress-install' => [
-                'url'         => $sapp->primaryDomain,
-                'title'       => $this->config['wpTitle'],
-                'admin_user'  => $this->config['wpAdminUser'],
-                'admin_pass'  => $this->config['wpAdminPass'],
+                'url' => $sapp->primaryDomain,
+                'title' => $this->config['wpTitle'],
+                'admin_user' => $this->config['wpAdminUser'],
+                'admin_password' => $this->config['wpAdminPass'],
                 'admin_email' => $this->config['wpAdminEmail'],
-                'multisite'   => $this->config['wpIsMultisite'],
-                'subdomains'  => $this->config['wpMultisiteSubdomains'],
+                'multisite' => $this->config['wpIsMultisite'],
+                'subdomains' => $this->config['wpMultisiteSubdomains'],
             ]
         ];
     }
