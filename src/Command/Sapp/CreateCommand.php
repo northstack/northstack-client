@@ -15,6 +15,7 @@ use NorthStack\NorthStackClient\AppTypes\StaticType;
 use NorthStack\NorthStackClient\AppTypes\WordPressType;
 
 use NorthStack\NorthStackClient\UserSettingsHelper;
+use Symfony\Component\Console\Helper\TableCell;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
@@ -144,17 +145,21 @@ class CreateCommand extends Command
         $io->newLine();
         $io->writeln("Woohoo! Your NorthStack app ({$appName}) was created successfully. Here are your prod, testing, and dev environments:");
 
-        $headers = ['id', 'environment', 'fqdn', 'config path'];
-        $rows = [];
         foreach ($sapps as $sapp) {
-            $rows[] = [
-                $sapp->id,
-                $sapp->environment,
-                $sapp->primaryDomain,
-                "{$appPath}/config/{$sapp->environment}",
+            $headers = [
+                [new TableCell($sapp->name . ' (' . $sapp->environment . ')', ['colspan' => 2])],
             ];
+
+            $rows = [
+                ['ID', $sapp->id],
+                ['Environment', $sapp->environment],
+                ['Internal URL', $sapp->internalUrl],
+                ['Primary Domain', $sapp->primaryDomain],
+                ['Config Path', "{$appPath}/config/{$sapp->environment}"],
+            ];
+
+            $io->table($headers, $rows);
         }
-        $io->table($headers, $rows);
 
         $io->writeln("Paths:");
         $io->table(

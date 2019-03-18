@@ -9,6 +9,7 @@ use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
 
 use NorthStack\NorthStackClient\Command\UserSettingsCommandTrait;
+use Symfony\Component\Console\Helper\TableCell;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -57,21 +58,23 @@ class InfoCommand extends Command
         );
 
         $r = $this->api->get($this->token->token, $sappId);
+        $app = json_decode($r->getBody()->getContents());
 
         $io = new SymfonyStyle($input, $output);
 
-        $app = json_decode($r->getBody()->getContents());
-        $headers = ['Field', 'Value'];
+        $headers = [
+            [new TableCell($app->name . ' (' . $app->environment . ')', ['colspan' => 2])],
+        ];
         $rows = [
-            ['Name', $app->name],
             ['Type', $app->appType],
             ['Cluster', $app->cluster],
             ['Id', $app->id],
             ['OrgId', $app->orgId],
             ['Created', $app->created],
+            ['Updated', $app->updated],
             ['Parent', $app->parentSapp],
-            ['Env', $app->environment],
             ['Stack', $app->appType],
+            ['Internal URL', isset($app->internalUrl) ? $app->internalUrl : ''], // This IF is just temporary because its a new value
             ['Primary Domain', $app->primaryDomain],
             ['Domains', implode("\n", $app->domains)],
             ['Current Release', $app->currentRelease ?: 'No releases found'],
