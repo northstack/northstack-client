@@ -54,5 +54,6 @@ trait UserSettingsCommandTrait
     protected function getUserSettings()
     {
         $this->userSettings = UserSettingsHelper::getSettings();
+        return $this->userSettings;
     }
 }

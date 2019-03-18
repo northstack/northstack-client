@@ -16,19 +16,20 @@ class StartAction extends BaseAction
         return $this;
     }
 
-    protected function getCmd(): array
+    protected function prepare()
     {
         $cmd = ['up'];
         if ($this->background) {
             $cmd[] = '-d';
         }
-        return $cmd;
+
+        $this->container->setCmd($cmd);
     }
 
     protected function cleanup()
     {
         $this->output->writeln("Caught signal, exiting");
-        $stop = $this->getAction('stop');
+        $stop = $this->createAction('stop');
         $stop->run();
     }
 }

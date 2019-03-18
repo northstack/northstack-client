@@ -24,12 +24,12 @@ class LogAction extends BaseAction
         return $this;
     }
 
-    protected function getCmd(): array
+    protected function prepare()
     {
         $cmd = ['logs', "--tail={$this->tail}"];
         if ($this->follow) {
             $cmd[] = '--follow';
         }
-        return $cmd;
+        $this->container->setCmd($cmd);
     }
 }

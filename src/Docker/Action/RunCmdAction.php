@@ -7,16 +7,16 @@ class RunCmdAction extends BaseAction
 {
     protected $name = 'cmd';
 
-    protected $cmd;
+    protected $cmd = [];
 
     public function setCmd($cmd)
     {
         $this->cmd = $cmd;
     }
 
-    protected function getCmd(): array
+    protected function prepare()
     {
-        return $this->cmd;
+        $this->container->setCmd($this->cmd);
     }
 
 }

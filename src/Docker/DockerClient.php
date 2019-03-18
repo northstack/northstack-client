@@ -112,7 +112,7 @@ class DockerClient
 
         try {
             $this->docker->imageInspect($name);
-        } catch (ImageInspectNotFoundException $e) {
+        } catch (\Throwable $e) {
             /** @var CreateImageStream $createImageStream */
             $createImageStream = $this->docker->imageCreate(
                 '',
