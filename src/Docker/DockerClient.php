@@ -111,7 +111,10 @@ class DockerClient
         }
 
         try {
-            $this->docker->imageInspect($name);
+            $info = $this->docker->imageInspect($image);
+            if (!in_array($tag, $info->getRepoTags(), true)) {
+                throw new \Exception('Pull that tag');
+            }
         } catch (\Throwable $e) {
             /** @var CreateImageStream $createImageStream */
             $createImageStream = $this->docker->imageCreate(
@@ -187,6 +190,19 @@ class DockerClient
         );
     }
 
+    public function attachWebsocket($name, $attachInput = false)
+    {
+        return $this->docker->containerAttachWebsocket(
+            $name,
+            [
+                'stream' => true,
+                'stdin'  => $attachInput,
+                'stdout' => true,
+                'stderr' => true,
+                'logs'   => true,
+            ]
+        );
+    }
     public function stop($name, $destroy = false, $timeout = 10)
     {
         try {

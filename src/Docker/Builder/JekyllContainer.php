@@ -17,10 +17,17 @@ class JekyllContainer extends ContainerHelper
     protected $baseLabel = 'com.northstack.localdev.jekyll';
     /**
      * @TODO currently there's something weird with docker-php or the docker api
-     * which causes it to say 540+MB of data is being returned which blows
-     * out memory since the library tries to force-read that amount of data :(
+     * Where it doesn't return a packed header, and instead reads the first line
+     * "ruby 2.8" which causes it to say 540+MB of data is being returned
+     * which blows out memory since the library tries to force-read that
+     * amount of data :(
      */
-//    protected $watchOutput = true;
+    // protected $watchOutput = true;
+    /**
+     * @TODO Unfortunately watching websocket is also not working properly
+     * We will just have to live without container output for now
+     */
+    // protected $watchWebsocket = true;
 
     /**
      * JekyllContainer constructor.

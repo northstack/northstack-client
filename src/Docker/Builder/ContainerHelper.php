@@ -5,6 +5,8 @@ namespace NorthStack\NorthStackClient\Docker\Builder;
 
 
 use Docker\API\Exception\ContainerInspectNotFoundException;
+use Docker\Stream\AttachWebsocketStream;
+use Docker\Stream\DockerRawStream;
 use NorthStack\NorthStackClient\Docker\Container;
 use NorthStack\NorthStackClient\Docker\DockerClient;
 use NorthStack\NorthStackClient\Docker\DockerStreamHandler;
@@ -21,6 +23,7 @@ class ContainerHelper
      */
     protected $docker;
     protected $watchOutput = false;
+    protected $watchWebsocket = false;
 
     protected $stopContainerOnExit = false;
     protected $destroyContainerOnExit = false;
@@ -42,6 +45,10 @@ class ContainerHelper
      */
     protected $containerName;
     protected $appRoot;
+    /**
+     * @var \Psr\Http\Message\ResponseInterface|AttachWebsocketStream
+     */
+    protected $websocket;
 
     public function __construct(string $containerName, DockerClient $docker, $outputHandler = null)
     {
@@ -67,17 +74,28 @@ class ContainerHelper
             );
         }
 
+        if ($this->watchWebsocket) {
+            return $this->docker->attachWebsocket($this->getContainerName());
+        }
+
         return null;
     }
 
     public function followOutput($stream, OutputInterface $output)
     {
         /** @var DockerStreamHandler $stream */
-        if ($this->watchOutput && $stream) {
+        if ($this->watchOutput && $stream instanceof DockerRawStream) {
             $ret = $stream->watch();
             if ($ret === $stream::$signaled) {
                 $output->writeln('');
                 $this->cleanup();
+            }
+        }
+        if ($this->watchWebsocket && $stream instanceof AttachWebsocketStream) {
+            while (($data = $stream->read()) !== null) {
+                if ($data) {
+                    $output->writeln($data);
+                }
             }
         }
     }
