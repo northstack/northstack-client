@@ -8,6 +8,6 @@ class PythonBuilder extends AbstractBuilder implements BuilderInterface
 {
     public function run()
     {
-        $this->exec('python /scripts/'.$this->config->getScript());
+        $this->exec("python {$this->baseFolder}/scripts/".$this->config->getScript());
     }
 }

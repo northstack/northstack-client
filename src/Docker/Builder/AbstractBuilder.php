@@ -21,19 +21,23 @@ abstract class AbstractBuilder
      * @var string
      */
     protected $containerId;
+    protected $baseFolder;
 
     public function __construct(
         ScriptConfig $config,
         DockerClient $client,
-        string $containerId
+        string $containerId,
+        string $baseFolder = ''
     ) {
         $this->config = $config;
         $this->dockerClient = $client;
         $this->containerId = $containerId;
+        $this->baseFolder = $baseFolder;
     }
 
     protected function exec(string $command, array $env = [])
     {
+        $env['BASE_APP_FOLDER'] = $this->baseFolder;
         $cmd = ['bash', '-c', 'source /root/.bashrc && '.$command];
 
         $this->dockerClient->exec($this->containerId, $cmd, $env);
