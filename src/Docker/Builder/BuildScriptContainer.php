@@ -32,10 +32,12 @@ class BuildScriptContainer extends ContainerHelper
     public function runScripts(\stdClass $buildConfig)
     {
         $outputHandler = $this->outputHandler;
+        $outputHandler('Build config: '.json_encode($buildConfig));
         if (isset($buildConfig->{'build-scripts'})) {
             foreach ($buildConfig->{'build-scripts'} as $script) {
                 try {
                     $type = BuildScriptType::memberByValue($script->type);
+                    $outputHandler('Running build-script type: '.$type->value());
 
                     $config = ScriptConfig::fromConfig($type, $script);
 
