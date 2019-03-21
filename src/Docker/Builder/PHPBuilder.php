@@ -8,6 +8,6 @@ class PHPBuilder extends AbstractBuilder implements BuilderInterface
 {
     public function run()
     {
-        $this->exec("php {$this->baseFolder}/scripts/".$this->config->getScript());
+        $this->exec("php /scripts/{$this->config->getScript()}");
     }
 }

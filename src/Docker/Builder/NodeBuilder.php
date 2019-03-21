@@ -18,6 +18,6 @@ class NodeBuilder extends AbstractBuilder implements BuilderInterface
     {
         $this->installNode();
 
-        $this->exec('nvm run '.$this->version." {$this->baseFolder}/scripts/".$this->config->getScript());
+        $this->exec('nvm run '.$this->version." /scripts/{$this->config->getScript()}");
     }
 }

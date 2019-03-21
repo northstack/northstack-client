@@ -37,7 +37,6 @@ abstract class AbstractBuilder
 
     protected function exec(string $command, array $env = [])
     {
-        $env['BASE_APP_FOLDER'] = $this->baseFolder;
         $cmd = ['bash', '-c', 'source /root/.bashrc && '.$command];
 
         $this->dockerClient->exec($this->containerId, $cmd, $env);

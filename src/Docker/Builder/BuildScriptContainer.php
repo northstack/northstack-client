@@ -50,7 +50,7 @@ class BuildScriptContainer extends ContainerHelper
                         throw new RuntimeException('Script not found');
                     }
                     $builderClass = self::BUILDERS[$type->value()];
-                    /** @var BuilderInterface $builder */
+                    /** @var BuilderInterface|AbstractBuilder $builder */
                     $builder = new $builderClass($config, $this->docker, $this->getContainerName());
 
                     $start = time();
