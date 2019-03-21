@@ -130,16 +130,25 @@ class ContainerHelper
 
     protected function getMounts()
     {
-        return [
+        $mounts = [
             [
                 'src' => $this->getRoot().'/app',
                 'dest' => '/app'
             ],
             [
-                'src' => $this->getRoot().'/scripts',
-                'dest' => '/scripts'
+                'src' => $this->getRoot().'/config',
+                'dest' => '/config'
             ],
         ];
+
+        if (file_exists($this->getRoot().'/scripts')) {
+            $mounts[] = [
+                'src' => $this->getRoot().'/scripts',
+                'dest' => '/scripts'
+            ];
+        }
+
+        return $mounts;
     }
 
     protected function getWorkingDir()
