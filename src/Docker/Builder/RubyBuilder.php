@@ -10,6 +10,7 @@ class RubyBuilder extends AbstractBuilder implements BuilderInterface
 
     public function run()
     {
+        $this->exec('ls -l /');
         $this->exec("ruby /scripts/{$this->config->getScript()}");
     }
 }
