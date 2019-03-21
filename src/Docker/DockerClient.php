@@ -232,4 +232,21 @@ class DockerClient
     {
         $this->docker->putContainerArchive($containerId, file_get_contents($file), ['path' => $dest]);
     }
+
+    public function copyFolder($fromContainerId, $destContainerId, $sourceFolder, $destFolder)
+    {
+        $tmp = tempnam('/tmp', 'dockercopy');
+        $this->createArchive($tmp, $fromContainerId, $sourceFolder);
+
+        $this->pushArchive($tmp, $destContainerId, $destFolder);
+    }
+
+    public function createArchive(string $file, string $containerId, $src = '/')
+    {
+        $r = $this->docker->containerArchive($containerId, ['path' => $src]);
+        $out = fopen($file, 'wb');
+
+        stream_copy_to_stream($r->getBody()->detach(), $out);
+        fclose($out);
+    }
 }
