@@ -40,6 +40,15 @@ class BuildScriptContainer extends ContainerHelper
 
                     $config = ScriptConfig::fromConfig($type, $script);
 
+                    $scriptLocation = $this->getRoot().'/scripts/'.$config->getScript();
+                    if (!file_exists($scriptLocation)) {
+                        $outputHandler('Script not found at '.$this->getRoot().'/scripts/'.$config->getScript());
+                        $outputHandler("Contents of {$this->getRoot()}/scripts:");
+                        foreach (scandir($this->getRoot() . '/scripts', SCANDIR_SORT_NONE) as $file) {
+                            $outputHandler($file);
+                        }
+                        throw new RuntimeException('Script not found');
+                    }
                     $builderClass = self::BUILDERS[$type->value()];
                     /** @var BuilderInterface $builder */
                     $builder = new $builderClass($config, $this->docker, $this->getContainerName());
