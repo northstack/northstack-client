@@ -31,21 +31,20 @@ class BuildScriptContainer extends ContainerHelper
 
     public function runScripts(\stdClass $buildConfig)
     {
-        $outputHandler = $this->outputHandler;
         if (isset($buildConfig->{'build-scripts'})) {
             foreach ($buildConfig->{'build-scripts'} as $script) {
                 try {
                     $type = BuildScriptType::memberByValue($script->type);
-                    $outputHandler('Running build-script type: '.$type->value());
+                    $this->log('Running build-script type: '.$type->value());
 
                     $config = ScriptConfig::fromConfig($type, $script);
 
                     $scriptLocation = $this->getRoot().'/scripts/'.$config->getScript();
                     if (!file_exists($scriptLocation)) {
-                        $outputHandler('Script not found at '.$this->getRoot().'/scripts/'.$config->getScript());
-                        $outputHandler("Contents of {$this->getRoot()}/scripts:");
+                        $this->log('Script not found at '.$this->getRoot().'/scripts/'.$config->getScript());
+                        $this->log("Contents of {$this->getRoot()}/scripts:");
                         foreach (scandir($this->getRoot() . '/scripts', SCANDIR_SORT_NONE) as $file) {
-                            $outputHandler($file);
+                            $this->log($file);
                         }
                         throw new RuntimeException('Script not found');
                     }
@@ -57,7 +56,7 @@ class BuildScriptContainer extends ContainerHelper
                     $builder->run();
                     $total = time() - $start;
 
-                    $outputHandler($config->getScript().' took '.$total.' seconds');
+                    $this->log($config->getScript().' took '.$total.' seconds');
                 } catch (Throwable $e) {
                     throw new RuntimeException($e->getMessage(), 0, $e);
                 }

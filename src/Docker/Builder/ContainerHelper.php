@@ -62,6 +62,13 @@ class ContainerHelper
         $this->appRoot = $appRoot;
     }
 
+    protected function log($msg)
+    {
+        $handler = $this->outputHandler;
+
+        $handler($msg);
+    }
+
     public function attachOutput(OutputInterface $output, $attachInput = false, $handleSignals = false)
     {
         if ($this->watchOutput) {
@@ -145,6 +152,7 @@ class ContainerHelper
             ],
         ];
 
+        $this->log('Mounts: '.json_encode($mounts));
         return $mounts;
     }
 
