@@ -230,6 +230,6 @@ class DockerClient
 
     public function pushArchive(string $file, string $containerId, $dest = '/')
     {
-        $this->docker->putContainerArchive($containerId, fopen($file, 'rb'), ['path' => $dest]);
+        $this->docker->putContainerArchive($containerId, file_get_contents($file), ['path' => $dest]);
     }
 }
