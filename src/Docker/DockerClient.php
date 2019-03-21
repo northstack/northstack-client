@@ -227,4 +227,9 @@ class DockerClient
         return $this->docker->containerInspect($name)
             ->getConfig()->getLabels();
     }
+
+    public function pushArchive(string $file, string $containerId, $dest = '/')
+    {
+        $this->docker->putContainerArchive($containerId, fopen($file, 'rb'), ['path' => $dest]);
+    }
 }
