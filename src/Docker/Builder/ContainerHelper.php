@@ -152,7 +152,6 @@ class ContainerHelper
             ],
         ];
 
-        $this->log('Mounts: '.json_encode($mounts));
         return $mounts;
     }
 

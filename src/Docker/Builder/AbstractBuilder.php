@@ -21,18 +21,15 @@ abstract class AbstractBuilder
      * @var string
      */
     protected $containerId;
-    protected $baseFolder;
 
     public function __construct(
         ScriptConfig $config,
         DockerClient $client,
-        string $containerId,
-        string $baseFolder = ''
+        string $containerId
     ) {
         $this->config = $config;
         $this->dockerClient = $client;
         $this->containerId = $containerId;
-        $this->baseFolder = $baseFolder;
     }
 
     protected function exec(string $command, array $env = [])
