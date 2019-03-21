@@ -69,9 +69,9 @@ class ContainerHelper
         $handler($msg);
     }
 
-    public function pushArchive(string $file, string $containerId, string $dest = '/')
+    public function pushArchive(string $file, string $containerId = null, string $dest = '/')
     {
-        $this->docker->pushArchive($file, $containerId, $dest);
+        $this->docker->pushArchive($file, $containerId ?: $this->getContainerName(), $dest);
     }
 
     public function attachOutput(OutputInterface $output, $attachInput = false, $handleSignals = false)
