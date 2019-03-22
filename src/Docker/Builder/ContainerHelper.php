@@ -50,6 +50,10 @@ class ContainerHelper
      */
     protected $websocket;
     protected $mountFolders = false;
+    /**
+     * @var array
+     */
+    protected $volumesFrom = [];
 
     public function __construct(string $containerName, DockerClient $docker, $outputHandler = null)
     {
@@ -62,6 +66,11 @@ class ContainerHelper
     {
         $this->mountFolders = $mount;
         return $this;
+    }
+
+    public function setVolumesFrom(array $volumesFrom)
+    {
+        $this->volumesFrom = $volumesFrom;
     }
 
     public function setRoot($appRoot)
@@ -150,7 +159,7 @@ class ContainerHelper
 
     protected function getMounts()
     {
-        return $this->mountFolders ?: [
+        return $this->mountFolders === false ? [
             [
                 'src' => $this->getRoot().'/app',
                 'dest' => '/app'
@@ -163,7 +172,7 @@ class ContainerHelper
                 'src' => $this->getRoot().'/scripts',
                 'dest' => '/scripts'
             ],
-        ];
+        ] : $this->mountFolders;
     }
 
     protected function getWorkingDir()
@@ -184,6 +193,7 @@ class ContainerHelper
         $conf = new Container();
         $conf
             ->setBindMounts($this->getMounts())
+            ->setVolumesFrom($this->volumesFrom)
             ->setImage($this->getImage())
             ->setCmd($this->getCmd())
             ->setEnv($this->getEnv())

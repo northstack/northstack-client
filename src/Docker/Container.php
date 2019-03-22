@@ -8,6 +8,11 @@ use Docker\API\Model\HostConfig;
 
 class Container extends ContainersCreatePostBody
 {
+    public function setVolumesFrom(array $volumesFrom): Container
+    {
+        $this->hostConfig->setVolumesFrom($volumesFrom);
+        return $this;
+    }
 
     public function setBindMounts(array $mounts): Container
     {
