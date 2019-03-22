@@ -49,7 +49,7 @@ class ContainerHelper
      * @var \Psr\Http\Message\ResponseInterface|AttachWebsocketStream
      */
     protected $websocket;
-    protected $mountFolders = true;
+    protected $mountFolders = false;
 
     public function __construct(string $containerName, DockerClient $docker, $outputHandler = null)
     {
@@ -58,14 +58,16 @@ class ContainerHelper
         $this->containerName = $containerName;
     }
 
-    public function setMountFolders(bool $mount)
+    public function setMountFolders(array $mount)
     {
         $this->mountFolders = $mount;
+        return $this;
     }
 
     public function setRoot($appRoot)
     {
         $this->appRoot = $appRoot;
+        return $this;
     }
 
     protected function log($msg)
@@ -148,11 +150,7 @@ class ContainerHelper
 
     protected function getMounts()
     {
-        if (!$this->mountFolders) {
-            return [];
-        }
-
-        return [
+        return $this->mountFolders ?: [
             [
                 'src' => $this->getRoot().'/app',
                 'dest' => '/app'
