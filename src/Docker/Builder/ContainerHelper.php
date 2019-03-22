@@ -71,6 +71,7 @@ class ContainerHelper
     public function setVolumesFrom(array $volumesFrom)
     {
         $this->volumesFrom = $volumesFrom;
+        return $this;
     }
 
     public function setRoot($appRoot)
@@ -290,5 +291,6 @@ class ContainerHelper
     public function setCmd($cmd = [])
     {
         $this->cmd = $cmd;
+        return $this;
     }
 }

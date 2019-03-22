@@ -54,8 +54,8 @@ class JekyllContainer extends ContainerHelper
 
     protected function getMounts()
     {
-        return [
+        return $this->mountFolders === false ? [
             ['src' => $this->getRoot().'/app', 'dest' => '/srv/jekyll']
-        ];
+        ] : $this->mountFolders;
     }
 }
