@@ -4,7 +4,6 @@
 namespace NorthStack\NorthStackClient\Docker\Builder;
 
 
-use Nette\Utils\FileSystem;
 use NorthStack\NorthStackClient\Build\ScriptConfig;
 use NorthStack\NorthStackClient\Enumeration\BuildScriptType;
 use RuntimeException;
@@ -61,12 +60,6 @@ class BuildScriptContainer extends ContainerHelper
                 } catch (Throwable $e) {
                     throw new RuntimeException($e->getMessage(), 0, $e);
                 }
-            }
-            if (file_exists('/app-build')) {
-                if (file_exists('/app-build/app')) {
-                    FileSystem::delete('/app-build/app');
-                }
-                FileSystem::copy($this->getRoot().'/app', '/app-build/app');
             }
         }
     }
