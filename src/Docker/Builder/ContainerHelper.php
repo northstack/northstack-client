@@ -54,6 +54,7 @@ class ContainerHelper
      * @var array
      */
     protected $volumesFrom = [];
+    protected $volumes = [];
 
     public function __construct(string $containerName, DockerClient $docker, $outputHandler = null)
     {
@@ -77,6 +78,20 @@ class ContainerHelper
     public function setRoot($appRoot)
     {
         $this->appRoot = $appRoot;
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    public function getVolumes(): array
+    {
+        return $this->volumes;
+    }
+
+    public function setVolumes(array $volumes)
+    {
+        $this->volumes = $volumes;
         return $this;
     }
 
@@ -195,6 +210,7 @@ class ContainerHelper
         $conf
             ->setBindMounts($this->getMounts())
             ->setVolumesFrom($this->volumesFrom)
+            ->setVolumes(new \ArrayObject($this->volumes))
             ->setImage($this->getImage())
             ->setCmd($this->getCmd())
             ->setEnv($this->getEnv())
