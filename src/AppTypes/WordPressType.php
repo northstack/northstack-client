@@ -100,7 +100,6 @@ class WordPressType extends BaseType
                 'url' => $sapp->primaryDomain,
                 'title' => $this->config['wpTitle'],
                 'admin_user' => $this->config['wpAdminUser'],
-                'admin_password' => $this->config['wpAdminPass'],
                 'admin_email' => $this->config['wpAdminEmail'],
                 'multisite' => $this->config['wpIsMultisite'],
                 'subdomains' => $this->config['wpMultisiteSubdomains'],

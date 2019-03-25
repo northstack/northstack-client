@@ -32,7 +32,7 @@ abstract class BaseType
 
     protected $sapps = [];
 
-    protected $config = [];
+    public $config = [];
 
     protected $args = [];
 

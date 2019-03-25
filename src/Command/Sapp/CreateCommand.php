@@ -6,6 +6,7 @@ namespace NorthStack\NorthStackClient\Command\Sapp;
 use GuzzleHttp\Exception\ClientException;
 use NorthStack\NorthStackClient\API\Sapp\SappClient;
 use NorthStack\NorthStackClient\API\Orgs\OrgsClient;
+use NorthStack\NorthStackClient\API\Sapp\SecretsClient;
 use NorthStack\NorthStackClient\AppTypes\JekyllType;
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
@@ -38,17 +39,23 @@ class CreateCommand extends Command
      * @var OrgAccountHelper
      */
     private $orgAccountHelper;
+    /**
+     * @var SecretsClient
+     */
+    private $secretsClient;
 
     public function __construct(
         SappClient $api,
         OrgsClient $orgs,
-        OrgAccountHelper $orgAccountHelper
+        OrgAccountHelper $orgAccountHelper,
+        SecretsClient $secretsClient
     )
     {
         parent::__construct('app:create');
         $this->api = $api;
         $this->orgs = $orgs;
         $this->orgAccountHelper = $orgAccountHelper;
+        $this->secretsClient = $secretsClient;
     }
 
     public function configure()
@@ -134,16 +141,41 @@ class CreateCommand extends Command
             }
             return;
         }
-
         $data = json_decode($r->getBody()->getContents());
-        $appTemplate->writeConfigs($data->data);
-        $this->printSuccess($input, $output, $data, $appPath);
+        $sapps = $data->data;
+
+        // Go ahead and try to set the secret for initial WP admin pass
+        if (! empty($appTemplate->config['wpAdminPass'])) {
+            $output->writeln('Setting initial WP admin password secrets...');
+            /**
+             * @TODO: we should throw a warning if the chosen admin pass has a single quote
+             * @ref: https://github.com/wp-cli/wp-cli/issues/5089
+             */
+            try {
+                // @TODO: build a `setMultiple` secrets endpoint to avoid multiple calls here
+                foreach ($sapps as $sapp) {
+                    $this->secretsClient->setSecret(
+                        $this->token->token,
+                        $sapp->id,
+                        'wp_initial_admin_pass',
+                        $appTemplate->config['wpAdminPass']
+                    );
+                    $output->writeln(' ...' . $sapp->environment . ' initial secret set');
+                }
+            } catch (ClientException $e) {
+                $output->writeln('<error>There was an issue setting the initial WordPress admin password. \n 
+One will be set for you on your first app deploy, which can be retrieved by fetching the secret `wp_initial_admin_pass`.</error>');
+            }
+        }
+
+
+        $appTemplate->writeConfigs($sapps);
+        $this->printSuccess($input, $output, $sapps, $appPath);
     }
 
-    function printSuccess($input, $output, $data, string $appPath)
+    function printSuccess($input, $output, $sapps, string $appPath)
     {
         $io = new SymfonyStyle($input, $output);
-        $sapps = $data->data;
         $appName = $sapps[0]->name;
         $io->newLine();
         $io->writeln("Woohoo! Your NorthStack app ({$appName}) was created successfully. Here are your prod, testing, and dev environments:");
