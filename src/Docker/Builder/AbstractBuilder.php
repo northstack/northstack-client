@@ -43,4 +43,9 @@ abstract class AbstractBuilder implements BuilderInterface
     {
         $this->exec("ls -l ${path}");
     }
+
+    public function waitForFile(string $file, int $timeout = 5)
+    {
+        $this->exec("php /usr/local/bin/filewaiter.php ${timeout} \"${file}\"");
+    }
 }
