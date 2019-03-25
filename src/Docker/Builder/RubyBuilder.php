@@ -4,7 +4,7 @@
 namespace NorthStack\NorthStackClient\Docker\Builder;
 
 
-class RubyBuilder extends AbstractBuilder implements BuilderInterface
+class RubyBuilder extends AbstractBuilder
 {
     protected $version;
 

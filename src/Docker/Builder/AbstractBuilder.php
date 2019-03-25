@@ -7,7 +7,7 @@ namespace NorthStack\NorthStackClient\Docker\Builder;
 use NorthStack\NorthStackClient\Build\ScriptConfig;
 use NorthStack\NorthStackClient\Docker\DockerClient;
 
-abstract class AbstractBuilder
+abstract class AbstractBuilder implements BuilderInterface
 {
     /**
      * @var ScriptConfig
@@ -37,5 +37,10 @@ abstract class AbstractBuilder
         $cmd = ['bash', '-c', 'source /root/.bashrc && '.$command];
 
         $this->dockerClient->exec($this->containerId, $cmd, $env);
+    }
+
+    public function ls($path)
+    {
+        $this->exec("ls -l ${path}");
     }
 }
