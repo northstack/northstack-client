@@ -32,6 +32,7 @@ class BuildScriptContainer extends ContainerHelper
     public function runScripts(\stdClass $buildConfig)
     {
         if (isset($buildConfig->{'build-scripts'})) {
+            $first = true;
             foreach ($buildConfig->{'build-scripts'} as $script) {
                 try {
                     $type = BuildScriptType::memberByValue($script->type);
@@ -52,6 +53,13 @@ class BuildScriptContainer extends ContainerHelper
                     /** @var BuilderInterface|AbstractBuilder $builder */
                     $builder = new $builderClass($config, $this->docker, $this->getContainerName());
 
+                    if ($first) {
+                        $this->log('Contents of /scripts:');
+                        $builder->ls('/scripts');
+                        $this->log('Contents of /app:');
+                        $builder->ls('/app');
+                        $first = false;
+                    }
                     $start = time();
                     $builder->run();
                     $total = time() - $start;
