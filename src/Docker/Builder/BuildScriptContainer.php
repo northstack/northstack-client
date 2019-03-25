@@ -29,7 +29,7 @@ class BuildScriptContainer extends ContainerHelper
         return self::DOCKER_IMAGE.':'.self::DOCKER_IMAGE_TAG;
     }
 
-    public function runScripts(\stdClass $buildConfig)
+    public function runScripts(\stdClass $buildConfig, array $waitForFiles = [])
     {
         if (isset($buildConfig->{'build-scripts'})) {
             $first = true;
@@ -60,6 +60,14 @@ class BuildScriptContainer extends ContainerHelper
                         $builder->ls('/app');
                         $first = false;
                     }
+
+                    if ($waitForFiles) {
+                        $this->log('Waiting for file synchronization...');
+                        foreach ($waitForFiles as $waitForFile) {
+                            $builder->waitForFile($waitForFile);
+                        }
+                    }
+
                     $start = time();
                     $builder->run();
                     $total = time() - $start;
