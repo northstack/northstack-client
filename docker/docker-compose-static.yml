@@ -2,6 +2,12 @@
 version: '3.4'
 
 services:
+  web:
+    image: nginx
+    volumes:
+      - "${APP_ROOT}/app:/usr/share/nginx/html"
+    depends_on:
+      - builder
 
   builder:
     image: northstack-static-builder
@@ -23,6 +29,3 @@ services:
       - STACK
       - EXPOSE_HTTP_PORT
 
-  web:
-    depends_on:
-      - builder

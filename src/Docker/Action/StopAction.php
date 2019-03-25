@@ -9,9 +9,9 @@ class StopAction extends BaseAction
 
     protected $name = 'stop';
 
-    protected function getCmd(): array
+    protected function prepare()
     {
-        return ['stop'];
+        $this->container->setCmd(['stop']);
     }
 
 }

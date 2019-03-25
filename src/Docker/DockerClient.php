@@ -22,9 +22,9 @@ class DockerClient
      */
     private $docker;
 
-    public function __construct()
+    public function __construct(Docker $docker = null)
     {
-        $this->docker = Docker::create();
+        $this->docker = $docker ?: Docker::create();
     }
 
     public function getClient()
@@ -111,8 +111,11 @@ class DockerClient
         }
 
         try {
-            $this->docker->imageInspect($name);
-        } catch (ImageInspectNotFoundException $e) {
+            $info = $this->docker->imageInspect($image);
+            if (!in_array($tag, $info->getRepoTags(), true)) {
+                throw new \Exception('Pull that tag');
+            }
+        } catch (\Throwable $e) {
             /** @var CreateImageStream $createImageStream */
             $createImageStream = $this->docker->imageCreate(
                 '',
@@ -187,6 +190,19 @@ class DockerClient
         );
     }
 
+    public function attachWebsocket($name, $attachInput = false)
+    {
+        return $this->docker->containerAttachWebsocket(
+            $name,
+            [
+                'stream' => true,
+                'stdin'  => $attachInput,
+                'stdout' => true,
+                'stderr' => true,
+                'logs'   => true,
+            ]
+        );
+    }
     public function stop($name, $destroy = false, $timeout = 10)
     {
         try {
@@ -210,5 +226,10 @@ class DockerClient
     {
         return $this->docker->containerInspect($name)
             ->getConfig()->getLabels();
+    }
+
+    public function pushArchive(string $file, string $containerId, $dest = '/')
+    {
+        $this->docker->putContainerArchive($containerId, file_get_contents($file), ['path' => $dest]);
     }
 }

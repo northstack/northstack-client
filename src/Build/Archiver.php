@@ -22,10 +22,22 @@ class Archiver
     {
         $baseFolder = getcwd();
         $zip = "{$baseFolder}/{$sappId}.tar.gz";
-
-        $this->zippy->create($zip, [
+        $doArchive = [
             'app' => "{$appFolder}/app",
-        ], true);
+        ];
+
+        foreach (
+            [
+                'scripts',
+                'config',
+            ] as $checkFile
+        ) {
+            if (file_exists("{$appFolder}/{$checkFile}")) {
+                $doArchive[$checkFile] = "{$appFolder}/{$checkFile}";
+            }
+        }
+
+        $this->zippy->create($zip, $doArchive, true);
 
         return $zip;
     }

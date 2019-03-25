@@ -29,9 +29,10 @@ class DockerStreamHandler
     {
         if ($this->handleSigInt) {
             return $this->watchForked();
-        } else {
-            return $this->watchInline();
         }
+
+        $this->watchInline();
+        return null;
     }
 
     protected function watchForked()
@@ -44,13 +45,13 @@ class DockerStreamHandler
 
         $pid = pcntl_fork();
 
-        if ($pid === -1)
-        {
+        if ($pid === -1) {
             throw new \Exception("Couldn't fork() while watching output stream");
-        } elseif ($pid)
-        {
+        }
+
+        if ($pid) {
             // pass signals through to our child proc
-            $killChild = function($sig, $siginfo) use ($pid) {
+            $killChild = function($sig) use ($pid) {
                 posix_kill($pid, $sig);
             };
             pcntl_signal(SIGTERM, $killChild);
@@ -84,12 +85,13 @@ class DockerStreamHandler
                 return self::$signaled;
             }
 
-        } else
-        {
+        } else {
             pcntl_signal(SIGTERM, SIG_DFL);
             pcntl_signal(SIGINT, SIG_DFL);
             $this->watchInline();
         }
+
+        return null;
     }
 
     protected function watchInline()

@@ -6,6 +6,7 @@ namespace NorthStack\NorthStackClient\Command\LocalDev;
 
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\Sapp\SappEnvironmentTrait;
+use NorthStack\NorthStackClient\Command\UserSettingsCommandTrait;
 use NorthStack\NorthStackClient\Docker;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
@@ -15,6 +16,9 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 abstract class AbstractLocalDevCmd extends Command
 {
+    use UserSettingsCommandTrait;
+    use SappEnvironmentTrait;
+
     protected static $defaultEnv = 'local';
 
     protected $commandDescription;
@@ -25,8 +29,6 @@ abstract class AbstractLocalDevCmd extends Command
      * @var Docker\Action\BaseAction
      */
     protected $action;
-
-    use SappEnvironmentTrait;
 
     public function __construct()
     {
@@ -61,7 +63,9 @@ abstract class AbstractLocalDevCmd extends Command
             $input,
             $output,
             $this->buildEnvVars(),
-            $this->appData
+            $this->appData,
+            $this->findDefaultAppsDir($input, $output, $this->getHelper('question'))
+                .'/'.$input->getArgument('name')
         );
     }
 

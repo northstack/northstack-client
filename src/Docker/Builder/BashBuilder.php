@@ -14,6 +14,6 @@ class BashBuilder extends AbstractBuilder implements BuilderInterface
             '/scripts/'.$this->config->getScript(),
         ]);
 
-        $this->exec('/scripts/'.$this->config->getScript());
+        $this->exec("/scripts/{$this->config->getScript()}");
     }
 }
