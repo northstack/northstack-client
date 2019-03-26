@@ -49,8 +49,11 @@ class BuildAction extends BaseAction
             case 'jekyll':
                 $this->container = new Builder\JekyllContainer('ns-jekyll-builder' ,$this->docker, null, $buildConfig->{'framework-version'});
 
-                $this->container->setRoot($this->localAppFolder);
-                $this->container->createContainer();
+                $this->container
+                    ->setRoot($this->localAppFolder)
+                    ->setEnv(['JEKYLL_DATA_DIR=/app'])
+                    ->createContainer();
+
                 $this->containerStreamHandler = $this->container->attachOutput($this->output, $this->attachInput, $this->handleSignals);
                 $this->container->startContainer();
                 $this->container->followOutput($this->containerStreamHandler, $this->output);
