@@ -107,7 +107,7 @@ class ContainerHelper
         return $this;
     }
 
-    public function getEnv()
+    protected function getEnv()
     {
         return $this->env;
     }

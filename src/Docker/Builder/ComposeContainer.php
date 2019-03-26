@@ -14,7 +14,6 @@ class ComposeContainer extends ContainerHelper
 
     protected $baseLabel = 'com.northstack.localdev.compose';
 
-    protected $env = [];
     /**
      * @var string
      */
