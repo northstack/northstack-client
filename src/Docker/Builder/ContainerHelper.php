@@ -32,6 +32,8 @@ class ContainerHelper
     protected $baseLabel = 'com.northstack.localdev';
     static $label = 'com.northstack.localdev.version';
 
+    protected $env = [];
+
     /**
      * @var \Closure
      */
@@ -93,6 +95,21 @@ class ContainerHelper
     {
         $this->volumes = $volumes;
         return $this;
+    }
+
+    /**
+     * @param array $env
+     * @return ContainerHelper
+     */
+    protected function setEnv(array $env): ContainerHelper
+    {
+        $this->env = $env;
+        return $this;
+    }
+
+    public function getEnv()
+    {
+        return $this->env;
     }
 
     protected function log($msg)
@@ -166,11 +183,6 @@ class ContainerHelper
     protected function getRoot()
     {
         return $this->appRoot;
-    }
-
-    protected function getEnv()
-    {
-        return [];
     }
 
     protected function getMounts()
