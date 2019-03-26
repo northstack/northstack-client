@@ -299,6 +299,11 @@ class ContainerHelper
         $this->docker->run($this->getContainerName());
     }
 
+    public function inspect()
+    {
+        $this->docker->inspect($this->getContainerName());
+    }
+
     protected function getCmd(): array
     {
         return $this->cmd;

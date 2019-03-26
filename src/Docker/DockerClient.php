@@ -232,4 +232,9 @@ class DockerClient
     {
         $this->docker->putContainerArchive($containerId, file_get_contents($file), ['path' => $dest]);
     }
+
+    public function inspect(string $containerId)
+    {
+        return $this->docker->containerInspect($containerId);
+    }
 }
