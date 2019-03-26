@@ -101,7 +101,7 @@ class ContainerHelper
      * @param array $env
      * @return ContainerHelper
      */
-    protected function setEnv(array $env): ContainerHelper
+    public function setEnv(array $env): ContainerHelper
     {
         $this->env = $env;
         return $this;
