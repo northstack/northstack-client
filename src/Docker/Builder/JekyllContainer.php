@@ -46,16 +46,4 @@ class JekyllContainer extends ContainerHelper
     {
         return self::DOCKER_IMAGE.':'.$this->jekyllVersion;
     }
-
-    protected function getWorkingDir()
-    {
-        return '/srv/jekyll';
-    }
-
-    protected function getMounts()
-    {
-        return $this->mountFolders === false ? [
-            ['src' => $this->getRoot().'/app', 'dest' => '/srv/jekyll']
-        ] : $this->mountFolders;
-    }
 }
