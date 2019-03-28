@@ -32,7 +32,7 @@ class ComposeContainer extends ContainerHelper
 
     protected function getWorkingDir()
     {
-        return '/northstack/docker';
+        return getenv('HOME').'/.local/northstack/docker';
     }
 
     protected function getMounts()
@@ -113,6 +113,7 @@ class ComposeContainer extends ContainerHelper
         return array_merge(
             [
                 "COMPOSE_ROOT_HOST=${HOME}/.local/northstack/docker",
+                "COMPOSE_ROOT=${HOME}/.local/northstack/docker",
                 "COMPOSE_FILE=${composeFiles}",
             ],
             $this->env
