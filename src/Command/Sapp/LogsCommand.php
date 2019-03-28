@@ -86,7 +86,7 @@ class LogsCommand extends Command
 
         if ($args['topic'] === 'build') {
             if (!isset($sappId)) {
-                throw new \RuntimeException('Sapp not determined for build logs');
+                throw new \RuntimeException('App not determined for build logs');
             }
             $this->showBuildLog($sappId, $formatter);
             exit;

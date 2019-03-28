@@ -26,7 +26,7 @@ class RemoveCommand extends Command
     {
         parent::__construct($name);
         $this
-            ->setDescription('Remove Sapp Secret')
+            ->setDescription('Remove App Secret')
             ->addArgument('name', InputArgument::REQUIRED)
             ->addArgument('key', InputArgument::REQUIRED)
             ->addArgument('environment', InputArgument::OPTIONAL, 'Environment', 'dev')
