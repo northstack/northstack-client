@@ -103,6 +103,7 @@ abstract class BaseAction
         try {
             $this->container->setRoot($this->localAppFolder);
             $this->prepare();
+            $this->container->setEnv($this->env);
             $this->container->createContainer();
             $this->containerStreamHandler = $this->container->attachOutput($this->output, $this->attachInput, $this->handleSignals);
             $this->container->startContainer();
