@@ -107,7 +107,7 @@ class ReleaseAndDeployCommand extends AbstractDeployCmd
             exit(1);
         }
 
-        $output->writeln('Testing worker health (might take a while)');
+        $output->writeln('Testing worker health (this might take a while)');
         $healthStatus = 'UNKNOWN';
 
         $retries = 0;

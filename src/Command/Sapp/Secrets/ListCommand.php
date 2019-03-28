@@ -28,7 +28,7 @@ class ListCommand extends Command
     {
         parent::__construct($name);
         $this
-            ->setDescription('List Sapp Secrets')
+            ->setDescription('List App Secrets')
             ->addArgument('name', InputArgument::REQUIRED)
             ->addArgument('environment', InputArgument::OPTIONAL, 'Environment', 'dev')
             ->addOption('show', null, InputOption::VALUE_NONE, 'Show Secret Values')
