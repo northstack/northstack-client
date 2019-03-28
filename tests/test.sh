@@ -14,8 +14,6 @@ user=$USER
 uid=$UID
 group=$(id -gn)
 gid=$(id -g)
-docker_group=$(stat /var/run/docker.sock --printf='%G') \
-docker_gid=$(stat /var/run/docker.sock --printf='%g') \
 
 docker build \
     -t northstack-test \

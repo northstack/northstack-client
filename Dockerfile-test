@@ -5,23 +5,7 @@ RUN apk add \
         jq \
         rsync \
         docker \
-        bash \
-        py-pip \
-        mysql-client \
-        shadow \
-        sudo \
-        gcc \
-        python-dev \
-        musl-dev \
-        libffi-dev \
-    && curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar \
-        && chmod +x wp-cli.phar \
-        && mv wp-cli.phar /usr/local/bin/wp \
-    && pip install --upgrade pip \
-    && pip install docker-compose \
-    && docker-php-ext-install \
-        mysqli \
-        pdo_mysql
+        bash
 
 ARG NORTHSTACK_USER
 ARG NORTHSTACK_UID
