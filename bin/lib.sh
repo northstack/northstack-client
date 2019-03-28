@@ -290,11 +290,6 @@ buildDockerImage() {
 
     local sock="$(dockerSocket)"
 
-#    local group="$(stat "$sock" --printf='%G')"
-#    local gid="$(stat "$sock" --printf='%g')"
-#
-#    debug "Detected docker group: $group, gid: $gid"
-
     log info "building the northstack docker image"
 
     local outfile=$(mktemp)

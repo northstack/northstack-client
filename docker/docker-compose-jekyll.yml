@@ -15,10 +15,7 @@ services:
       com.northstack.localdev: 1
       com.northstack.localdev.role: web
       com.northstack.app.id: "${APP_ID}"
-    # user: "${NORTHSTACK_UID}:${NORTHSTACK_GID}"
     environment:
       - PRIMARY_DOMAIN
       - STACK
       - EXPOSE_HTTP_PORT
-#      - JEKYLL_UID="${NORTHSTACK_UID}"
-#      - JEKYLL_GID="${NORTHSTACK_GID}"
