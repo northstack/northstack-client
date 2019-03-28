@@ -18,11 +18,3 @@ COPY entrypoint.sh /
 RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
 
-ARG DOCKER_GROUP
-ARG DOCKER_GID
-RUN groupadd \
-        --force \
-        --non-unique \
-        --system \
-        --gid "${DOCKER_GID:?build arg is required}" \
-        "${DOCKER_GROUP:?build arg is required}"

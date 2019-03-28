@@ -106,7 +106,13 @@ copyFiles() {
     local dest=$2
 
     if [[ -d "$src" ]]; then
-        rsyncDirs "$src" "$dest"
+        if [[ ! -d "$dest" ]]
+        then
+            mkdir -p "$dest"
+        fi
+
+        debugCmd cp -Rf "$src/*" "$dest/"
+        # rsyncDirs "$src" "$dest"
         return
     fi
 
@@ -239,9 +245,9 @@ checkDocker() {
 
 dockerSocket() {
     local possible=(
+        $HOME/Library/Containers/com.docker.docker/Data/docker.sock
         /var/lib/docker.sock
         /var/run/docker.sock
-        $HOME/Library/Containers/com.docker.docker/Data/docker.sock
     )
 
     for sock in ${possible[@]}; do
@@ -284,10 +290,10 @@ buildDockerImage() {
 
     local sock="$(dockerSocket)"
 
-    local group="$(stat "$sock" --printf='%G')"
-    local gid="$(stat "$sock" --printf='%g')"
-
-    debug "Detected docker group: $group, gid: $gid"
+#    local group="$(stat "$sock" --printf='%G')"
+#    local gid="$(stat "$sock" --printf='%g')"
+#
+#    debug "Detected docker group: $group, gid: $gid"
 
     log info "building the northstack docker image"
 
@@ -296,8 +302,6 @@ buildDockerImage() {
 
     set +e
     docker build \
-        --build-arg DOCKER_GID="$gid" \
-        --build-arg DOCKER_GROUP="$group" \
         -t "$tag" \
         --label "com.northstack=1" \
         "$ctx" \
@@ -326,7 +330,6 @@ installComposerDeps() {
 
     debugCmd docker run --rm \
         --volume "${ctx}:/app" \
-        --user "$UID:$(getGid)" \
         composer install --ignore-platform-reqs
 
     debug "Completed all of the composer install stuff. Onward!"

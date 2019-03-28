@@ -37,7 +37,13 @@ class ComposeContainer extends ContainerHelper
 
     protected function getMounts()
     {
+        $HOME = getenv('HOME');
+
         return [
+            [
+                'src' => "${HOME}/.local/northstack",
+                'dest' => "${HOME}/.local/northstack",
+            ],
             [
                 'src' => $this->getRoot(),
                 'dest' => '/northstack'
@@ -89,6 +95,8 @@ class ComposeContainer extends ContainerHelper
 
     protected function getEnv()
     {
+        $HOME = getenv('HOME');
+
         /** @noinspection DegradedSwitchInspection */
         switch ($this->stack) {
             case 'static':
@@ -101,11 +109,10 @@ class ComposeContainer extends ContainerHelper
                 $composeFiles = "docker-compose-{$this->stack}.yml";
                 break;
         }
-        $lib = $this->getRoot();
+
         return array_merge(
             [
-                'COMPOSE_ROOT=/northstack/docker',
-                "COMPOSE_ROOT_HOST={$lib}/docker",
+                "COMPOSE_ROOT_HOST=${HOME}/.local/northstack/docker",
                 "COMPOSE_FILE=${composeFiles}",
             ],
             $this->env
