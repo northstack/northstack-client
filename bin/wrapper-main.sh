@@ -12,8 +12,6 @@ main() {
 
     socket=$(dockerSocket)
 
-    echo "Using socket at $socket"
-
     if [[ $socket == "$HOME/Library/Containers/com.docker.docker/Data/docker.sock" ]]
     then
         VOLUMESOCK="--volume /var/run/docker.sock:/var/run/docker.sock"
