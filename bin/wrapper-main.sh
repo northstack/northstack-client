@@ -10,8 +10,14 @@ main() {
     checkDocker
     checkPaths
 
-    local NS_UID=$(($UID + 2000))
-    GID=$(($(getGid) + 2000))
+    local NS_UID=$UID
+    GID=$(getGid)
+
+    if [[ $(uname) == Darwin ]]
+    then
+        NS_UID=$(($UID + 2000))
+        GID=$(($GID + 2000))
+    fi
 
     socket=$(dockerSocket)
 
