@@ -117,11 +117,6 @@ copyFiles() {
     fi
 
     dest_dir=$(dirname "$dest")
-    echo "Dir: $dest_dir"
-    echo "file: $dest"
-    whoami
-    id -u
-    id -g
     if [[ -w $dest_dir ]] && [[ -w $dest ]]; then
         debugCmd cp -av "$src" "$dest"
     else
