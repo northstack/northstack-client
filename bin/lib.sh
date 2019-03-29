@@ -274,7 +274,7 @@ checkPaths() {
         log "error" "NorthStack was started in DEV_MODE but the dev path ($DEV_SOURCE) does not exist."
     fi
 
-    if [[ ! -d $prefix/lib/northstack ]]; then
+    if [[ ! -d $prefix/northstack ]]; then
         failed=1
         log "error" "NorthStack assets ($prefix/northstack) are missing"
     fi
