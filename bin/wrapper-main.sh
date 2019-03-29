@@ -1,6 +1,6 @@
 main() {
     local NS_PWD=${NS_PWD:-}
-    local VOLUMESOCK
+    local VOLUMESOCK=""
 
     if [[ -z $NS_PWD ]]; then
         debug "Using default workdir ($PWD); set \$NS_PWD to override"
