@@ -117,9 +117,9 @@ abstract class AbstractLocalDevCmd extends Command
             'COMPOSE_PROJECT_NAME' => $appName,
 
             'NORTHSTACK_USER' => $user,
-            'NORTHSTACK_UID' => $uid,
+            'NORTHSTACK_UID' => getenv('NORTHSTACK_UID') ?: $uid,
             'NORTHSTACK_GROUP' => $group,
-            'NORTHSTACK_GID' => $gid,
+            'NORTHSTACK_GID' => getenv('NORTHSTACK_GID') ?: $gid,
         ];
 
         // TODO: move this logic somewhere else

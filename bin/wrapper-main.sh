@@ -10,6 +10,8 @@ main() {
     checkDocker
     checkPaths
 
+    GID=$(getGid)
+
     socket=$(dockerSocket)
 
     if [[ $socket == "$HOME/Library/Containers/com.docker.docker/Data/docker.sock" ]]
@@ -32,6 +34,8 @@ main() {
             -e HOME=$HOME \
             -e NS_PWD="$NS_PWD" \
             -e NS_LIB="$ns_lib" \
+            -e NORTHSTACK_UID=$UID \
+            -e NORTHSTACK_GID=$GID \
             --volume "$NS_PWD:$NS_PWD" \
             --volume $HOME:$HOME \
             --volume "$socket":"$socket" $VOLUMESOCK \
@@ -44,6 +48,8 @@ main() {
             -e HOME=$HOME \
             -e NS_PWD="$NS_PWD" \
             -e NS_LIB="$ns_lib" \
+            -e NORTHSTACK_UID=$UID \
+            -e NORTHSTACK_GID=$GID \
             --volume "$NS_PWD:$NS_PWD" \
             --volume $HOME:$HOME $VOLUMESOCK \
             --volume "$socket":"$socket" \
