@@ -117,6 +117,8 @@ copyFiles() {
     fi
 
     dest_dir=$(dirname "$dest")
+    echo "Dir: $dest_dir"
+    echo "file: $dest"
     if [[ -w $dest_dir ]] && [[ -w $dest ]]; then
         debugCmd cp -av "$src" "$dest"
     else
@@ -161,7 +163,7 @@ mkdirP() {
     if [[ -w $parent ]]; then
         debugCmd mkdir -pv "$dir"
     else
-        log "warn" "$parent is not writeable by your shell user. Using sudo to create $dir"
+        log "warn" "$parent is not writeable by your shell user. Using sudo to create $dir (164)"
         askForSudo mkdir -pv "$dir"
         debugCmd sudo mkdir -pv "$dir"
     fi
