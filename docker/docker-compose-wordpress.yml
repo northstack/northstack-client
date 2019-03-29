@@ -58,6 +58,7 @@ services:
 
   nginx-unit-php:
     image: northstack/nginx-unit-php:7.2-2018.12.18
+    container_name: nginx-unit-php
     volumes:
       - "${APP_APP}:/app"
     working_dir: "${APP_PUBLIC}"

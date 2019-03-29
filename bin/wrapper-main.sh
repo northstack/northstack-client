@@ -10,7 +10,8 @@ main() {
     checkDocker
     checkPaths
 
-    GID=$(getGid)
+    local NS_UID=$(($UID + 2000))
+    GID=$(($(getGid) + 2000))
 
     socket=$(dockerSocket)
 
@@ -34,7 +35,7 @@ main() {
             -e HOME=$HOME \
             -e NS_PWD="$NS_PWD" \
             -e NS_LIB="$ns_lib" \
-            -e NORTHSTACK_UID=$UID \
+            -e NORTHSTACK_UID=$NS_UID \
             -e NORTHSTACK_GID=$GID \
             --volume "$NS_PWD:$NS_PWD" \
             --volume $HOME:$HOME \
@@ -48,7 +49,7 @@ main() {
             -e HOME=$HOME \
             -e NS_PWD="$NS_PWD" \
             -e NS_LIB="$ns_lib" \
-            -e NORTHSTACK_UID=$UID \
+            -e NORTHSTACK_UID=$NS_UID \
             -e NORTHSTACK_GID=$GID \
             --volume "$NS_PWD:$NS_PWD" \
             --volume $HOME:$HOME $VOLUMESOCK \

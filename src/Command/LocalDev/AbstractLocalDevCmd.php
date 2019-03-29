@@ -88,10 +88,10 @@ abstract class AbstractLocalDevCmd extends Command
         $appId = $this->appData['id'];
         $stack = $config->{'app-type'};
 
-        $uid = posix_geteuid();
-        $user = posix_getpwuid($uid)['name'];
-        $gid = posix_getegid();
-        $group = posix_getgrgid($gid)['name'];
+        $uid = getenv('NORTHSTACK_UID');
+        $user = 'ns';
+        $gid = getenv('NORTHSTACK_GID');
+        $group = 'ns';
 
         switch ($stack) {
             case 'jekyll':
