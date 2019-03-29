@@ -120,7 +120,7 @@ copyFiles() {
     if [[ -w $dest_dir ]] && [[ -w $dest ]]; then
         debugCmd cp -av "$src" "$dest"
     else
-        log "warn" "$dest is not writeable by your shell user. Using sudo to copy"
+        log "warn" "$dest or $dest_dir is not writeable by your shell user. Using sudo to copy"
         askForSudo mkdir -pv "$dest_dir" \; cp -av "$src" "$dest"
         debugCmd sudo mkdir -pv "$dest_dir"
         debugCmd sudo cp -av "$src" "$dest"
