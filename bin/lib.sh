@@ -300,7 +300,7 @@ buildDockerImage() {
         -t "$tag" \
         --label "com.northstack=1" \
         "$ctx" \
-    &> "$outfile"
+    &> "$outfile" & show_spinner_pid
 
     if [[ $? -ne 0 ]]; then
         log "error" "image build failed:"
@@ -378,4 +378,29 @@ colorText() {
     fi
 
     return;
+}
+
+show_spinner_cmd()
+{
+  local cmd="$@"
+  $cmd &
+  show_spinner_pid
+}
+
+show_spinner_pid()
+{
+  local -r pid="$!"
+  local -r delay='0.5'
+  local spinstr='\|/-'
+  local temp
+  tput civis
+  while ps a | awk '{print $1}' | grep -q "${pid}"; do
+    temp="${spinstr#?}"
+    printf "[%c]  " "${spinstr}"
+    spinstr=${temp}${spinstr%"${temp}"}
+    sleep "${delay}"
+    printf "\b\b\b\b\b\b"
+  done
+  tput cnorm
+  printf "    \b\b\b\b"
 }
