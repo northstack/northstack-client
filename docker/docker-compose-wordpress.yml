@@ -26,7 +26,10 @@ services:
         com.northstack.localdev: 1
         com.northstack: 1
     volumes:
-      - "${APP_APP}:/app"
+      - type: bind
+        source: ${APP_APP}
+        target: /app
+        consistency: cached
     working_dir: "${APP_PUBLIC}"
     user: "${NORTHSTACK_UID}:${NORTHSTACK_GID}"
     environment:
@@ -60,7 +63,10 @@ services:
     image: northstack/nginx-unit-php:7.2-2018.12.18
     container_name: nginx-unit-php
     volumes:
-      - "${APP_APP}:/app"
+      - type: bind
+        source: ${APP_APP}
+        target: /app
+        consistency: cached
     working_dir: "${APP_PUBLIC}"
     depends_on:
       - wordpress
