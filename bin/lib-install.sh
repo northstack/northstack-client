@@ -295,7 +295,7 @@ doDockerInstall() {
     "$context"/bin/build-wrapper.sh "$wrapperFile" "$BASE" "$isDev"
 
     copyFiles "$wrapperFile" "${install_path}/bin/northstack"
-    copyFiles "${context}/docker" "${install_path}/lib/northstack/docker"
+    copyFiles "${context}/docker" "${install_path}/northstack/docker"
 
     afterInstall "$install_path"
 }
