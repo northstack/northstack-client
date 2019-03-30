@@ -28,8 +28,7 @@ services:
     volumes:
       - type: bind
         source: ${APP_APP}
-        target: /app
-        consistency: cached
+        target: ${APP_APP}
     working_dir: "${APP_PUBLIC}"
     user: "${NORTHSTACK_UID}:${NORTHSTACK_GID}"
     environment:
