@@ -113,17 +113,10 @@ abstract class BaseType
 
     protected function writeDomainConfigs()
     {
-        foreach ($this->sapps as $sapp)
-        {
-            if ('prod' === $sapp->environment) {
-                $sapp->domains[] = $sapp->primaryDomain;
-            }
-
+        foreach ($this->sapps as $sapp) {
             $this->writeConfigFile(
                 "config/{$sapp->environment}/domains.json",
-                [
-                    'domains' => $sapp->domains,
-                ]
+                $sapp->domains
             );
         }
     }

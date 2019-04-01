@@ -121,13 +121,13 @@ class ReleaseAndDeployCommand extends AbstractDeployCmd
 
         switch ($healthStatus) {
             case 'UNKNOWN':
-                $output->writeln('We were not able to connect to the worker.');
+                $output->writeln('<error>We were not able to connect to the worker.</error>');
                 exit(1);
             case 'HEALTHY':
-                $output->writeln('Worker is running properly!');
+                $output->writeln('<info>Worker is running properly!</info>');
                 break;
             case 'UNHEALTHY':
-                $output->writeln('Worker is reporting as unhealthy.');
+                $output->writeln('<comment>Worker is reporting as unhealthy.</comment>');
                 exit(1);
         }
 
