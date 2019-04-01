@@ -10,19 +10,15 @@ source "$BDIR/bin/lib.sh"
 
 buildDockerImage .
 
-user=$USER
-uid=$UID
 group=$(id -gn)
 gid=$(id -g)
-docker_group=$(stat /var/run/docker.sock --printf='%G') \
-docker_gid=$(stat /var/run/docker.sock --printf='%g') \
 
 docker build \
     -t northstack-test \
     -f Dockerfile-test \
-    --build-arg NORTHSTACK_USER=$user \
+    --build-arg NORTHSTACK_USER=ns \
     --build-arg NORTHSTACK_UID=$uid \
-    --build-arg NORTHSTACK_GROUP=$group \
+    --build-arg NORTHSTACK_GROUP=ns \
     --build-arg NORTHSTACK_GID=$gid \
     --build-arg DOCKER_GROUP=$docker_group \
     --build-arg DOCKER_GID=$docker_gid \
@@ -40,9 +36,9 @@ docker run \
     -e NS_PWD="$NS_PWD" \
     -e NS_LIB="$BDIR" \
     -e PAUSE=$PAUSE \
-    -e NORTHSTACK_USER=$user \
+    -e NORTHSTACK_USER=ns \
     -e NORTHSTACK_UID=$uid \
-    -e NORTHSTACK_GROUP=$group \
+    -e NORTHSTACK_GROUP=ns \
     -e NORTHSTACK_GID=$gid \
     -e DOCKER_GROUP=$docker_group \
     -e DOCKER_GID=$docker_gid \

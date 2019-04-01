@@ -12,4 +12,4 @@ socket=$(dockerSocket)
 GID=$(getGid)
 
 docker run \
-    
+

@@ -29,6 +29,10 @@ abstract class AbstractLocalDevCmd extends Command
      * @var Docker\Action\BaseAction
      */
     protected $action;
+    /**
+     * @var string
+     */
+    protected $localAppRoot;
 
     public function __construct()
     {
@@ -55,6 +59,9 @@ abstract class AbstractLocalDevCmd extends Command
         $env = $input->getOption('env');
         $this->appData = $this->getSapp($input->getArgument('name'), $env);
 
+        $this->localAppRoot = $this->findDefaultAppsDir($input, $output, $this->getHelper('question'))
+            .'/'.$input->getArgument('name');
+
         $docker = new Docker\DockerClient();
         $action = $this->getDockerAction();
         $this->action = new $action(
@@ -64,8 +71,7 @@ abstract class AbstractLocalDevCmd extends Command
             $output,
             $this->buildEnvVars(),
             $this->appData,
-            $this->findDefaultAppsDir($input, $output, $this->getHelper('question'))
-                .'/'.$input->getArgument('name')
+            $this->localAppRoot
         );
     }
 
@@ -82,12 +88,21 @@ abstract class AbstractLocalDevCmd extends Command
         $appId = $this->appData['id'];
         $stack = $config->{'app-type'};
 
-        $uid = posix_geteuid();
-        $user = posix_getpwuid($uid)['name'];
-        $gid = posix_getegid();
-        $group = posix_getgrgid($gid)['name'];
+        $uid = getenv('NORTHSTACK_UID');
+        $user = 'ns';
+        $gid = getenv('NORTHSTACK_GID');
+        $group = 'ns';
 
-        $pwd = getenv('NS_PWD') ?: getcwd();
+        switch ($stack) {
+            case 'jekyll':
+                $public = '/app/_site';
+                break;
+            case 'wordpress':
+            case 'static':
+            default:
+                $public = '/app/public';
+                break;
+        }
         // TODO: let users configure some of this stuff via $APP_ROOT/config/localdev.json
         $vars = [
             'APP_NAME' => $appName,
@@ -95,15 +110,16 @@ abstract class AbstractLocalDevCmd extends Command
             'STACK' => $stack,
             'EXPOSE_HTTP_PORT' => 8080,
             'EXPOSE_MYSQL_PORT' => 3306,
-            'APP_ROOT' => $pwd,
-            'APP_PUBLIC' => $pwd . '/app/public',
+            'APP_ROOT' => (string)$this->localAppRoot,
+            'APP_APP' => "$this->localAppRoot/app",
+            'APP_PUBLIC' => "$this->localAppRoot/${public}",
             'PRIMARY_DOMAIN' => 'localhost',
             'COMPOSE_PROJECT_NAME' => $appName,
 
             'NORTHSTACK_USER' => $user,
-            'NORTHSTACK_UID' => $uid,
+            'NORTHSTACK_UID' => getenv('NORTHSTACK_UID') ?: $uid,
             'NORTHSTACK_GROUP' => $group,
-            'NORTHSTACK_GID' => $gid,
+            'NORTHSTACK_GID' => getenv('NORTHSTACK_GID') ?: $gid,
         ];
 
         // TODO: move this logic somewhere else

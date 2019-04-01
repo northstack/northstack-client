@@ -34,17 +34,20 @@ addLocal() {
     local extra=${4:-}
 
     if [[ $ns == "group" ]]; then
+        echo "Adding group $id"
         groupadd \
             --force \
             --gid "$id" \
             "$name"
     elif [[ $ns == "passwd" ]]; then
+        echo "Adding user $id"
         useradd \
             --uid "$id" \
             --no-create-home \
             --key MAIL_DIR=/tmp \
-            --gid "$extra" \
             "$name"
+    else
+        echo "$ns id $id already exists"
     fi
 }
 
@@ -67,12 +70,14 @@ addIfNotExists() {
     addLocal "$name" "$id" "$ns" "$extra"
 }
 
-addIfNotExists "$NORTHSTACK_GROUP" "$NORTHSTACK_GID" group
-addIfNotExists "$NORTHSTACK_USER" "$NORTHSTACK_UID" passwd "$NORTHSTACK_GID"
+    echo "Checking for group $NORTHSTACK_GID"
+addIfNotExists "ns" "$NORTHSTACK_GID" group
+    echo "Checking for user $NORTHSTACK_UID"
+addIfNotExists "ns" "$NORTHSTACK_UID" passwd "$NORTHSTACK_GID"
 
 sed \
-    -e "s/NORTHSTACK_USERNAME/$NORTHSTACK_USER/g" \
-    -e "s/NORTHSTACK_GROUP/$NORTHSTACK_GROUP/g" \
+    -e "s/NORTHSTACK_USERNAME/ns/g" \
+    -e "s/NORTHSTACK_GROUP/ns/g" \
     /unit.json.template \
 > /usr/local/unit-state/conf.json
 

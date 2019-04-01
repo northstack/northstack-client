@@ -1,3 +1,4 @@
+#@IgnoreInspection BashAddShebang
 . ./bin/lib.sh
 
 readonly MIN_DOCKER_VERSION=17.09
@@ -165,35 +166,64 @@ dockerInstallOK() {
         iHave docker \
         && checkVersion docker "$MIN_DOCKER_VERSION"
     } || return 1
-    [[ $OSTYPE =~ linux ]] || {
-        setError OS "Docker installation is only supported on Linux"
+    [[ $OSTYPE =~ linux || `uname` =~ Darwin ]] || {
+        setError OS "Docker installation is only supported on Linux & Mac"
         return 1
     }
     return 0
 }
 
 selectInstallMethod() {
+    dockerInstallOK && {
+        printf -v INSTALL_METHOD "docker"
+        return 0
+    }
+
     nativeInstallOK && {
         printf -v INSTALL_METHOD "native"
         return 0
     }
 
-    dockerInstallOK && {
-        printf -v INSTALL_METHOD "docker"
-        return 0
-    }
     printf -v INSTALL_METHOD "none"
 }
 
 afterInstall() {
     local path=$1
     local bindir=$path/bin
+    local updated="0"
 
     # We're just going to attempt to update all of the potential bash profiles that might be used. Everyone is different!
-    log info "Attempting to update all possible bash profiles -- sometimes we've just gotta do that."
-    updateBashProfile $bindir $HOME/.bash_profile
-    updateBashProfile $bindir $HOME/.bashrc
-    updateBashProfile $bindir $HOME/.zshrc
+    log info "Attempting to update all possible bash/zsh profiles -- sometimes we've just gotta do that."
+    if [ -w $HOME/.bash_profile ]
+    then
+        updateBashProfile $bindir $HOME/.bash_profile
+        updated=1
+    fi
+
+    if [ -w $HOME/.bashrc ]
+    then
+        updateBashProfile $bindir $HOME/.bashrc
+        updated=1
+    fi
+
+    if [ -w $HOME/.zshrc ]
+    then
+        updateBashProfile $bindir $HOME/.zshrc
+        updated=1
+    fi
+
+    if [ $updated == "0" ]
+    then
+        if [ -f $HOME/.bash_profile ]
+        then
+            log error "Please make ~/.bash_profile writable and re-run install.sh"
+            exit 1
+        fi
+
+        log warn "Could not find any bash or zsh profiles to update. Creating ~/.bash_profile"
+        touch ~HOME/.bash_profile
+        afterInstall $1
+    fi
 
     echo ""
 
@@ -265,12 +295,18 @@ doDockerInstall() {
     "$context"/bin/build-wrapper.sh "$wrapperFile" "$BASE" "$isDev"
 
     copyFiles "$wrapperFile" "${install_path}/bin/northstack"
-    copyFiles "${context}/docker" "${install_path}/lib/northstack/docker"
+    copyFiles "${context}/docker" "${install_path}/northstack/docker"
 
     afterInstall "$install_path"
 }
 
 setUserOptions() {
+    if [ -f $HOME/.northstack-settings.json ]
+        then
+            log info "Previous settings found..."
+        return
+    fi
+
     local appDir="$HOME/northstack/apps"
 
     echo "Use the default recommended directory to store your apps?"
@@ -346,6 +382,13 @@ complain() {
 install() {
     local context=$1
     local isDev=${2:-0}
+
+    if [ ! -d ~/.northstack ]
+    then
+        mkdir ~/.northstack
+    fi
+
+    cp -Rf ${context}/docker ~/.northstack/
 
     selectInstallMethod
     case $INSTALL_METHOD in

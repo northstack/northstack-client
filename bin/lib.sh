@@ -106,7 +106,13 @@ copyFiles() {
     local dest=$2
 
     if [[ -d "$src" ]]; then
-        rsyncDirs "$src" "$dest"
+        if [[ ! -d "$dest" ]]
+        then
+            mkdir -p "$dest"
+        fi
+
+        debugCmd cp -Rf "$src/*" "$dest/"
+        # rsyncDirs "$src" "$dest"
         return
     fi
 
@@ -114,7 +120,7 @@ copyFiles() {
     if [[ -w $dest_dir ]] && [[ -w $dest ]]; then
         debugCmd cp -av "$src" "$dest"
     else
-        log "warn" "$dest is not writeable by your shell user. Using sudo to copy"
+        log "warn" "$dest or $dest_dir is not writeable by your shell user. Using sudo to copy"
         askForSudo mkdir -pv "$dest_dir" \; cp -av "$src" "$dest"
         debugCmd sudo mkdir -pv "$dest_dir"
         debugCmd sudo cp -av "$src" "$dest"
@@ -155,7 +161,7 @@ mkdirP() {
     if [[ -w $parent ]]; then
         debugCmd mkdir -pv "$dir"
     else
-        log "warn" "$parent is not writeable by your shell user. Using sudo to create $dir"
+        log "warn" "$parent is not writeable by your shell user. Using sudo to create $dir (164)"
         askForSudo mkdir -pv "$dir"
         debugCmd sudo mkdir -pv "$dir"
     fi
@@ -239,9 +245,9 @@ checkDocker() {
 
 dockerSocket() {
     local possible=(
+        $HOME/Library/Containers/com.docker.docker/Data/docker.sock
         /var/lib/docker.sock
         /var/run/docker.sock
-        $HOME/Library/Containers/com.docker.docker/Data/docker.sock
     )
 
     for sock in ${possible[@]}; do
@@ -268,7 +274,7 @@ checkPaths() {
         log "error" "NorthStack was started in DEV_MODE but the dev path ($DEV_SOURCE) does not exist."
     fi
 
-    if [[ ! -d $prefix/lib/northstack ]]; then
+    if [[ ! -d $prefix/northstack ]]; then
         failed=1
         log "error" "NorthStack assets ($prefix/northstack) are missing"
     fi
@@ -284,11 +290,6 @@ buildDockerImage() {
 
     local sock="$(dockerSocket)"
 
-    local group="$(stat "$sock" --printf='%G')"
-    local gid="$(stat "$sock" --printf='%g')"
-
-    debug "Detected docker group: $group, gid: $gid"
-
     log info "building the northstack docker image"
 
     local outfile=$(mktemp)
@@ -296,12 +297,10 @@ buildDockerImage() {
 
     set +e
     docker build \
-        --build-arg DOCKER_GID="$gid" \
-        --build-arg DOCKER_GROUP="$group" \
         -t "$tag" \
         --label "com.northstack=1" \
         "$ctx" \
-    &> "$outfile"
+    &> "$outfile" & show_spinner_pid
 
     if [[ $? -ne 0 ]]; then
         log "error" "image build failed:"
@@ -326,7 +325,6 @@ installComposerDeps() {
 
     debugCmd docker run --rm \
         --volume "${ctx}:/app" \
-        --user "$UID:$(getGid)" \
         composer install --ignore-platform-reqs
 
     debug "Completed all of the composer install stuff. Onward!"
@@ -380,4 +378,29 @@ colorText() {
     fi
 
     return;
+}
+
+show_spinner_cmd()
+{
+  local cmd="$@"
+  $cmd &
+  show_spinner_pid
+}
+
+show_spinner_pid()
+{
+  local -r pid="$!"
+  local -r delay='0.5'
+  local spinstr='\|/-'
+  local temp
+  tput civis
+  while ps a | awk '{print $1}' | grep -q "${pid}"; do
+    temp="${spinstr#?}"
+    printf "[%c]  " "${spinstr}"
+    spinstr=${temp}${spinstr%"${temp}"}
+    sleep "${delay}"
+    printf "\b\b\b\b\b\b"
+  done
+  tput cnorm
+  printf "    \b\b\b\b"
 }

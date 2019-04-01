@@ -10,7 +10,7 @@ use NorthStack\NorthStackClient\Docker\DockerClient;
 class ComposeContainer extends ContainerHelper
 {
     const DOCKER_IMAGE = 'docker/compose';
-    const DOCKER_IMAGE_TAG = '1.23.3';
+    const DOCKER_IMAGE_TAG = '1.23.2';
 
     protected $baseLabel = 'com.northstack.localdev.compose';
 
@@ -32,15 +32,33 @@ class ComposeContainer extends ContainerHelper
 
     protected function getWorkingDir()
     {
-        return '/northstack/docker';
+        return getenv('HOME').'/.local/northstack/docker';
     }
 
     protected function getMounts()
     {
+        $HOME = getenv('HOME');
+
         return [
+            [
+                'src' => "${HOME}/.local/northstack",
+                'dest' => "${HOME}/.local/northstack",
+            ],
             [
                 'src' => $this->getRoot(),
                 'dest' => '/northstack'
+            ],
+            [
+                'src' => $this->getRoot(),
+                'dest' => $this->getRoot(),
+            ],
+            [
+                'src' => $this->getRoot().'/app',
+                'dest' => $this->getRoot().'/app',
+            ],
+            [
+                'src' => $this->getRoot().'/public',
+                'dest' => $this->getRoot().'/public',
             ],
             [
                 'src' => '/var/run/docker.sock',
@@ -77,12 +95,26 @@ class ComposeContainer extends ContainerHelper
 
     protected function getEnv()
     {
-        $lib = $this->getRoot();
+        $HOME = getenv('HOME');
+
+        /** @noinspection DegradedSwitchInspection */
+        switch ($this->stack) {
+            case 'static':
+                $composeFiles = "docker-compose.yml";
+                break;
+            case 'wordpress':
+                $composeFiles = "docker-compose.yml:docker-compose-{$this->stack}.yml";
+                break;
+            default:
+                $composeFiles = "docker-compose-{$this->stack}.yml";
+                break;
+        }
+
         return array_merge(
             [
-                'COMPOSE_ROOT=/northstack/docker',
-                "COMPOSE_ROOT_HOST={$lib}/docker",
-                "COMPOSE_FILE=docker-compose.yml:docker-compose-{$this->stack}.yml",
+                "COMPOSE_ROOT_HOST=${HOME}/.local/northstack/docker",
+                "COMPOSE_ROOT=${HOME}/.local/northstack/docker",
+                "COMPOSE_FILE=${composeFiles}",
             ],
             $this->env
         );
