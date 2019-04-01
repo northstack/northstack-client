@@ -38,7 +38,7 @@ class WordPressType extends BaseType
         ],
         'wpVersion' => [
             'prompt' => 'WordPress version: ',
-            'default' => '4.8'
+            'default' => '5.1'
         ]
     ];
 
