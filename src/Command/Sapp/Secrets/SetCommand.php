@@ -27,8 +27,8 @@ class SetCommand extends Command
         parent::__construct($name);
         $this
             ->setDescription('Set App Secret. You can optionally pipe a value to this command')
-            ->addArgument('name', InputArgument::REQUIRED)
-            ->addArgument('key', InputArgument::REQUIRED)
+            ->addArgument('name', InputArgument::REQUIRED, 'App name')
+            ->addArgument('key', InputArgument::REQUIRED, 'Secret key used for retrieving the secret later')
             ->addArgument('value', InputArgument::REQUIRED)
             ->addArgument('environment', InputArgument::OPTIONAL, 'Environment', 'dev')
             ->addOauthOptions()

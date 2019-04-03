@@ -11,6 +11,7 @@ use NorthStack\NorthStackClient\Build\Archiver;
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
 use NorthStack\NorthStackClient\Command\UserSettingsCommandTrait;
+use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -100,5 +101,13 @@ abstract class AbstractDeployCmd extends Command
         unlink($zip);
 
         return [$sappId, $appFolder];
+    }
+
+    function printBlock(OutputInterface $output, array $messages, string $style = 'error', bool $large = true)
+    {
+        /** @var FormatterHelper $formatter */
+        $formatter = $this->getHelper('formatter');
+
+        $output->writeln($formatter->formatBlock($messages, $style, $large));
     }
 }
