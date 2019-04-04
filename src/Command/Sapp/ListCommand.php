@@ -3,6 +3,9 @@
 
 namespace NorthStack\NorthStackClient\Command\Sapp;
 
+use Symfony\Component\Console\Helper\Table;
+use Symfony\Component\Console\Helper\TableCell;
+use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
@@ -61,23 +64,49 @@ class ListCommand extends Command
         );
 
         $body = json_decode($r->getBody()->getContents());
-        $io = new SymfonyStyle($input, $output);
 
-        $headers = ['Type', 'Name', 'Primary Domain', 'Env', 'Id'];
+        $sections = $rows = [];
         foreach ($body->data as $sapp) {
-            $rows[] = [
-                $sapp->appType,
-                $sapp->name,
-                $sapp->primaryDomain,
-                $sapp->environment,
-                $sapp->id
-            ];
-        }
-        $io->table($headers, $rows);
-    }
+            switch($sapp->environment) {
+                case 'prod':
+                    $parentId = $sapp->id;
+                    break;
+                default:
+                    $parentId = $sapp->parentSapp;
+                    break;
+            }
 
-    protected function commandName(): string
-    {
-        return 'app:deploy-legacy';
+            $sections[$parentId][$sapp->environment] = $sapp;
+        }
+
+        $count = 1;
+        $headers = ['<fg=magenta>ID</>', '<fg=magenta>Env</>', '<fg=magenta>Primary Domain</>'];
+        foreach ($sections as $parentId => $section) {
+            $rows[] = [
+                new TableCell("<fg=cyan>{$section['prod']->name} ({$section['prod']->appType})</>", ['colspan' => 2]),
+                "<fg=cyan>{$section['prod']->orgId}</>"
+            ];
+            $rows[] = [' ']; // add a little space to help the sapp title be more visible
+            foreach ($section as $sapp) {
+                $rows[] = [$sapp->id, $sapp->environment, $sapp->primaryDomain];
+            }
+            if ($count % 12) {
+                $rows[] = new TableSeparator();
+            } elseif ($count == count($body->data)) {
+                $rows[] = $headers;
+            } else {
+                $rows[] = new TableSeparator();
+                $rows[] = $headers;
+                $rows[] = new TableSeparator();
+            }
+            $count++;
+        }
+
+        $table = new Table($output);
+        $table->setStyle('borderless');
+        $table->setHeaders($headers);
+        $table->setRows($rows);
+
+        $table->render();
     }
 }
