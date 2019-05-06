@@ -42,6 +42,12 @@ class WordPressType extends BaseType
         ]
     ];
 
+    public function setArgsFromExistingApp($sapps)
+    {
+        $this->sapps = $sapps;
+
+    }
+
     protected function writePerEnvBuildConfigs()
     {
         if ($this->config['wpIsMultisite']) {

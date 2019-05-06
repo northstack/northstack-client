@@ -46,11 +46,7 @@ abstract class BaseType
         $this->input = $input;
         $this->output = $output;
         $this->questionHelper = $qh;
-
-        foreach ($userConfig as $k => $v)
-        {
-            $this->config[$k] = $v;
-        }
+        $this->config = $userConfig;
     }
 
     public function writeConfigs($sappsCreated)

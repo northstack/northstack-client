@@ -130,6 +130,9 @@ class CreateCommand extends Command
         }
 
         try {
+            /**
+             * @TODO: Save the initial build configs on create, otherwise we don't know what the user chose if they don't run a deploy and delete their local files!
+             */
             $r = $this->api->createApp(
                 $this->token->token,
                 $args['name'],
