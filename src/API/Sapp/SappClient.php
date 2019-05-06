@@ -16,11 +16,13 @@ class SappClient extends BaseApiClient
         $orgId,
         $cluster,
         $primaryDomain,
-        $appType
+        $appType,
+        $frameworkVersion = null,
+        $frameworkConfig = null
     )
     {
         $data = [
-            'name' => $name,
+            'appName' => $name,
             'cluster' => $cluster,
             'primaryDomain' => $primaryDomain,
             'appType' => $appType,
@@ -29,8 +31,16 @@ class SappClient extends BaseApiClient
             $data['orgId'] = $orgId;
         }
 
+        if ($frameworkVersion) {
+            $data['frameworkVersion'] = $frameworkVersion;
+        }
+
+        if ($frameworkConfig) {
+            $data['frameworkConfig'] = $frameworkConfig;
+        }
+
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->post('/sapps', [
+            ->post('/sapps/apps', [
                 'json' => $data,
             ]);
     }
