@@ -36,7 +36,7 @@ class WordPressType extends BaseType
             'depends' => 'wpIsMultisite',
             'default' => 'subdomain'
         ],
-        'wpVersion' => [
+        'frameworkVersion' => [
             'prompt' => 'WordPress version: ',
             'default' => '5.1'
         ]
@@ -71,17 +71,17 @@ class WordPressType extends BaseType
                     'name' => 'wordpress-php',
                     'version' => $this->config['wpVersion']
                 ],
-                'build-type' => 'builder',
-                'wordpress-version' => '^' . $this->config['wpVersion']
+                'build_type' => 'builder',
+                'framework_version' => $this->config['wpVersion']
             ]
         );
 
         $this->writeConfigFile(
             "config/config.json",
             [
-                'app-type' => 'wordpress',
+                'app_type' => 'wordpress',
                 'layout' => 'standard',
-                'shared-paths' => [
+                'shared_paths' => [
                     'wp-content/uploads',
                     'wp-content/cache'
                 ]
@@ -96,7 +96,7 @@ class WordPressType extends BaseType
     protected function buildWpInstallArgs($sapp)
     {
         return [
-            'wordpress-install' => [
+            'frameworkBuildArgs' => [
                 'url' => $sapp->primaryDomain,
                 'title' => $this->config['wpTitle'],
                 'admin_user' => $this->config['wpAdminUser'],
@@ -104,6 +104,20 @@ class WordPressType extends BaseType
                 'multisite' => $this->config['wpIsMultisite'],
                 'subdomains' => $this->config['wpMultisiteSubdomains'],
             ]
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function getFrameworkConfig()
+    {
+        return [
+                'title' => $this->config['wpTitle'],
+                'admin_user' => $this->config['wpAdminUser'],
+                'admin_email' => $this->config['wpAdminEmail'],
+                'multisite' => $this->config['wpIsMultisite'],
+                'subdomains' => $this->config['wpMultisiteSubdomains'],
         ];
     }
 

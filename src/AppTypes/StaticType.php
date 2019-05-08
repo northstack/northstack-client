@@ -9,8 +9,8 @@ class StaticType extends BaseType
         $this->writeConfigFile(
             'config/build.json',
             [
-                'build-type' => 'builder',
-                'build-scripts' => [],
+                'build_type' => 'builder',
+                'build_scripts' => [],
             ]
         );
 
@@ -19,7 +19,7 @@ class StaticType extends BaseType
             [
                 'app-type' => 'static',
                 'layout' => 'standard',
-                'shared-paths' => ['/'],
+                'shared_paths' => ['/'],
             ]
         );
     }

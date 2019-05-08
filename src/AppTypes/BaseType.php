@@ -232,4 +232,9 @@ abstract class BaseType
         return $param;
     }
 
+    public function getFrameworkConfig()
+    {
+        return null;
+    }
+
 }

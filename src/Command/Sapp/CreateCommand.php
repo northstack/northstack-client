@@ -66,6 +66,8 @@ class CreateCommand extends Command
             ->addArgument('name', InputArgument::REQUIRED, 'App name')
             ->addArgument('primaryDomain', InputArgument::REQUIRED, 'Primary Domain')
             ->addArgument('stack', InputArgument::REQUIRED, 'Application stack type (one of: [wordpress, static, jekyll])')
+            ->addArgument('stack', InputArgument::REQUIRED, 'Application stack type (one of: [wordpress, static, jekyll])')
+            ->addOption('frameworkVersion', null, InputOption::VALUE_REQUIRED, 'Framework version (if not static app)')
             ->addOption('cluster', null, InputOption::VALUE_REQUIRED, 'Deployment location', 'dev-us-east-1')
             ->addOption('orgId', null, InputOption::VALUE_REQUIRED, 'Only needed if you have access to multiple organizations')
             ->addOption('useDefaultLocation', null, InputOption::VALUE_REQUIRED, 'Only needed if you have access to multiple organizations')
@@ -103,24 +105,29 @@ class CreateCommand extends Command
             'primaryDomain' => $args['primaryDomain'],
             'cluster' => $options['cluster'],
             'accountUsername' => $user->username,
-            'accountEmail' => $user->email
+            'accountEmail' => $user->email,
+            'frameworkVersion' => $options['frameworkVersion'],
         ];
 
-
-        switch ($args['stack']) {
-            case 'wordpress':
+        $stack = strtoupper($args['stack']);
+        switch ($stack) {
+            case 'WORDPRESS':
                 $appTemplate = new WordPressType($input, $output, $questionHelper, $templateArgs);
                 break;
-            case 'static':
+            case 'STATIC':
                 $appTemplate = new StaticType($input, $output, $questionHelper, $templateArgs);
                 break;
-            case 'jekyll':
+            case 'JEKYLL':
                 $appTemplate = new JekyllType($input, $output, $questionHelper, $templateArgs);
                 break;
             default:
                 throw new \Exception("Invalid stack {$args['stack']}");
         }
         $appTemplate->promptForArgs();
+
+        if ($appTemplate->getFrameworkConfig()) {
+            $options['frameworkConfig'] = $appTemplate->getFrameworkConfig();
+        }
 
         try {
             $r = $this->api->createApp(
@@ -129,7 +136,10 @@ class CreateCommand extends Command
                 $orgId,
                 $options['cluster'],
                 $args['primaryDomain'],
-                strtoupper($args['stack'])
+                strtoupper($args['stack']),
+                !empty($options['frameworkVersion']) ? $options['frameworkVersion'] : null,
+                !empty($options['frameworkConfig']) ? $options['frameworkConfig'] : null
+
             );
         } catch (ClientException $e) {
             $i = $e->getResponse()->getStatusCode();
