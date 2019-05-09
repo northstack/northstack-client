@@ -30,10 +30,22 @@ abstract class BaseType
         'config/{{env}}'
     ];
 
+    /**
+     * Supported environment files. All of these with the exception of `domains` can override
+     * the related "shared" App-level field.
+     *
+     * @var array An array of the Sapp field matched to its config filename
+     */
+    protected static $envFiles = [
+        'configBuild' => 'build.json',
+        'config' => 'config.json',
+        'domains' => 'domains.json',
+        'configGatewayCust' => 'gateway.json',
+    ];
+
+    protected $app;
     protected $sapps = [];
-
     public $config = [];
-
     protected $args = [];
 
     public function __construct(
@@ -49,26 +61,13 @@ abstract class BaseType
         $this->config = $userConfig;
     }
 
-    public function writeConfigs($sappsCreated)
+    public function writeConfigs($app)
     {
-        $this->sapps = $sappsCreated;
+        $this->app = $app;
+        $this->sapps = $app->sapps;
         $this->createSkeleton();
         $this->writeEnvironmentFile();
-        $this->writeDomainConfigs();
         $this->writePerEnvConfigs();
-        $this->writePerEnvBuildConfigs();
-    }
-
-    abstract protected function writePerEnvBuildConfigs();
-
-    protected function writeEnvironmentFile()
-    {
-        $env = [];
-        foreach ($this->sapps as $sapp)
-        {
-            $env[$sapp->environment] = $sapp->id;
-        }
-        $this->writeConfigFile('config/environment.json', $env);
     }
 
     protected function createSkeleton()
@@ -86,6 +85,31 @@ abstract class BaseType
         $this->mkdirRecursive($paths);
     }
 
+    protected function writeEnvironmentFile()
+    {
+        $env = [];
+        foreach ($this->sapps as $sapp)
+        {
+            $env[$sapp->environment] = $sapp->id;
+        }
+        $this->writeConfigFile('config/environment.json', $env);
+    }
+
+    protected function writeSharedConfigFiles()
+    {
+        foreach ([
+            'shared-build.json' => $this->app->sharedConfigBuild,
+            'shared-config.json' => $this->app->sharedConfig,
+            'shared-gateway.json' => $this->app->sharedConfigGatewaySys,
+                 ] as $filename => $data) {
+            if (!$data) {
+                continue;
+            }
+
+            $this->writeConfigFile('config/' . $filename, $data);
+        }
+    }
+
     protected function mkdirRecursive(array $paths)
     {
         foreach($paths as $path)
@@ -101,49 +125,27 @@ abstract class BaseType
         }
     }
 
-    protected function writeConfigFile(string $path, array $data)
+    /**
+     * @param string $path
+     * @param object|array $data
+     */
+    protected function writeConfigFile(string $path, $data)
     {
         $path = $this->config['baseDir'] . '/' . $path;
         file_put_contents($path, json_encode($data, JSON_PRETTY_PRINT));
     }
 
-    protected function writeDomainConfigs()
-    {
-        foreach ($this->sapps as $sapp) {
-            $this->writeConfigFile(
-                "config/{$sapp->environment}/domains.json",
-                $sapp->domains
-            );
-        }
-    }
-
     protected function writePerEnvConfigs()
     {
-        $defaults = [
-            'prod' => [
-                'environment' => 'production'
-            ],
-            'test' => [
-                'environment' => 'test',
-                'auth-type' => 'standard'
-            ],
-            'dev' => [
-                'environment' => 'development',
-                'auth-type' => 'standard'
-            ],
-        ];
-
         foreach ($this->sapps as $sapp)
         {
-            $this->writeConfigFile(
-                "config/{$sapp->environment}/config.json",
-                $defaults[$sapp->environment]
-            );
+            foreach (self::$envFiles as $sappKey => $filename) {
+                $this->writeConfigFile(
+                    "config/{$sapp->environment}/{$filename}",
+                    $sapp->{$sappKey}
+                );
+            }
         }
-        $this->writeConfigFile(
-            "config/local/config.json",
-            $defaults['dev']
-        );
     }
 
     protected function askQuestion($question)

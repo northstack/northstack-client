@@ -29,7 +29,8 @@
         "alchemy/zippy": "dev-master"
     },
     "require-dev": {
-        "phpstan/phpstan": "^0.10.5"
+        "phpstan/phpstan": "^0.10.5",
+        "phpunit/phpunit": "^8.1"
     },
     "repositories": [
         {

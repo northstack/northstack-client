@@ -130,9 +130,6 @@ class CreateCommand extends Command
         }
 
         try {
-            /**
-             * @TODO: Save the initial build configs on create, otherwise we don't know what the user chose if they don't run a deploy and delete their local files!
-             */
             $r = $this->api->createApp(
                 $this->token->token,
                 $args['name'],
@@ -154,8 +151,7 @@ class CreateCommand extends Command
             }
             return;
         }
-        $data = json_decode($r->getBody()->getContents());
-        $sapps = $data->data;
+        $app = json_decode($r->getBody()->getContents());
 
         // Go ahead and try to set the secret for initial WP admin pass
         if (! empty($appTemplate->config['wpAdminPass'])) {
@@ -166,7 +162,7 @@ class CreateCommand extends Command
              */
             try {
                 // @TODO: build a `setMultiple` secrets endpoint to avoid multiple calls here
-                foreach ($sapps as $sapp) {
+                foreach ($app->sapps as $sapp) {
                     $this->secretsClient->setSecret(
                         $this->token->token,
                         $sapp->id,
@@ -182,18 +178,18 @@ One will be set for you on your first app deploy, which can be retrieved by fetc
         }
 
 
-        $appTemplate->writeConfigs($sapps);
-        $this->printSuccess($input, $output, $sapps, $appPath);
+        $appTemplate->writeConfigs($app);
+        $this->printSuccess($input, $output, $app, $appPath);
     }
 
-    function printSuccess($input, $output, $sapps, string $appPath)
+    function printSuccess($input, $output, $app, string $appPath)
     {
         $io = new SymfonyStyle($input, $output);
-        $appName = $sapps[0]->name;
+        $appName = $app->sapps[0]->name;
         $io->newLine();
         $io->writeln("Woohoo! Your NorthStack app ({$appName}) was created successfully. Here are your prod, testing, and dev environments:");
 
-        foreach ($sapps as $sapp) {
+        foreach ($app->sapps as $sapp) {
             $headers = [
                 [new TableCell($sapp->name . ' (' . $sapp->environment . ')', ['colspan' => 2])],
             ];
