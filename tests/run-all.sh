@@ -7,6 +7,8 @@ cd $BDIR
 
 ./vendor/bin/phpstan analyze --level 0 src
 
+./vendor/bin/phpunit
+
 if [[ ${TEST_LOCALDEV:-0} == 1 ]]; then
     ./tests/test-localdev.sh
 fi

@@ -1,0 +1,4 @@
+---
+steps:
+  - label: ':cat: Run Tests'
+    command: ./tests/test.sh
