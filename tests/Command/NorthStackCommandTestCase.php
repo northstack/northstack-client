@@ -62,14 +62,16 @@ abstract class NorthStackCommandTestCase extends NorthStackTestCase
 
     /**
      * @param string $type
+     * @param string $orgId
      * @return array
      */
-    function getAuthOptionsAsUser($type = 'Pagely.Model.Orgs.OrgUser')
+    function getAuthOptionsAsUser($type = 'Pagely.Model.Orgs.OrgUser', $orgId = 'testorg')
     {
         $testToken = new \stdClass();
         $testToken->sub = $type . ':testUser';
 
         return [
+            '--orgId' => 'testorg',
             '--authClientId' => 'test',
             '--authToken' => 'test.' . base64_encode(json_encode($testToken)),
         ];
