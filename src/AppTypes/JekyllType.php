@@ -4,7 +4,7 @@ namespace NorthStack\NorthStackClient\AppTypes;
 
 class JekyllType extends BaseType
 {
-    protected $args = [
+    protected static $args = [
         'frameworkVersion' => [
             'prompt' => 'Jekyll version: ',
             'default' => '^3'

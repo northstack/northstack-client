@@ -5,7 +5,7 @@ namespace NorthStack\NorthStackClient\AppTypes;
 
 class WordPressType extends BaseType
 {
-    protected $args = [
+    protected static $args = [
         'wpTitle' => [
             'prompt' => 'Enter the title of the site:',
             'default' => '$appName',
@@ -52,13 +52,18 @@ class WordPressType extends BaseType
      */
     public function getFrameworkConfig()
     {
-        return [
-                'title' => $this->config['wpTitle'],
-                'admin_user' => $this->config['wpAdminUser'],
-                'admin_email' => $this->config['wpAdminEmail'],
-                'multisite' => $this->config['wpIsMultisite'],
-                'subdomains' => $this->config['wpMultisiteSubdomains'],
+        $config = [
+            'title' => $this->config['wpTitle'],
+            'admin_user' => $this->config['wpAdminUser'],
+            'admin_email' => $this->config['wpAdminEmail'],
+            'multisite' => $this->config['wpIsMultisite'],
         ];
+
+        if ($config['multisite']) {
+            $config['subdomains'] = !empty($this->config['wpMultisiteSubdomains']) ? $this->config['wpMultisiteSubdomains'] : 'subdomain';
+        }
+
+        return $config;
     }
 
 }

@@ -3,24 +3,11 @@
 
 namespace NorthStack\NorthStackClient\Command\UserSettings;
 
-use GuzzleHttp\Exception\ClientException;
-use NorthStack\NorthStackClient\API\Sapp\SappClient;
-use NorthStack\NorthStackClient\API\Orgs\OrgsClient;
 use NorthStack\NorthStackClient\Command\Command;
-use NorthStack\NorthStackClient\Command\OauthCommandTrait;
-use NorthStack\NorthStackClient\OrgAccountHelper;
-
-use NorthStack\NorthStackClient\AppTypes\StaticType;
-use NorthStack\NorthStackClient\AppTypes\WordPressType;
-
 use NorthStack\NorthStackClient\UserSettingsHelper;
-use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Console\Command\HelpCommand;
 
 class GetSettingsCommand extends Command
 {

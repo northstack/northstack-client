@@ -7,6 +7,7 @@ use GuzzleHttp\Exception\ClientException;
 use NorthStack\NorthStackClient\API\Sapp\SappClient;
 use NorthStack\NorthStackClient\API\Orgs\OrgsClient;
 use NorthStack\NorthStackClient\API\Sapp\SecretsClient;
+use NorthStack\NorthStackClient\AppTypes\BaseType;
 use NorthStack\NorthStackClient\AppTypes\JekyllType;
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
@@ -32,7 +33,7 @@ class CreateCommand extends Command
     /**
      * @var SappClient
      */
-    protected $api;
+    protected $sappClient;
 
     protected $orgs;
     /**
@@ -45,14 +46,14 @@ class CreateCommand extends Command
     private $secretsClient;
 
     public function __construct(
-        SappClient $api,
+        SappClient $sappClient,
         OrgsClient $orgs,
         OrgAccountHelper $orgAccountHelper,
         SecretsClient $secretsClient
     )
     {
         parent::__construct('app:create');
-        $this->api = $api;
+        $this->sappClient = $sappClient;
         $this->orgs = $orgs;
         $this->orgAccountHelper = $orgAccountHelper;
         $this->secretsClient = $secretsClient;
@@ -72,13 +73,28 @@ class CreateCommand extends Command
             ->addOption('orgId', null, InputOption::VALUE_REQUIRED, 'Only needed if you have access to multiple organizations')
             ->addOption('useDefaultLocation', null, InputOption::VALUE_REQUIRED, 'Only needed if you have access to multiple organizations')
         ;
+
+        foreach (array_merge(BaseType::getArgs(), StaticType::getArgs(), JekyllType::getArgs(), WordPressType::getArgs()) as $name => $optArgs) {
+            if ('frameworkVersion' === $name) {
+                continue;
+            }
+
+            $this->addOption(
+                $name,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                $optArgs['prompt'],
+                null
+            );
+        }
+
         $this->addOauthOptions();
     }
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
         if ($output->isDebug()) {
-            $this->api->setDebug();
+            $this->sappClient->setDebug();
         }
 
         $args = $input->getArguments();
@@ -130,7 +146,7 @@ class CreateCommand extends Command
         }
 
         try {
-            $r = $this->api->createApp(
+            $r = $this->sappClient->createApp(
                 $this->token->token,
                 $args['name'],
                 $orgId,
@@ -154,7 +170,7 @@ class CreateCommand extends Command
         $app = json_decode($r->getBody()->getContents());
 
         // Go ahead and try to set the secret for initial WP admin pass
-        if (! empty($appTemplate->config['wpAdminPass'])) {
+        if (!empty($appTemplate->config['wpAdminPass'])) {
             $output->writeln('Setting initial WP admin password secrets...');
             /**
              * @TODO: we should throw a warning if the chosen admin pass has a single quote

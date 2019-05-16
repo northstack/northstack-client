@@ -6,6 +6,7 @@ use Auryn\Injector;
 use duncan3dc\Console\Application;
 use NorthStack\NorthStackClient\Command\Loader;
 use NorthStack\NorthStackClient\Helper;
+use NorthStack\NorthStackClient\UserSettingsHelper;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
 
@@ -16,6 +17,7 @@ abstract class NorthStackTestCase extends TestCase
      */
     public $diCallables = [];
     public $injector;
+    /** @var Application */
     public $application;
     /**
      * @var MockObject[]
@@ -37,6 +39,27 @@ abstract class NorthStackTestCase extends TestCase
         $this->application = new Application();
         $loader = new Loader($this->injector, $this->application);
         $loader->loadCommands(dirname(__DIR__, 1) . '/src/Command', 'NorthStack\\NorthStackClient\\Command');
+    }
+
+    /**
+     * Inject pre-created mocks
+     *
+     * @param $mocks
+     */
+    public function injectMocksIntoDi($mocks)
+    {
+        $this->addDiCallback(function (Injector $injector) use ($mocks) {
+            foreach ($mocks as $class => $mock) {
+                $this->injector->delegate($class, function () use ($mock) {
+                    return $mock;
+                });
+            }
+        });
+    }
+
+    public function addDiCallback(callable $callable)
+    {
+        $this->diCallables[] = $callable;
     }
 
     public function generateMocks($classes, $injectIntoDi = false)
@@ -67,24 +90,9 @@ abstract class NorthStackTestCase extends TestCase
         return $this->mocks[$class] ?? false;
     }
 
-    /**
-     * Inject pre-created mocks
-     *
-     * @param $mocks
-     */
-    public function injectMocksIntoDi($mocks)
+    function getSettingByKey($key)
     {
-        $this->addDiCallback(function (Injector $injector) use ($mocks) {
-            foreach ($mocks as $class => $mock) {
-                $this->injector->delegate($class, function () use ($mock) {
-                    return $mock;
-                });
-            }
-        });
-    }
+        return isset($this->mockSettings[$key]) ? $this->mockSettings[$key] : null;
 
-    public function addDiCallback(callable $callable)
-    {
-        $this->diCallables[] = $callable;
     }
 }

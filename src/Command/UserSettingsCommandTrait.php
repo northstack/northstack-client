@@ -23,18 +23,18 @@ trait UserSettingsCommandTrait
      */
     public function findDefaultAppsDir(InputInterface $input, OutputInterface $output, QuestionHelper $questionHelper)
     {
-        $nsdir = UserSettingsHelper::get(UserSettingsHelper::KEY_LOCAL_APPS_DIR);
+        $appsDir = UserSettingsHelper::get(UserSettingsHelper::KEY_LOCAL_APPS_DIR);
 
-        if (!$nsdir) {
+        if (!$appsDir) {
             $askAppLocation = new Question('Enter the parent directory you would NorthStack apps to be created in by default: ', $_SERVER['HOME'] . '/northstack/apps');
-            $nsdir = $questionHelper->ask($input, $output, $askAppLocation);
+            $appsDir = $questionHelper->ask($input, $output, $askAppLocation);
             $maybeReplace = 1;
-            $nsdir = 0 === strpos($nsdir, '~') ? str_replace('~', $_SERVER['HOME'], $nsdir, $maybeReplace) : $nsdir;
+            $appsDir = 0 === strpos($appsDir, '~') ? str_replace('~', $_SERVER['HOME'], $appsDir, $maybeReplace) : $appsDir;
 
             // Ensure the directory exists -- if not, try to create it
-            if (!is_dir($nsdir)) {
+            if (!is_dir($appsDir)) {
                 try {
-                    mkdir($nsdir, 0777, true);
+                    mkdir($appsDir, 0777, true);
                 } catch (\Throwable $e) {
                     $output->writeln('There was an error creating the new directory, please create it and try again.');
                     $output->writeln('Error message: ' . $e->getMessage());
@@ -43,12 +43,12 @@ trait UserSettingsCommandTrait
             }
 
             // update the setting in the settings file
-            UserSettingsHelper::updateSetting(UserSettingsHelper::KEY_LOCAL_APPS_DIR, $nsdir);
+            UserSettingsHelper::updateSetting(UserSettingsHelper::KEY_LOCAL_APPS_DIR, $appsDir);
 
-            $output->writeln("Default Apps Directory set: $nsdir");
+            $output->writeln("Default Apps Directory set: $appsDir");
         }
 
-        return $nsdir;
+        return $appsDir;
     }
 
     protected function getUserSettings()

@@ -1,0 +1,222 @@
+{
+  "@type": "Pagely.Model.Sapps.App",
+  "id": "testapp1",
+  "orgId": "testorg",
+  "cluster": "us-east-1-dev",
+  "appName": "World of Badgers App",
+  "sharedConfig": {
+    "layout": "standard",
+    "shared_paths": [
+      "wp-content\/uploads",
+      "wp-content\/cache"
+    ]
+  },
+  "sharedConfigGatewaySys": null,
+  "sharedConfigGatewayCust": null,
+  "sharedConfigBuild": {
+    "build_type": "builder",
+    "framework_version": "5.1",
+    "image": {
+      "name": "wordpress-php"
+    },
+    "framework_config": {
+      "title": "Badger Badger Badger",
+      "admin_user": "badger_admin",
+      "admin_email": "maura.teal+elbadger@pagely.com",
+      "multisite": true,
+      "subdomains": true
+    }
+  },
+  "created": "2019-05-14T23:29:32+00:00",
+  "updated": "2019-05-14T23:29:32+00:00",
+  "appType": "WORDPRESS",
+  "sapps": [
+    {
+      "@type": "Pagely.Model.Sapps.Sapp",
+      "id": "testapp1",
+      "orgId": "testorg",
+      "parentSapp": "testapp1",
+      "cluster": "us-east-1-dev",
+      "name": "World of Badgers App",
+      "environment": "prod",
+      "internalUrl": "ns-a717a968-f710-4794-bf25-bb8adf49825d.us-east-1-dev-northstack.com",
+      "primaryDomain": "badgerbadgerbadger.io",
+      "domains": [
+        "ns-a717a968-f710-4794-bf25-bb8adf49825d.us-east-1-dev-northstack.com",
+        "badgerbadgerbadger.io"
+      ],
+      "config": {
+        "environment": "prod"
+      },
+      "configGatewaySys": null,
+      "configGatewayCust": null,
+      "configBuild": {
+        "build_type": "builder",
+        "framework_config": {
+          "url": "badgerbadgerbadger.io"
+        }
+      },
+      "configCloudfront": null,
+      "active": true,
+      "created": "2019-05-14T23:29:32+00:00",
+      "updated": "2019-05-14T23:29:32+00:00",
+      "deactivated": null,
+      "uploadUrl": null,
+      "currentRelease": null,
+      "currentReleaseDetails": null,
+      "appType": "WORDPRESS",
+      "appName": "World of Badgers App",
+      "sharedConfig": {
+        "layout": "standard",
+        "shared_paths": [
+          "wp-content\/uploads",
+          "wp-content\/cache"
+        ]
+      },
+      "sharedConfigGatewaySys": null,
+      "sharedConfigGatewayCust": null,
+      "sharedConfigBuild": {
+        "build_type": "builder",
+        "framework_version": "5.1",
+        "image": {
+          "name": "wordpress-php"
+        },
+        "framework_config": {
+          "title": "Badger Badger Badger",
+          "admin_user": "badger_admin",
+          "admin_email": "maura.teal+elbadger@pagely.com",
+          "multisite": true,
+          "subdomains": true
+        }
+      }
+    },
+    {
+      "@type": "Pagely.Model.Sapps.Sapp",
+      "id": "HiCapnLYiFFNgGryNiCs8T",
+      "orgId": "testorg",
+      "parentSapp": "testapp1",
+      "cluster": "us-east-1-dev",
+      "name": "World of Badgers App",
+      "environment": "test",
+      "internalUrl": "ns-8d303c6a-6f49-4efd-89b5-9f8d916953d2.us-east-1-dev-northstack.com",
+      "primaryDomain": "ns-8d303c6a-6f49-4efd-89b5-9f8d916953d2.us-east-1-dev-northstack.com",
+      "domains": [
+        "ns-8d303c6a-6f49-4efd-89b5-9f8d916953d2.us-east-1-dev-northstack.com"
+      ],
+      "config": {
+        "environment": "test",
+        "auth_type": "standard"
+      },
+      "configGatewaySys": null,
+      "configGatewayCust": null,
+      "configBuild": {
+        "build_type": "builder",
+        "framework_config": {
+          "url": "ns-8d303c6a-6f49-4efd-89b5-9f8d916953d2.us-east-1-dev-northstack.com"
+        }
+      },
+      "configCloudfront": null,
+      "active": true,
+      "created": "2019-05-14T23:29:32+00:00",
+      "updated": "2019-05-14T23:29:32+00:00",
+      "deactivated": null,
+      "uploadUrl": null,
+      "currentRelease": null,
+      "currentReleaseDetails": null,
+      "appType": "WORDPRESS",
+      "appName": "World of Badgers App",
+      "sharedConfig": {
+        "layout": "standard",
+        "shared_paths": [
+          "wp-content\/uploads",
+          "wp-content\/cache"
+        ]
+      },
+      "sharedConfigGatewaySys": null,
+      "sharedConfigGatewayCust": null,
+      "sharedConfigBuild": {
+        "build_type": "builder",
+        "framework_version": "5.1",
+        "image": {
+          "name": "wordpress-php"
+        },
+        "framework_config": {
+          "title": "Badger Badger Badger",
+          "admin_user": "badger_admin",
+          "admin_email": "maura.teal+elbadger@pagely.com",
+          "multisite": true,
+          "subdomains": true
+        }
+      }
+    },
+    {
+      "@type": "Pagely.Model.Sapps.Sapp",
+      "id": "HreKynZgCjCtG5XHDGwcG5",
+      "orgId": "testorg",
+      "parentSapp": "testapp1",
+      "cluster": "us-east-1-dev",
+      "name": "World of Badgers App",
+      "environment": "dev",
+      "internalUrl": "ns-124d63bd-48ef-4dab-a297-ede4c8eb1f61.us-east-1-dev-northstack.com",
+      "primaryDomain": "ns-124d63bd-48ef-4dab-a297-ede4c8eb1f61.us-east-1-dev-northstack.com",
+      "domains": [
+        "ns-124d63bd-48ef-4dab-a297-ede4c8eb1f61.us-east-1-dev-northstack.com"
+      ],
+      "config": {
+        "environment": "dev",
+        "auth_type": "standard"
+      },
+      "configGatewaySys": null,
+      "configGatewayCust": null,
+      "configBuild": {
+        "build_type": "builder",
+        "framework_config": {
+          "url": "ns-124d63bd-48ef-4dab-a297-ede4c8eb1f61.us-east-1-dev-northstack.com"
+        },
+        "define_constants": [
+          {
+            "key": "WP_DEBUG_DISPLAY",
+            "value": false
+          },
+          {
+            "key": "WP_DEBUG_DISPLAY",
+            "value": false
+          }
+        ]
+      },
+      "configCloudfront": null,
+      "active": true,
+      "created": "2019-05-14T23:29:32+00:00",
+      "updated": "2019-05-14T23:29:32+00:00",
+      "deactivated": null,
+      "uploadUrl": null,
+      "currentRelease": null,
+      "currentReleaseDetails": null,
+      "appType": "WORDPRESS",
+      "appName": "World of Badgers App",
+      "sharedConfig": {
+        "layout": "standard",
+        "shared_paths": [
+          "wp-content\/uploads",
+          "wp-content\/cache"
+        ]
+      },
+      "sharedConfigGatewaySys": null,
+      "sharedConfigGatewayCust": null,
+      "sharedConfigBuild": {
+        "build_type": "builder",
+        "framework_version": "5.1",
+        "image": {
+          "name": "wordpress-php"
+        },
+        "framework_config": {
+          "title": "Badger Badger Badger",
+          "admin_user": "badger_admin",
+          "admin_email": "maura.teal+elbadger@pagely.com",
+          "multisite": true,
+          "subdomains": true
+        }
+      }
+    }
+  ]
+}
