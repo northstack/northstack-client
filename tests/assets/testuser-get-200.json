@@ -1,0 +1,27 @@
+{
+  "@type": "Pagely.Model.Orgs.OrgUser",
+  "id": "testUser",
+  "firstName": "Bobby",
+  "lastName": "McBob",
+  "active": true,
+  "created": "2019-05-15T18:25:05+00:00",
+  "updated": "2019-05-15T18:25:05+00:00",
+  "username": "bob@bobco.com",
+  "email": "bob@bobco.com",
+  "phone": "8008008000",
+  "phoneCountry": "1",
+  "mfaEnabled": null,
+  "orgPermissions": [
+    {
+      "@type": "Pagely.Model.Orgs.OrgUserPermission",
+      "orgId": "testOrg",
+      "orgUserId": "testUser",
+      "permissions": 2047,
+      "created": "2019-05-15T18:25:07+00:00",
+      "updated": "2019-05-15T18:25:07+00:00",
+      "addedByUser": "",
+      "accepted": null
+    }
+  ],
+  "acceptedInvite": null
+}

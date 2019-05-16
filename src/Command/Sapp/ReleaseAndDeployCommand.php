@@ -65,6 +65,14 @@ class ReleaseAndDeployCommand extends AbstractDeployCmd
         }
 
         try {
+            /**
+             * TODO: check for shared configs here -- if this isn't the prod sapp,
+             * we should confirm that the user wants to actually make those shared changes
+             * (and note that a deploy of each sapp individually is required)
+             *
+             * -- actually, just have a check that asks if the user also wants to push sharedconfigs too
+             * (and then have it so they don't push by default)
+             */
             $this->sappClient->update($this->token->token, $sappId, $update);
         } catch (RequestException $e) {
             if (422 === $e->getCode()) {

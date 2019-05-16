@@ -7,6 +7,7 @@ use GuzzleHttp\Exception\ClientException;
 use NorthStack\NorthStackClient\API\Sapp\SappClient;
 use NorthStack\NorthStackClient\API\Orgs\OrgsClient;
 use NorthStack\NorthStackClient\API\Sapp\SecretsClient;
+use NorthStack\NorthStackClient\AppTypes\BaseType;
 use NorthStack\NorthStackClient\AppTypes\JekyllType;
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
@@ -32,7 +33,7 @@ class CreateCommand extends Command
     /**
      * @var SappClient
      */
-    protected $api;
+    protected $sappClient;
 
     protected $orgs;
     /**
@@ -45,14 +46,14 @@ class CreateCommand extends Command
     private $secretsClient;
 
     public function __construct(
-        SappClient $api,
+        SappClient $sappClient,
         OrgsClient $orgs,
         OrgAccountHelper $orgAccountHelper,
         SecretsClient $secretsClient
     )
     {
         parent::__construct('app:create');
-        $this->api = $api;
+        $this->sappClient = $sappClient;
         $this->orgs = $orgs;
         $this->orgAccountHelper = $orgAccountHelper;
         $this->secretsClient = $secretsClient;
@@ -66,17 +67,34 @@ class CreateCommand extends Command
             ->addArgument('name', InputArgument::REQUIRED, 'App name')
             ->addArgument('primaryDomain', InputArgument::REQUIRED, 'Primary Domain')
             ->addArgument('stack', InputArgument::REQUIRED, 'Application stack type (one of: [wordpress, static, jekyll])')
+            ->addOption('frameworkVersion', null, InputOption::VALUE_REQUIRED, 'Framework version (if not static app)')
+            ->addOption('frameworkConfig', null, InputOption::VALUE_REQUIRED, 'Framework config object')
             ->addOption('cluster', null, InputOption::VALUE_REQUIRED, 'Deployment location', 'dev-us-east-1')
             ->addOption('orgId', null, InputOption::VALUE_REQUIRED, 'Only needed if you have access to multiple organizations')
             ->addOption('useDefaultLocation', null, InputOption::VALUE_REQUIRED, 'Only needed if you have access to multiple organizations')
         ;
+
+        foreach (array_merge(BaseType::getArgs(), StaticType::getArgs(), JekyllType::getArgs(), WordPressType::getArgs()) as $name => $optArgs) {
+            if ('frameworkVersion' === $name) {
+                continue;
+            }
+
+            $this->addOption(
+                $name,
+                null,
+                InputOption::VALUE_OPTIONAL,
+                $optArgs['prompt'],
+                null
+            );
+        }
+
         $this->addOauthOptions();
     }
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
         if ($output->isDebug()) {
-            $this->api->setDebug();
+            $this->sappClient->setDebug();
         }
 
         $args = $input->getArguments();
@@ -103,18 +121,19 @@ class CreateCommand extends Command
             'primaryDomain' => $args['primaryDomain'],
             'cluster' => $options['cluster'],
             'accountUsername' => $user->username,
-            'accountEmail' => $user->email
+            'accountEmail' => $user->email,
+            'frameworkVersion' => $options['frameworkVersion'],
         ];
 
-
-        switch ($args['stack']) {
-            case 'wordpress':
+        $stack = strtoupper($args['stack']);
+        switch ($stack) {
+            case 'WORDPRESS':
                 $appTemplate = new WordPressType($input, $output, $questionHelper, $templateArgs);
                 break;
-            case 'static':
+            case 'STATIC':
                 $appTemplate = new StaticType($input, $output, $questionHelper, $templateArgs);
                 break;
-            case 'jekyll':
+            case 'JEKYLL':
                 $appTemplate = new JekyllType($input, $output, $questionHelper, $templateArgs);
                 break;
             default:
@@ -122,14 +141,21 @@ class CreateCommand extends Command
         }
         $appTemplate->promptForArgs();
 
+        if ($appTemplate->getFrameworkConfig()) {
+            $options['frameworkConfig'] = $appTemplate->getFrameworkConfig();
+        }
+
         try {
-            $r = $this->api->createApp(
+            $r = $this->sappClient->createApp(
                 $this->token->token,
                 $args['name'],
                 $orgId,
                 $options['cluster'],
                 $args['primaryDomain'],
-                strtoupper($args['stack'])
+                strtoupper($args['stack']),
+                !empty($options['frameworkVersion']) ? $options['frameworkVersion'] : null,
+                !empty($options['frameworkConfig']) ? $options['frameworkConfig'] : null
+
             );
         } catch (ClientException $e) {
             $i = $e->getResponse()->getStatusCode();
@@ -141,11 +167,10 @@ class CreateCommand extends Command
             }
             return;
         }
-        $data = json_decode($r->getBody()->getContents());
-        $sapps = $data->data;
+        $app = json_decode($r->getBody()->getContents());
 
         // Go ahead and try to set the secret for initial WP admin pass
-        if (! empty($appTemplate->config['wpAdminPass'])) {
+        if (!empty($appTemplate->config['wpAdminPass'])) {
             $output->writeln('Setting initial WP admin password secrets...');
             /**
              * @TODO: we should throw a warning if the chosen admin pass has a single quote
@@ -153,7 +178,7 @@ class CreateCommand extends Command
              */
             try {
                 // @TODO: build a `setMultiple` secrets endpoint to avoid multiple calls here
-                foreach ($sapps as $sapp) {
+                foreach ($app->sapps as $sapp) {
                     $this->secretsClient->setSecret(
                         $this->token->token,
                         $sapp->id,
@@ -169,18 +194,18 @@ One will be set for you on your first app deploy, which can be retrieved by fetc
         }
 
 
-        $appTemplate->writeConfigs($sapps);
-        $this->printSuccess($input, $output, $sapps, $appPath);
+        $appTemplate->writeConfigs($app);
+        $this->printSuccess($input, $output, $app, $appPath);
     }
 
-    function printSuccess($input, $output, $sapps, string $appPath)
+    function printSuccess($input, $output, $app, string $appPath)
     {
         $io = new SymfonyStyle($input, $output);
-        $appName = $sapps[0]->name;
+        $appName = $app->sapps[0]->name;
         $io->newLine();
         $io->writeln("Woohoo! Your NorthStack app ({$appName}) was created successfully. Here are your prod, testing, and dev environments:");
 
-        foreach ($sapps as $sapp) {
+        foreach ($app->sapps as $sapp) {
             $headers = [
                 [new TableCell($sapp->name . ' (' . $sapp->environment . ')', ['colspan' => 2])],
             ];

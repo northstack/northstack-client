@@ -5,7 +5,7 @@ namespace NorthStack\NorthStackClient\AppTypes;
 
 class WordPressType extends BaseType
 {
-    protected $args = [
+    protected static $args = [
         'wpTitle' => [
             'prompt' => 'Enter the title of the site:',
             'default' => '$appName',
@@ -36,75 +36,34 @@ class WordPressType extends BaseType
             'depends' => 'wpIsMultisite',
             'default' => 'subdomain'
         ],
-        'wpVersion' => [
+        'frameworkVersion' => [
             'prompt' => 'WordPress version: ',
             'default' => '5.1'
         ]
     ];
 
-    protected function writePerEnvBuildConfigs()
+    public function setArgsFromExistingApp($sapps)
     {
-        if ($this->config['wpIsMultisite']) {
-            $this->config['wpMultisiteSubdomains'] = ($this->config['wpMultisiteSubdomains'] === 'subdomain');
-        } else {
-            $this->config['wpMultisiteSubdomains'] = false;
-        }
-
-        foreach ($this->sapps as $sapp) {
-            $this->writeConfigFile(
-                "config/{$sapp->environment}/build.json",
-                $this->buildWpInstallArgs($sapp)
-            );
-
-            if ($sapp->environment === 'dev') {
-                $this->writeConfigFile(
-                    "config/local/build.json",
-                    $this->buildWpInstallArgs($sapp)
-                );
-            }
-        }
-
-        $this->writeConfigFile(
-            "config/build.json",
-            [
-                'image' => [
-                    'name' => 'wordpress-php',
-                    'version' => $this->config['wpVersion']
-                ],
-                'build-type' => 'builder',
-                'wordpress-version' => '^' . $this->config['wpVersion']
-            ]
-        );
-
-        $this->writeConfigFile(
-            "config/config.json",
-            [
-                'app-type' => 'wordpress',
-                'layout' => 'standard',
-                'shared-paths' => [
-                    'wp-content/uploads',
-                    'wp-content/cache'
-                ]
-            ]
-        );
+        $this->sapps = $sapps;
     }
 
     /**
-     * @param $sapp
      * @return array
      */
-    protected function buildWpInstallArgs($sapp)
+    public function getFrameworkConfig()
     {
-        return [
-            'wordpress-install' => [
-                'url' => $sapp->primaryDomain,
-                'title' => $this->config['wpTitle'],
-                'admin_user' => $this->config['wpAdminUser'],
-                'admin_email' => $this->config['wpAdminEmail'],
-                'multisite' => $this->config['wpIsMultisite'],
-                'subdomains' => $this->config['wpMultisiteSubdomains'],
-            ]
+        $config = [
+            'title' => $this->config['wpTitle'],
+            'admin_user' => $this->config['wpAdminUser'],
+            'admin_email' => $this->config['wpAdminEmail'],
+            'multisite' => $this->config['wpIsMultisite'],
         ];
+
+        if ($config['multisite']) {
+            $config['subdomains'] = !empty($this->config['wpMultisiteSubdomains']) ? $this->config['wpMultisiteSubdomains'] : 'subdomain';
+        }
+
+        return $config;
     }
 
 }

@@ -7,12 +7,15 @@ namespace NorthStack\NorthStackClient;
 class UserSettingsHelper
 {
     static $settings = null;
-
+    static $settingsFilepath = null;
     const KEY_LOCAL_APPS_DIR = 'local_apps_dir';
 
     static function getSettingsFilepath()
     {
-        return "{$_SERVER['HOME']}/.northstack-settings.json";
+        if (!static::$settingsFilepath) {
+            static::$settingsFilepath = "{$_SERVER['HOME']}/.northstack-settings.json";
+        }
+        return static::$settingsFilepath;
     }
 
     static function get($key) {
