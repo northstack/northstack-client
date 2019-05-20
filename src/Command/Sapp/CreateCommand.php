@@ -38,6 +38,10 @@ class CreateCommand extends Command
      * @var SecretsClient
      */
     private $secretsClient;
+    /**
+     * @var OrgsClient
+     */
+    private $orgs;
 
     public function __construct(
         SappClient $sappClient,
