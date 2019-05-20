@@ -61,20 +61,26 @@ abstract class NorthStackCommandTestCase extends NorthStackTestCase
     }
 
     /**
+     * @param bool $includeOrg
      * @param string $type
      * @param string $orgId
      * @return array
      */
-    function getAuthOptionsAsUser($type = 'Pagely.Model.Orgs.OrgUser', $orgId = 'testorg')
+    function getAuthOptionsAsUser($includeOrg = true, $type = 'Pagely.Model.Orgs.OrgUser', $orgId = 'testorg')
     {
         $testToken = new \stdClass();
         $testToken->sub = $type . ':testUser';
 
-        return [
-            '--orgId' => 'testorg',
+        $args = [
             '--authClientId' => 'test',
             '--authToken' => 'test.' . base64_encode(json_encode($testToken)),
         ];
+
+        if ($includeOrg) {
+            $args['--orgId'] = $orgId;
+        }
+
+        return $args;
     }
 
     function mockQuestionHelper()

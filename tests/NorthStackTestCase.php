@@ -23,6 +23,9 @@ abstract class NorthStackTestCase extends TestCase
      * @var MockObject[]
      */
     protected $mocks = [];
+    public $testDir;
+    public $userSettingsFilepath;
+
 
     function __construct(?string $name = null, array $data = [], string $dataName = '')
     {
@@ -90,9 +93,20 @@ abstract class NorthStackTestCase extends TestCase
         return $this->mocks[$class] ?? false;
     }
 
-    function getSettingByKey($key)
+    public function mockUserSettings($settingsFile = 'test-local-settings.json', $settings = null)
     {
-        return isset($this->mockSettings[$key]) ? $this->mockSettings[$key] : null;
+        $this->testDir = dirname(__FILE__) . '/localdata';
+        $this->userSettingsFilepath = $this->testDir . '/' . $settingsFile;
+        // mock the local settings
+        UserSettingsHelper::$settingsFilepath = $this->userSettingsFilepath;
+        if (null === $settings) {
+            $settings = ['local_apps_dir' => $this->testDir];
+        }
+        file_put_contents(UserSettingsHelper::$settingsFilepath, json_encode($settings));
+    }
 
+    public function resetUserSettingsTestFile()
+    {
+        file_put_contents($this->userSettingsFilepath, json_encode([]));
     }
 }

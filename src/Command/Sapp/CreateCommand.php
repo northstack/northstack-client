@@ -11,31 +11,25 @@ use NorthStack\NorthStackClient\AppTypes\BaseType;
 use NorthStack\NorthStackClient\AppTypes\JekyllType;
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
-use NorthStack\NorthStackClient\Command\UserSettingsCommandTrait;
 use NorthStack\NorthStackClient\OrgAccountHelper;
 
 use NorthStack\NorthStackClient\AppTypes\StaticType;
 use NorthStack\NorthStackClient\AppTypes\WordPressType;
 
-use NorthStack\NorthStackClient\UserSettingsHelper;
-use Symfony\Component\Console\Helper\TableCell;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
-use Symfony\Component\Console\Command\HelpCommand;
 
 class CreateCommand extends Command
 {
     use OauthCommandTrait;
-    use UserSettingsCommandTrait;
+    use CommandFetchAppTrait;
     /**
      * @var SappClient
      */
     protected $sappClient;
 
-    protected $orgs;
     /**
      * @var OrgAccountHelper
      */
@@ -72,15 +66,16 @@ class CreateCommand extends Command
             ->addOption('cluster', null, InputOption::VALUE_REQUIRED, 'Deployment location', 'dev-us-east-1')
             ->addOption('orgId', null, InputOption::VALUE_REQUIRED, 'Only needed if you have access to multiple organizations')
             ->addOption('useDefaultLocation', null, InputOption::VALUE_REQUIRED, 'Only needed if you have access to multiple organizations')
+            ->addOption('appSlug', null, InputOption::VALUE_REQUIRED, 'Name to use for the app\'s local directory and local reference')
         ;
 
-        foreach (array_merge(BaseType::getArgs(), StaticType::getArgs(), JekyllType::getArgs(), WordPressType::getArgs()) as $name => $optArgs) {
-            if ('frameworkVersion' === $name) {
+        foreach (array_merge(BaseType::getArgs(), StaticType::getArgs(), JekyllType::getArgs(), WordPressType::getArgs()) as $optKey => $optArgs) {
+            if ('frameworkVersion' === $optKey) {
                 continue;
             }
 
             $this->addOption(
-                $name,
+                $optKey,
                 null,
                 InputOption::VALUE_OPTIONAL,
                 $optArgs['prompt'],
@@ -101,17 +96,16 @@ class CreateCommand extends Command
         $options = $input->getOptions();
 
         $questionHelper = $this->getHelper('question');
-        $nsdir = $this->findDefaultAppsDir($input, $output, $questionHelper);
-
-        $appPath = "{$nsdir}/{$args['name']}";
-
-        if (file_exists($appPath)) {
-            $output->writeln("Folder for app {$args['name']} already exists at {$appPath}");
-            return;
+        $appSlug = $input->getOption('appSlug');
+        if (!$appSlug) {
+            $appSlug = $this->getLocalAppSlug($input->getArgument('name'));
+            $output->writeln('No app slug set. The local app\'s slug will be: ' . $appSlug);
+        } else {
+            $this->getLocalAppSlug($appSlug);
         }
 
+        $appPath = $this->getLocalAppDir($input, $output, $questionHelper, $appSlug);
         $orgId = $input->getOption('orgId') ?: $this->orgAccountHelper->getDefaultOrg()['id'];
-
         $user = $this->requireLogin($this->orgs);
 
         $appTemplate = null;
@@ -193,53 +187,8 @@ One will be set for you on your first app deploy, which can be retrieved by fetc
             }
         }
 
-
-        $appTemplate->writeConfigs($app);
-        $this->printSuccess($input, $output, $app, $appPath);
-    }
-
-    function printSuccess($input, $output, $app, string $appPath)
-    {
-        $io = new SymfonyStyle($input, $output);
-        $appName = $app->sapps[0]->name;
-        $io->newLine();
-        $io->writeln("Woohoo! Your NorthStack app ({$appName}) was created successfully. Here are your prod, testing, and dev environments:");
-
-        foreach ($app->sapps as $sapp) {
-            $headers = [
-                [new TableCell($sapp->name . ' (' . $sapp->environment . ')', ['colspan' => 2])],
-            ];
-
-            $rows = [
-                ['ID', $sapp->id],
-                ['Environment', $sapp->environment],
-                ['Internal URL', $sapp->internalUrl],
-                ['Primary Domain', $sapp->primaryDomain],
-                ['Config Path', "{$appPath}/config/{$sapp->environment}"],
-            ];
-
-            $io->table($headers, $rows);
-        }
-
-        $io->writeln("Paths:");
-        $io->table(
-            ['location', 'path'],
-            [
-                ['root', $appPath],
-                ['code', "{$appPath}/app"],
-                ['webroot', "{$appPath}/app/public"],
-                ['configuration', "{$appPath}/config"]
-            ]
-        );
-
-        $io->newLine();
-        $io->note("Your app isn't live until you create and deploy your first release! Use the `app:deploy` command for that:");
-        $io->newLine();
-        $io->writeln("$ northstack app:deploy --help\n");
-
-        $help = new HelpCommand();
-        $deploy = $this->getApplication()->find('app:deploy');
-        $help->setCommand($deploy);
-        $help->run($input, $output);
+        $this->setupLocalApp($input, $output, $app, $appSlug, $appPath);
+        $output->writeln("Woohoo! Your NorthStack app ({$app->appName}) was created successfully.");
+        $this->printSuccess($input, $output, $app, $appSlug, $appPath, true);
     }
 }

@@ -10,9 +10,6 @@ use Symfony\Component\Console\Question\Question;
 
 trait UserSettingsCommandTrait
 {
-    protected $userSettingsHelper;
-    protected $userSettings;
-
     /**
      * Checks the user settings for a default local apps dir and asks the user to choose one
      *
@@ -49,11 +46,5 @@ trait UserSettingsCommandTrait
         }
 
         return $appsDir;
-    }
-
-    protected function getUserSettings()
-    {
-        $this->userSettings = UserSettingsHelper::getSettings();
-        return $this->userSettings;
     }
 }

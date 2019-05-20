@@ -9,6 +9,7 @@ class UserSettingsHelper
     static $settings = null;
     static $settingsFilepath = null;
     const KEY_LOCAL_APPS_DIR = 'local_apps_dir';
+    const KEY_LOCAL_APPS_MAP = 'local_apps_map';
 
     static function getSettingsFilepath()
     {

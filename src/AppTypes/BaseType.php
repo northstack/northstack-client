@@ -12,27 +12,6 @@ use Symfony\Component\Console\Question\ConfirmationQuestion;
 
 abstract class BaseType
 {
-    protected static $directories = [
-        'config',
-        'scripts',
-        'app',
-        'app/public'
-    ];
-    protected static $perEnvDirectories = [
-        'config/{{env}}'
-    ];
-    /**
-     * Supported environment files. All of these with the exception of `domains` can override
-     * the related "shared" App-level field.
-     *
-     * @var array An array of the Sapp field matched to its config filename
-     */
-    protected static $envFiles = [
-        'configBuild' => 'build.json',
-        'config' => 'config.json',
-        'domains' => 'domains.json',
-        'configGatewayCust' => 'gateway.json',
-    ];
     public $config = [];
     protected $input;
     protected $output;
@@ -60,73 +39,6 @@ abstract class BaseType
     public static function getArgs()
     {
         return static::$args;
-    }
-
-    public function writeConfigs($app)
-    {
-        $this->app = $app;
-        $this->sapps = $app->sapps;
-        $this->createSkeleton();
-        $this->writeEnvironmentFile();
-        $this->writePerEnvConfigs();
-        $this->writeSharedConfigFiles();
-    }
-
-    protected function createSkeleton()
-    {
-        $this->mkdirRecursive(self::$directories);
-        $paths = [];
-        foreach (self::$perEnvDirectories as $dir) {
-            foreach ($this->sapps as $sapp) {
-                $paths[] = str_replace('{{env}}', $sapp->environment, $dir);
-            }
-            $paths[] = str_replace('{{env}}', 'local', $dir);
-        }
-        $this->mkdirRecursive($paths);
-    }
-
-    protected function mkdirRecursive(array $paths)
-    {
-        foreach ($paths as $path) {
-            $mkPath = $this->config['baseDir'] . '/' . $path;
-            if (!file_exists($mkPath)) {
-                $this->output->writeln("Creating directory {$mkPath}");
-                if (!mkdir($mkPath, 0775, true) && !is_dir($mkPath)) {
-                    throw new \RuntimeException(sprintf('Directory "%s" was not created', $mkPath));
-                }
-            }
-        }
-    }
-
-    protected function writeEnvironmentFile()
-    {
-        $env = [];
-        foreach ($this->sapps as $sapp) {
-            $env[$sapp->environment] = $sapp->id;
-        }
-        $this->writeConfigFile('config/environment.json', $env);
-    }
-
-    /**
-     * @param string $path
-     * @param object|array $data
-     */
-    protected function writeConfigFile(string $path, $data)
-    {
-        $path = $this->config['baseDir'] . '/' . $path;
-        file_put_contents($path, json_encode($data, JSON_PRETTY_PRINT));
-    }
-
-    protected function writePerEnvConfigs()
-    {
-        foreach ($this->sapps as $sapp) {
-            foreach (self::$envFiles as $sappKey => $filename) {
-                $this->writeConfigFile(
-                    "config/{$sapp->environment}/{$filename}",
-                    $sapp->{$sappKey}
-                );
-            }
-        }
     }
 
     public function promptForArgs()
@@ -211,21 +123,6 @@ abstract class BaseType
     public function getFrameworkConfig()
     {
         return null;
-    }
-
-    protected function writeSharedConfigFiles()
-    {
-        foreach ([
-                     'shared-build.json' => $this->app->sharedConfigBuild,
-                     'shared-config.json' => $this->app->sharedConfig,
-                     'shared-gateway.json' => $this->app->sharedConfigGatewaySys,
-                 ] as $filename => $data) {
-            if (!$data) {
-                continue;
-            }
-
-            $this->writeConfigFile('config/' . $filename, $data);
-        }
     }
 
 }
