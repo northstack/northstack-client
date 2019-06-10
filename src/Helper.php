@@ -23,7 +23,7 @@ class Helper
             ->define(\Monolog\Logger::class, [':name' => 'CLI', ':handlers' => $handlers])
             ->share(\Psr\Log\LoggerInterface::class)
             ->define($className, [
-                ':baseUrl' => getenv('MGMT_API_URL') ?: 'https://mgmt.pagely.com/api/'
+                ':baseUrl' => getenv('MGMT_API_URL') ?: 'https://api.northstack.com/'
             ]);
 
         return $injector->make($className);
