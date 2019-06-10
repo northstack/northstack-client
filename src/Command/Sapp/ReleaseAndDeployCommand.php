@@ -49,7 +49,7 @@ class ReleaseAndDeployCommand extends AbstractDeployCmd
         $environment = $input->getArgument('environment');
         $configs = $this->mergeConfigs($appFolder, $environment);
 
-        $appType = json_decode($configs['config'])->{'app-type'};
+        $appType = json_decode($configs['config'])->app_type;
 
         // update configs
         $output->writeln('Updating Sapp configs...');

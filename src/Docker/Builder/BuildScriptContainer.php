@@ -31,9 +31,9 @@ class BuildScriptContainer extends ContainerHelper
 
     public function runScripts(\stdClass $buildConfig, array $waitForFiles = [])
     {
-        if (isset($buildConfig->{'build-scripts'})) {
+        if (isset($buildConfig->build_scripts)) {
             $first = true;
-            foreach ($buildConfig->{'build-scripts'} as $script) {
+            foreach ($buildConfig->build_scripts as $script) {
                 try {
                     $type = BuildScriptType::memberByValue($script->type);
                     $this->log('Running build-script type: '.$type->value());

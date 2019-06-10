@@ -4,7 +4,7 @@ version: '3.4'
 services:
 
   web:
-    image: jekyll/jekyll:3
+    image: jekyll/jekyll:${FRAMEWORK_VERSION}
     command: "jekyll serve"
     ports:
       - 4000:4000

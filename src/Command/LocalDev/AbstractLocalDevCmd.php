@@ -65,7 +65,7 @@ abstract class AbstractLocalDevCmd extends Command
         $docker = new Docker\DockerClient();
         $action = $this->getDockerAction();
         $this->action = new $action(
-            $this->appData['config']->{'app-type'},
+            $this->appData['config']->app_type,
             $docker,
             $input,
             $output,
@@ -86,7 +86,7 @@ abstract class AbstractLocalDevCmd extends Command
         $build = $this->appData['build'];
         $appName = $this->appData['name'];
         $appId = $this->appData['id'];
-        $stack = $config->{'app-type'};
+        $stack = strtoupper($config->app_type);
 
         $uid = getenv('NORTHSTACK_UID');
         $user = 'ns';
@@ -94,11 +94,12 @@ abstract class AbstractLocalDevCmd extends Command
         $group = 'ns';
 
         switch ($stack) {
-            case 'jekyll':
+            case 'JEKYLL':
+            case 'GATSBY':
                 $public = '/app/_site';
                 break;
-            case 'wordpress':
-            case 'static':
+            case 'WORDPRESS':
+            case 'STATIC':
             default:
                 $public = '/app/public';
                 break;
@@ -120,18 +121,20 @@ abstract class AbstractLocalDevCmd extends Command
             'NORTHSTACK_UID' => getenv('NORTHSTACK_UID') ?: $uid,
             'NORTHSTACK_GROUP' => $group,
             'NORTHSTACK_GID' => getenv('NORTHSTACK_GID') ?: $gid,
+            'FRAMEWORK_VERSION' => $build->framework_version,
         ];
 
         // TODO: move this logic somewhere else
-        if ($stack === 'wordpress') {
-            $install = $build->{'wordpress-install'};
+        if ($stack === 'WORDPRESS') {
+            $install = $build->framework_config;
             $wp = [
-                'WORDPRESS_VERSION' => $build->{'wordpress-version'},
+
                 'WORDPRESS_TITLE' => $install->title,
                 'WORDPRESS_URL' => $install->url,
                 'WORDPRESS_ADMIN_USER' => $install->admin_user,
                 'WORDPRESS_ADMIN_EMAIL' => $install->admin_email,
-                'WORDPRESS_ADMIN_PASS' => $install->admin_pass,
+//                'WORDPRESS_ADMIN_PASS' => $install->admin_pass,
+                'WORDPRESS_ADMIN_PASS' => 'password', /** TODO: ask user for a local pass to use, or pull/set one in secrets just for local? */
             ];
             $vars = array_merge($vars, $wp);
         }
