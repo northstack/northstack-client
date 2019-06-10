@@ -1,0 +1,27 @@
+#!/bin/sh
+set -e
+
+export DIR="/_site"
+export PATH="$PATH:/usr/local/bin/gatsby"
+
+git config --global user.email "localdev@northstack.test"
+git config --global user.name "NorthStack"
+
+# Initialize Gatsby or run NPM install if needed
+if [ ! -f "$DIR/package.json" ]
+then
+  echo "Initializing Gatsby..."
+  gatsby new $DIR
+
+else
+  if [ ! -e "$DIR/node_modules/" ]
+  then
+    echo "Node modules is empty. Running npm install..."
+    npm install
+  fi
+fi
+
+echo "Serving local development site"
+
+rm -rf $DIR/public
+gatsby develop --host 0.0.0.0
