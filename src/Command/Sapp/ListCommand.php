@@ -8,7 +8,6 @@ use Symfony\Component\Console\Helper\TableCell;
 use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Input\InputOption;
 
 use NorthStack\NorthStackClient\Command\Command;
@@ -55,9 +54,9 @@ class ListCommand extends Command
     public function execute(InputInterface $input, OutputInterface $output)
     {
         $orgId = $input->getOption('orgId') ?: $this->orgAccountHelper->getDefaultOrg()['id'];
-        $user = $this->requireLogin($this->orgs);
+        $this->requireLogin($this->orgs);
 
-        $r = $this->api->Search(
+        $r = $this->api->search(
             $this->token->token,
             $input->getOption('name'),
             $orgId
@@ -92,7 +91,7 @@ class ListCommand extends Command
             }
             if ($count % 12) {
                 $rows[] = new TableSeparator();
-            } elseif ($count == count($body->data)) {
+            } elseif ($count === count($body->data)) {
                 $rows[] = $headers;
             } else {
                 $rows[] = new TableSeparator();
