@@ -1,0 +1,21 @@
+---
+version: '3.4'
+
+services:
+  web:
+    image: northstack-gatsby
+    build:
+      context: ./images/gatsby
+    ports:
+      - 4000:4000
+      - 8000:8000
+    volumes:
+      - "${APP_APP}:/app"
+    labels:
+      com.northstack: 1
+      com.northstack.localdev: 1
+      com.northstack.app.id: "${APP_ID}"
+    environment:
+      - PRIMARY_DOMAIN
+      - STACK
+      - EXPOSE_HTTP_PORT
