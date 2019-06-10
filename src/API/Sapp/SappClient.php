@@ -40,7 +40,7 @@ class SappClient extends BaseApiClient
         }
 
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->post('/sapps/apps', [
+            ->post('sapps/apps', [
                 'json' => $data,
             ]);
     }
@@ -51,7 +51,7 @@ class SappClient extends BaseApiClient
     )
     {
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->get("/sapps/{$sappId}/deploy");
+            ->get("sapps/{$sappId}/deploy");
     }
 
     public function get(
@@ -60,7 +60,7 @@ class SappClient extends BaseApiClient
     )
     {
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->get("/sapps/{$sappId}");
+            ->get("sapps/{$sappId}");
     }
 
     public function getAppBySappId(
@@ -69,7 +69,7 @@ class SappClient extends BaseApiClient
     )
     {
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->get("/sapps/app/{$sappId}");
+            ->get("sapps/app/{$sappId}");
     }
 
     public function update(string $accessToken, string $sappId, $data)
@@ -86,7 +86,7 @@ class SappClient extends BaseApiClient
         $domains
     ) {
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->post("/sapps/{$sappId}/deploy", [
+            ->post("sapps/{$sappId}/deploy", [
                 'json' => [
                     'config' => $config,
                     'build' => $buildConfig,
@@ -102,7 +102,7 @@ class SappClient extends BaseApiClient
         $cluster = null
     ) {
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->get("/sapps", [
+            ->get("sapps", [
                 'query' => [
                     'name' => $name,
                     'orgId' => $orgId,

@@ -23,6 +23,6 @@ class BankClient extends BaseApiClient
             $args['fromDate'] = $from;
         }
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->get("/bank/stats/$statType/sapp/$sappId", $args);
+            ->get("bank/stats/$statType/sapp/$sappId", $args);
     }
 }

@@ -22,7 +22,7 @@ class OrgsClient extends BaseApiClient
     )
     {
         return $this->guzzle()->post(
-            '/orgs/signup',
+            'orgs/signup',
             [
                 'json' => [
                     'name' => $organizationName,
@@ -41,13 +41,13 @@ class OrgsClient extends BaseApiClient
     public function get($accessToken, $orgId)
     {
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->get("/orgs/$orgId");
+            ->get("orgs/$orgId");
     }
 
     public function listUsers($accessToken, $orgId)
     {
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->get("/orgs/$orgId/users");
+            ->get("orgs/$orgId/users");
     }
 
     public function addUser($accessToken, $orgId, $firstName, $lastName, array $permissions, $email = null)
@@ -63,7 +63,7 @@ class OrgsClient extends BaseApiClient
         }
 
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->post("/orgs/$orgId/users", [
+            ->post("orgs/$orgId/users", [
                 'json' => $data,
             ]);
     }
@@ -71,19 +71,19 @@ class OrgsClient extends BaseApiClient
     public function getUser($accessToken, $userId)
     {
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->get("/orgs/user/$userId");
+            ->get("orgs/user/$userId");
     }
 
     public function getCurrentUserPermissions($accessToken)
     {
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->get('/orgs/permissions');
+            ->get('orgs/permissions');
     }
 
     public function verify($accessToken, $orgId, $code)
     {
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->post("/orgs/{$orgId}/verify", [
+            ->post("orgs/{$orgId}/verify", [
                 'json' => [
                     'code' => $code,
                 ],
@@ -93,20 +93,20 @@ class OrgsClient extends BaseApiClient
     public function verifyRequest($accessToken, $orgId)
     {
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->post("/orgs/{$orgId}/verify-request");
+            ->post("orgs/{$orgId}/verify-request");
     }
 
     public function listOrgs($accessToken)
     {
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->get("/orgs");
+            ->get("orgs");
     }
 
     // 2fa
     public function requestTwoFactor(string $accessToken, string $orgUserId, string $phone)
     {
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->get("/orgs/user/{$orgUserId}/2fa", [
+            ->get("orgs/user/{$orgUserId}/2fa", [
                 'query' => ['phone' => $phone],
             ]);
     }
@@ -114,7 +114,7 @@ class OrgsClient extends BaseApiClient
     public function enableTwoFactor(string $accessToken, string $orgUserId, string $code)
     {
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->post("/orgs/user/{$orgUserId}/2fa", [
+            ->post("orgs/user/{$orgUserId}/2fa", [
                 'json' => ['code' => $code],
             ]);
     }

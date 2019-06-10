@@ -14,12 +14,12 @@ class NorthstackClient extends BaseApiClient
     )
     {
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->post("/northstack/worker/launch/$sappId");
+            ->post("northstack/worker/launch/$sappId");
     }
 
     public function stopWorkers(string $accessToken, string $sappId)
     {
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->post("/northstack/worker/stop/$sappId");
+            ->post("northstack/worker/stop/$sappId");
     }
 }

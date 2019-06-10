@@ -21,7 +21,7 @@ class UserSettingsHelper
 
     static function get($key) {
         $settings = self::getSettings();
-        return isset($settings[$key]) ? $settings[$key] : null;
+        return $settings[$key] ?? null;
     }
 
     static function getSettings()
