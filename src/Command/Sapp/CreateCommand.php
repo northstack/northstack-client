@@ -67,7 +67,7 @@ class CreateCommand extends Command
             ->addArgument('stack', InputArgument::REQUIRED, 'Application stack type (one of: [wordpress, static, jekyll])')
             ->addOption('frameworkVersion', null, InputOption::VALUE_REQUIRED, 'Framework version (if not static app)')
             ->addOption('frameworkConfig', null, InputOption::VALUE_REQUIRED, 'Framework config object')
-            ->addOption('cluster', null, InputOption::VALUE_REQUIRED, 'Deployment location', 'dev-us-east-1')
+            ->addOption('cluster', null, InputOption::VALUE_REQUIRED, 'Deployment location', 'prod-us-east-1')
             ->addOption('orgId', null, InputOption::VALUE_REQUIRED, 'Only needed if you have access to multiple organizations')
             ->addOption('useDefaultLocation', null, InputOption::VALUE_REQUIRED, 'Only needed if you have access to multiple organizations')
             ->addOption('appSlug', null, InputOption::VALUE_REQUIRED, 'Name to use for the app\'s local directory and local reference')
