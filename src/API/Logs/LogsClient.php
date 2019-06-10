@@ -56,6 +56,6 @@ class LogsClient extends BaseApiClient
     public function getBuildLog(string $accessToken, string $sappId)
     {
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->get("/sapps/{$sappId}/build-logs");
+            ->get("sapps/{$sappId}/build-logs");
     }
 }

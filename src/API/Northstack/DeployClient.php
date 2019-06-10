@@ -25,7 +25,7 @@ class DeployClient extends BaseApiClient
         }
 
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->post("/northstack/deploy/app/$sappId/build", [
+            ->post("northstack/deploy/app/$sappId/build", [
                 'json' => $data,
             ]);
     }
@@ -33,7 +33,7 @@ class DeployClient extends BaseApiClient
     public function gateway($accessToken, $releaseId)
     {
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->post("/northstack/deploy/release/$releaseId/gateway");
+            ->post("northstack/deploy/release/$releaseId/gateway");
     }
 
     public function run(
@@ -42,7 +42,7 @@ class DeployClient extends BaseApiClient
     )
     {
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->post("/northstack/deploy/release/$releaseId/run");
+            ->post("northstack/deploy/release/$releaseId/run");
     }
 
     public function test(
@@ -51,7 +51,7 @@ class DeployClient extends BaseApiClient
     )
     {
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->post("/northstack/deploy/release/$releaseId/test");
+            ->post("northstack/deploy/release/$releaseId/test");
     }
 
     public function stopOld(
@@ -60,6 +60,6 @@ class DeployClient extends BaseApiClient
     )
     {
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->post("/northstack/deploy/release/$releaseId/stop-old");
+            ->post("northstack/deploy/release/$releaseId/stop-old");
     }
 }

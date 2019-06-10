@@ -13,13 +13,13 @@ class SecretsClient extends BaseApiClient
     public function listSecrets(string $accessToken, string $sappId)
     {
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->get("/sapps/{$sappId}/secrets");
+            ->get("sapps/{$sappId}/secrets");
     }
 
     public function setSecret(string $accessToken, string $sappId, string $key, $value)
     {
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->put("/sapps/{$sappId}/secrets/{$key}", [
+            ->put("sapps/{$sappId}/secrets/{$key}", [
                 'json' => [
                     'secret' => $value,
                 ],
@@ -29,6 +29,6 @@ class SecretsClient extends BaseApiClient
     public function removeSecret(string $accessToken, string $sappId, string $key)
     {
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->delete("/sapps/{$sappId}/secrets/{$key}");
+            ->delete("sapps/{$sappId}/secrets/{$key}");
     }
 }
