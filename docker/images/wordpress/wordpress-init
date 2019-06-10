@@ -6,7 +6,7 @@ if wp core version ; then
     echo "WordPress core already downloaded"
 else
     wp core download \
-        --version="$WORDPRESS_VERSION"
+        --version="$FRAMEWORK_VERSION"
 fi
 
 echo -n "Waiting for MySQL to be up and reachable"

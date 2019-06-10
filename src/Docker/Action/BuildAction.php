@@ -45,9 +45,9 @@ class BuildAction extends BaseAction
         // run build-scripts
         $buildConfig = $this->appData['build'];
 
-        switch ($this->appData['config']->{'app-type'}) {
-            case 'jekyll':
-                $this->container = new Builder\JekyllContainer('ns-jekyll-builder' ,$this->docker, null, $buildConfig->{'framework-version'});
+        switch (strtoupper($this->appData['config']->app_type)) {
+            case 'JEKYLL':
+                $this->container = new Builder\JekyllContainer('ns-jekyll-builder' ,$this->docker, null, $buildConfig->framework_version);
 
                 $this->container
                     ->setRoot($this->localAppFolder)
@@ -59,8 +59,8 @@ class BuildAction extends BaseAction
                 $this->container->followOutput($this->containerStreamHandler, $this->output);
                 $this->container->finish();
                 break;
-            case 'static':
-            case 'wordpress':
+            case 'STATIC':
+            case 'WORDPRESS':
             default:
                 break;
         }

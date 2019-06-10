@@ -12,7 +12,7 @@ class JekyllContainer extends ContainerHelper
     /**
      * @var string
      */
-    protected $jekyllVersion;
+    protected $frameworkVersion;
     protected $cmd = ['jekyll', 'build'];
     protected $baseLabel = 'com.northstack.localdev.jekyll';
     /**
@@ -34,16 +34,16 @@ class JekyllContainer extends ContainerHelper
      * @param string $containerName
      * @param DockerClient $docker
      * @param \Closure $outputHandler
-     * @param string $jekyllVersion
+     * @param string $frameworkVersion
      */
-    public function __construct(string $containerName, DockerClient $docker, $outputHandler = null, $jekyllVersion = '3')
+    public function __construct(string $containerName, DockerClient $docker, $outputHandler = null, $frameworkVersion = '3')
     {
         parent::__construct($containerName, $docker, $outputHandler);
-        $this->jekyllVersion = $jekyllVersion;
+        $this->frameworkVersion = $frameworkVersion;
     }
 
     protected function getImage()
     {
-        return self::DOCKER_IMAGE.':'.$this->jekyllVersion;
+        return self::DOCKER_IMAGE.':'.$this->frameworkVersion;
     }
 }
