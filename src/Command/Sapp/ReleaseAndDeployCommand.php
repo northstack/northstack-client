@@ -11,7 +11,6 @@ use NorthStack\NorthStackClient\API\AuthApi;
 use NorthStack\NorthStackClient\API\Northstack\DeployClient;
 use NorthStack\NorthStackClient\API\Sapp\SappClient;
 use NorthStack\NorthStackClient\Build\Archiver;
-use Symfony\Component\Console\Helper\FormatterHelper;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -76,13 +75,11 @@ class ReleaseAndDeployCommand extends AbstractDeployCmd
             $this->sappClient->update($this->token->token, $sappId, $update);
         } catch (RequestException $e) {
             if (422 === $e->getCode()) {
-                /** @var FormatterHelper $formatter */
-                $formatter = $this->getHelper('formatter');
                 $errors = json_decode($e->getResponse()->getBody()->getContents(), true)['body'];
                 // Prettfy any validation errors
                 foreach ($errors as $field => $error) {
                     foreach ($error['messages'] as $errorMessage) {
-                        if (stristr($errorMessage, '$schema(')) {
+                        if (false !== stripos($errorMessage, '$schema(')) {
                             $errorMessage = explode(PHP_EOL, json_decode($errorMessage));
                             // if for some reason we didn't get <2 items in the explode, have a fallback:
                             $errorMessage = !empty($errorMessage[1]) ? trim($errorMessage[1]) : implode(' ', $errorMessage);

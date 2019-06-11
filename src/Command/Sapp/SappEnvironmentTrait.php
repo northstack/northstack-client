@@ -63,8 +63,8 @@ trait SappEnvironmentTrait
     protected function mergeConfigs(string $appFolder, string $environment, $decode = false)
     {
         $configs = [
-            'config' => file_get_contents("{$appFolder}/config/config.json"),
-            'build' => file_get_contents("{$appFolder}/config/build.json"),
+            'config' => file_get_contents("{$appFolder}/config/shared-config.json"),
+            'build' => file_get_contents("{$appFolder}/config/shared-build.json"),
             'domains' => '[]',
         ];
 
