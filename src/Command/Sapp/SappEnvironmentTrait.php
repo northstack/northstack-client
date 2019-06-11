@@ -41,8 +41,8 @@ trait SappEnvironmentTrait
             },
             [
                 '/app/public',
-                '/config/build.json',
-                '/config/config.json',
+                '/config/shared-build.json',
+                '/config/shared-config.json',
                 '/config/environment.json',
                 "/config/{$env}"
             ]
@@ -63,14 +63,14 @@ trait SappEnvironmentTrait
     protected function mergeConfigs(string $appFolder, string $environment, $decode = false)
     {
         $configs = [
-            'config' => file_get_contents("{$appFolder}/config/config.json"),
-            'build' => file_get_contents("{$appFolder}/config/build.json"),
+            'config' => file_get_contents("{$appFolder}/config/shared-config.json"),
+            'build' => file_get_contents("{$appFolder}/config/shared-build.json"),
             'domains' => '[]',
         ];
 
         // the gateway file doesn't have to exist at all
-        if (file_exists("{$appFolder}/config/gateway.json")) {
-            $configs['gateway'] = file_get_contents("{$appFolder}/config/gateway.json");
+        if (file_exists("{$appFolder}/config/shared-gateway.json")) {
+            $configs['gateway'] = file_get_contents("{$appFolder}/config/shared-gateway.json");
         }
 
         foreach ($configs as $file => $json) {
