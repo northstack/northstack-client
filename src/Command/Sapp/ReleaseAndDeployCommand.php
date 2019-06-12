@@ -121,7 +121,7 @@ class ReleaseAndDeployCommand extends AbstractDeployCmd
         }
 
         // nothing left to do for static apps
-        if (in_array($appType, ['static', 'jekyll'])) {
+        if (in_array($appType, ['STATIC', 'JEKYLL'])) {
             $output->writeln('Release and Deploy Finished!');
             return;
         }
