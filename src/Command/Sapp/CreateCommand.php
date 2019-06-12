@@ -156,15 +156,28 @@ class CreateCommand extends Command
                 strtoupper($args['stack']),
                 !empty($options['frameworkVersion']) ? $options['frameworkVersion'] : null,
                 !empty($options['frameworkConfig']) ? $options['frameworkConfig'] : null
-
             );
         } catch (ClientException $e) {
             $i = $e->getResponse()->getStatusCode();
             if ($i === 401) {
                 $output->writeln('<error>Please Log in and try again</error>');
             } else {
-                $output->writeln('<error>App Create Failed</error>');
-                $output->writeln($e->getResponse()->getBody()->getContents());
+                $errorMessage = '<error>App Create Failed' . PHP_EOL;
+                $errors = json_decode($e->getResponse()->getBody()->getContents(), true);
+                foreach ($errors['body'] as $field => $error) {
+                    $errorMessage .= 'There was an error with the field ' . $field . PHP_EOL;
+                    // TODO: add this field validation error handling/output in a helper method
+                    if (is_iterable($error)) {
+                        foreach ($error as $errorContent) {
+                            if (isset($errorContent['messages'])) {
+                                foreach ($errorContent['messages'] as $message) {
+                                    $errorMessage .= $message . PHP_EOL;
+                                }
+                            }
+                        }
+                    }
+                }
+                $output->write($errorMessage . '</error>');
             }
             return;
         }
