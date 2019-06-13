@@ -134,6 +134,9 @@ class CreateCommand extends Command
             case 'JEKYLL':
                 $appTemplate = new JekyllType($input, $output, $questionHelper, $templateArgs);
                 break;
+            case 'GATSBY':
+                $appTemplate = new JekyllType($input, $output, $questionHelper, $templateArgs);
+                break;
             default:
                 throw new \Exception("Invalid stack {$args['stack']}");
         }
