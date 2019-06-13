@@ -2,12 +2,12 @@
 
 namespace NorthStack\NorthStackClient\AppTypes;
 
-class JekyllType extends BaseType
+class GatsbyType extends BaseType
 {
     protected static $args = [
         'frameworkVersion' => [
-            'prompt' => 'Jekyll version: ',
-            'default' => '3'
+            'prompt' => 'Gatsby version: ',
+            'default' => '2.5.0'
         ]
     ];
 }
