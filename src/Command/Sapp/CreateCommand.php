@@ -142,6 +142,9 @@ class CreateCommand extends Command
         if ($appTemplate->getFrameworkConfig()) {
             $options['frameworkConfig'] = $appTemplate->getFrameworkConfig();
         }
+        if (method_exists($appTemplate, 'getFrameworkVersion')) {
+            $options['frameworkVersion'] = $appTemplate->getFrameworkVersion();
+        }
 
         try {
             $r = $this->sappClient->createApp(

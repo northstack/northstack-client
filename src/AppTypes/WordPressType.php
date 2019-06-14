@@ -47,6 +47,11 @@ class WordPressType extends BaseType
         $this->sapps = $sapps;
     }
 
+    public function getFrameworkVersion()
+    {
+        return $this->config['frameworkVersion'];
+    }
+
     /**
      * @return array
      */
