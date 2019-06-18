@@ -33,7 +33,8 @@ class GetStatsCommand extends Command
         parent::configure();
         $this
             ->setDescription('Get Stats for an App')
-            ->addArgument('id', InputArgument::REQUIRED, 'App id')
+            ->addArgument('org', InputArgument::REQUIRED, 'Org ID')
+            ->addArgument('appids', InputArgument::REQUIRED, 'App ids comma separated')
             ->addArgument('type', InputArgument::REQUIRED, 'Stats Type (access, worker)')
             ->addOption('from', null, InputOption::VALUE_REQUIRED, 'From date YYYY-MM-DD', date('Y-m-d', strtotime('-30 days')))
             ->addOption('to', null, InputOption::VALUE_REQUIRED, 'To date YYYY-MM-DD', date('Y-m-d'))
@@ -56,8 +57,9 @@ class GetStatsCommand extends Command
 
         $r = $this->api->statsForApp(
             $this->token->token,
-            $args['id'],
-            $args['type'],
+            $args['org'],
+            explode(',', $args['appids']),
+            [$args['type']],
             $options['to'],
             $options['from']
         );
