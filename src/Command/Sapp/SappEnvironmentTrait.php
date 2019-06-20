@@ -99,10 +99,10 @@ trait SappEnvironmentTrait
 
             switch ($configType) {
                 case 'config':
-                    $configs[$configType] = new AppConfig((array) $configs[$configType]);
+                    $configs['configObject'] = new AppConfig(json_decode($configs[$configType], true));
                     break;
                 case 'build':
-                    $configs[$configType] = new BuildConfig((array) $configs[$configType]);
+                    $configs['buildObject'] = new BuildConfig(json_decode($configs[$configType], true));
                     break;
             }
         }
