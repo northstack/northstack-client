@@ -46,6 +46,19 @@ class BuildAction extends BaseAction
         $buildConfig = $this->appData['build'];
 
         switch (strtoupper($this->appData['config']->app_type)) {
+            case 'GATSBY':
+                $this->container = new Builder\BuildScriptContainer('ns-gatsby-builder', $this->docker, null);
+                $this->container
+                    ->setRoot($this->localAppFolder)
+                    ->setEntryPoint(['gatsby.sh'])
+                    ->setEnv(['GATSBY_VERSION' => $buildConfig->framework_version])
+                    ->createContainer();
+
+                $this->containerStreamHandler = $this->container->attachOutput($this->output, $this->attachInput, $this->handleSignals);
+                $this->container->startContainer();
+                $this->container->followOutput($this->containerStreamHandler, $this->output);
+                $this->container->finish();
+                break;
             case 'JEKYLL':
                 $this->container = new Builder\JekyllContainer('ns-jekyll-builder' ,$this->docker, null, $buildConfig->framework_version);
 

@@ -20,6 +20,7 @@ class BuildScriptContainer extends ContainerHelper
         'bash' => BashBuilder::class,
         'ruby' => RubyBuilder::class,
         'python' => PythonBuilder::class,
+        'gatsby' => GatsbyBuilder::class,
     ];
 
     protected $baseLabel = 'com.northstack.localdev.buildscripts';
