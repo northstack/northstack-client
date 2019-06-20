@@ -4,6 +4,8 @@
 namespace NorthStack\NorthStackClient\Command\Sapp;
 
 
+use NorthStack\NorthStackClient\Build\AppConfig;
+use NorthStack\NorthStackClient\Build\BuildConfig;
 use NorthStack\NorthStackClient\JSON\Merger;
 use NorthStack\NorthStackClient\UserSettingsHelper;
 
@@ -30,7 +32,7 @@ trait SappEnvironmentTrait
             throw new \Exception('No local apps directory set. ', 400);
         }
 
-        $dir = $dir . "/$name";
+        $dir .= "/$name";
 
         array_map(
             function ($path) use ($dir) {
@@ -73,11 +75,11 @@ trait SappEnvironmentTrait
             $configs['gateway'] = file_get_contents("{$appFolder}/config/shared-gateway.json");
         }
 
-        foreach ($configs as $file => $json) {
-            $envFile = "{$appFolder}/config/{$environment}/{$file}.json";
+        foreach ($configs as $configType => $json) {
+            $envFile = "{$appFolder}/config/{$environment}/{$configType}.json";
             if (file_exists($envFile)) {
                 // fix domains if they are in the old format
-                if ($file === 'domains') {
+                if ($configType === 'domains') {
                     $domains = json_decode(file_get_contents($envFile));
                     if (!is_array($domains)) {
                         if (is_object($domains) && $domains->domains) {
@@ -88,11 +90,20 @@ trait SappEnvironmentTrait
                         }
                     }
                 }
-                $configs[$file] = Merger::merge($json, file_get_contents($envFile));
+                $configs[$configType] = Merger::merge($json, file_get_contents($envFile));
             }
 
             if ($decode) {
-                $configs[$file] = json_decode($configs[$file]);
+                $configs[$configType] = json_decode($configs[$configType]);
+            }
+
+            switch ($configType) {
+                case 'config':
+                    $configs[$configType] = new AppConfig((array) $configs[$configType]);
+                    break;
+                case 'build':
+                    $configs[$configType] = new BuildConfig((array) $configs[$configType]);
+                    break;
             }
         }
         return $configs;
