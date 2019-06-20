@@ -8,6 +8,7 @@ use NorthStack\NorthStackClient\API\Sapp\SappClient;
 use NorthStack\NorthStackClient\API\Orgs\OrgsClient;
 use NorthStack\NorthStackClient\API\Sapp\SecretsClient;
 use NorthStack\NorthStackClient\AppTypes\BaseType;
+use NorthStack\NorthStackClient\AppTypes\GatsbyType;
 use NorthStack\NorthStackClient\AppTypes\JekyllType;
 use NorthStack\NorthStackClient\Command\Command;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
@@ -135,7 +136,7 @@ class CreateCommand extends Command
                 $appTemplate = new JekyllType($input, $output, $questionHelper, $templateArgs);
                 break;
             case 'GATSBY':
-                $appTemplate = new JekyllType($input, $output, $questionHelper, $templateArgs);
+                $appTemplate = new GatsbyType($input, $output, $questionHelper, $templateArgs);
                 break;
             default:
                 throw new \Exception("Invalid stack {$args['stack']}");
@@ -157,7 +158,7 @@ class CreateCommand extends Command
                 $options['cluster'],
                 $args['primaryDomain'],
                 strtoupper($args['stack']),
-                !empty($options['frameworkVersion']) ? $options['frameworkVersion'] : null,
+                $input->getOption('frameworkVersion') ?: $appTemplate->config['frameworkVersion'] ?: null,
                 !empty($options['frameworkConfig']) ? $options['frameworkConfig'] : null
             );
         } catch (ClientException $e) {
