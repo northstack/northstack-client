@@ -38,6 +38,7 @@ class ContainerHelper
      * @var \Closure
      */
     protected $outputHandler;
+    protected $entryPoint = [];
     /**
      * @var array
      */
@@ -104,6 +105,12 @@ class ContainerHelper
     public function setEnv(array $env): ContainerHelper
     {
         $this->env = $env;
+        return $this;
+    }
+
+    public function setEntryPoint(array $entryPoint)
+    {
+        $this->entryPoint = $entryPoint;
         return $this;
     }
 
@@ -213,6 +220,11 @@ class ContainerHelper
         return self::DOCKER_IMAGE.':'.self::DOCKER_IMAGE_TAG;
     }
 
+    protected function getEntryPoint()
+    {
+        return $this->entryPoint;
+    }
+
     /**
      * @return \Docker\API\Model\ContainersCreatePostBody|Container
      */
@@ -224,12 +236,17 @@ class ContainerHelper
             ->setVolumesFrom($this->volumesFrom)
             ->setVolumes(new \ArrayObject($this->volumes))
             ->setImage($this->getImage())
-            ->setCmd($this->getCmd())
             ->setEnv($this->getEnv())
             ->setWorkingDir($this->getWorkingDir())
             ->setAttachStdout($this->watchOutput)
             ->setAttachStderr($this->watchOutput)
         ;
+        if ($this->getCmd()) {
+            $conf->setCmd($this->getCmd());
+        }
+        if ($this->getEntryPoint()) {
+            $conf->setEntrypoint($this->getEntryPoint());
+        }
 
         return $conf
             ->setShell(['/bin/bash'])
