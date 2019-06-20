@@ -4,7 +4,7 @@
 namespace NorthStack\NorthStackClient\Docker\Builder;
 
 
-class NodeBuilder extends AbstractBuilder implements BuilderInterface
+class NodeBuilder extends AbstractBuilder
 {
     protected $version;
 
