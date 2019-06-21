@@ -4,16 +4,8 @@ load helpers
 
 listFuncs() {
     local file=$1
-    local before=$(mktemp)
-    local after=$(mktemp)
-    declare -F | sed -e 's/declare -f//' > "$before"
-    (. "$file" && declare -F) | sed -e 's/declare -f//'  > "$after"
-    while read f; do
-        if grep -E -q "$f" "$before"; then
-            continue
-        fi
-        echo "$f"
-    done < "$after"
+    # Really really un-fun trying to do this programmatically, so let's just mash it
+    sed -n -r -e 's/^([a-zA-Z0-9_:]+)[ ]*\(\).*/\1/p' < "$file"
 }
 
 getCoverage() {
@@ -24,6 +16,7 @@ getCoverage() {
     local report=$(mktemp)
     local stub=$(basename "$path")
     stub=${stub%.sh}
+    echo "Missing:" >&3
     for func in $(listFuncs $path); do
         count=$((count +1))
         testFile="${BATS_TEST_DIRNAME}/test-${stub}-${func}.bats"
@@ -33,7 +26,7 @@ getCoverage() {
             echo "$func $(basename "$testFile")"
         fi
     done > "$report"
-    sort "$report" | column -t >&2
+    sort "$report" | column -t >&3
 
     echo "Total functions: $count" >&3
     echo "Total covered:   $covered" >&3
