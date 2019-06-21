@@ -36,7 +36,7 @@ class SappClient extends BaseApiClient
         }
 
         if ($frameworkConfig) {
-            $data['frameworkConfig'] = json_encode($frameworkConfig);
+            $data['frameworkConfig'] = is_string($frameworkConfig) ? $frameworkConfig : json_encode($frameworkConfig);
         }
 
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
