@@ -11,7 +11,7 @@ main() {
     checkPaths
 
     local NS_UID=$UID
-    GID=$(getGid)
+    GID=$(id -g)
 
     if [[ $(uname) == Darwin ]]
     then
