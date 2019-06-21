@@ -1,5 +1,5 @@
-#@IgnoreInspection BashAddShebang
-. ./bin/lib.sh
+# shellcheck shell=bash
+. ${BIN_DIR:-./bin}/lib.sh
 
 readonly MIN_DOCKER_VERSION=17.09
 readonly MIN_PHP_VERSION=7.2
