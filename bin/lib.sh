@@ -377,10 +377,6 @@ dockerSocket() {
     exit 1
 }
 
-getGid() {
-    id -g
-}
-
 checkPaths() {
     local prefix=$(getInstallPrefix)
     local failed=0

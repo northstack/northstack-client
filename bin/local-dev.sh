@@ -9,7 +9,7 @@ source "$CDIR"/lib.sh
 checkDocker
 
 socket=$(dockerSocket)
-GID=$(getGid)
+GID=$(id -g)
 
 docker run \
 
