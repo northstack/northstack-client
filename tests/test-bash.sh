@@ -15,6 +15,7 @@ current=${repo}:${bats_version}
 
 check=$(docker image ls "$current" --filter label=com.northstack.image.stamp="$stamp" -q)
 if [[ -z $check ]]; then
+    echo "--- Building northstack/bats docker image"
     docker build \
         --file "$CDIR/docker/Dockerfile" \
         --tag "$current" \
@@ -24,6 +25,7 @@ if [[ -z $check ]]; then
         "$CDIR/docker"
 fi
 
+echo "+++ Running tests"
 docker run \
     --rm \
     --init \
