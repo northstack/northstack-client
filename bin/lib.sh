@@ -103,32 +103,66 @@ askForSudo() {
     return 1
 }
 
-copyFiles() {
-    local src=$1
-    local dest=$2
+copyFile() {
+    local src=${1:?src path required}
+    local dest=${2:?dest path required}
+
+    assertSafePath "$dest" || return 1
+
+    if [[ ! -f $src ]]; then
+        log error "File $src does not exist or is not a regular file"
+        return 1
+    fi
+
+    if [[ -e $dest && ! -f $dest ]]; then
+        log error "Destination exists and is not a regular file"
+        return 1
+    fi
+
+    local parent=$(dirname "$dest")
+    mkdirP "$parent" || return 1
+
+    set -- cp -va "$src" "$dest"
+
+    if [[ -f $dest && ! -w $dest ]]; then
+        askForSudo "$@" || return 1
+        set -- sudo "$@"
+    fi
+
+    debugCmd "$@"
+}
+
+copyTree() {
+    local src=${1:?src path required}
+    local dest=${2:?dest path required}
+
+    local parent=$(parentDir "$dest")
 
     if [[ -d "$src" ]]; then
-        if [[ ! -d "$dest" ]]; then
+        if [[ -d "$dest" ]]; then
+            log warn "Destination directory already exists--removing"
+            rmDir "$dest"
+        elif [[ -e $dest ]]; then
+            local filetype=$(stat -c '%F' "$dest")
+            log error "Destination exists but is not a directory: $filetype"
+            return 1
+        else
             mkdirP "$dest"
         fi
 
-        src=${src%/}; dest=${dest%/}
-        src=${src}/; dest=${dest}/
-
-        debugCmd cp -av "$src" "$dest"
-        # rsyncDirs "$src" "$dest"
-        return
+        src=${src%/}/.
+        dest=${dest%/}
+    else
+        mkdirP "$parent"
     fi
 
-    dest_dir=$(dirname "$dest")
-    if [[ -w $dest_dir ]]; then
-        debugCmd cp -avf "$src" "$dest"
-    else
-        log "warn" "$dest or $dest_dir is not writeable by your shell user. Using sudo to copy"
+    if [[ -e $dest && ! -w $dest ]] || [[ -e $parent && ! -w $parent ]]; then
+        log "warn" "$dest or its parent directory ($parent) is not writeable by your shell user. Using sudo to copy"
         askForSudo mkdir -pv "$dest_dir" \; cp -av "$src" "$dest" || return 1
         debugCmd sudo mkdir -pv "$dest_dir"
-        debugCmd sudo cp -av "$src" "$dest"
     fi
+
+    debugCmd sudo cp -av "$src" "$dest"
 }
 
 rsyncDirs() {
@@ -163,15 +197,61 @@ parentDir() {
     echo -e "$dir"
 }
 
+userOwnership() {
+    echo -n "$(id -u -n):$(id -g -n)"
+}
+
+assertSafePath() {
+    local path=${1:?path required}
+
+    path=${path%/}
+
+    local installPrefix=$(getInstallPrefix)
+    installPrefix=${installPrefix%/}
+
+    local safeFiles=(
+        "${installPrefix}/bin/northstack"
+    )
+
+    local safeDirs=(
+        /tmp
+        "${installPrefix}/northstack"
+    )
+    if [[ -n ${TMPDIR:-} ]]; then
+        safeDirs+=("${TMPDIR%/}")
+    fi
+
+    local file
+    for file in "${safeFiles[@]}"; do
+        if [[ $path == "$file" ]]; then
+            return 0
+        fi
+    done
+
+    local dir
+    for dir in "${safeDirs[@]}"; do
+        if [[ $path == "$dir" || $path == $dir/* ]]; then
+            echo "$path is safe because: $dir"
+            return 0
+        fi
+    done
+
+    log error "Refusing to act on unsafe path: $path"
+    return 1
+}
+
 mkdirP() {
     local dir=$1
+    assertSafePath "$dir" || return 1
     local parent=$(parentDir "$dir")
     if [[ -w $parent ]]; then
         debugCmd mkdir -pv "$dir"
     else
-        log "warn" "$parent is not writeable by your shell user. Using sudo to create $dir (164)"
-        askForSudo mkdir -pv "$dir"
+        log "warn" "Parent directory $parent is not writeable by your shell user. Using sudo to create $dir"
+        chownTo=$(userOwnership)
+        askForSudo mkdir -pv "$dir" \; chown "$chownTo" "$dir" || return 1
         debugCmd sudo mkdir -pv "$dir"
+        debugCmd sudo chown "$chownTo" "$dir"
     fi
 
 }
@@ -179,6 +259,8 @@ mkdirP() {
 lnS() {
     local target=$1
     local link=$2
+
+    assertSafePath "$target" || return 1
 
     if [[ -f $link ]] && [[ ! -h $link ]]; then
         rmFile "$link"
@@ -198,17 +280,43 @@ lnS() {
 rmFile() {
     local file=${1:?filename required}
 
-    local rm="rm -v "
+    assertSafePath "$file" || return 1
 
     if [[ ! -e $file ]]; then
         return 0
     fi
 
-    [[ -w $file ]] || {
+    if [[ ! -w $file ]]; then
         log "warn" "$file is not writeable by your shell user. Using sudo to delete"
-        askForSudo $rm "$file" && rm="sudo ${rm}"
-    }
-    debugCmd $rm "$file"
+        askForSudo rm -v "$file" || return 1
+        debugCmd sudo rm -v "$file"
+    fi
+    debugCmd rm -v "$file"
+}
+
+rmDir() {
+    local dir=${1:?directory name required}
+
+    assertSafePath "$dir" || return 1
+
+    if [[ ! -e $dir ]]; then
+        debug "rmDir: $dir does not exist"
+        return 0
+    fi
+
+    if [[ ! -d $dir ]]; then
+        log error "rmDir: $dir exists but is not a file"
+        return 1
+    fi
+
+
+    set -- rm -r "$dir"
+    if [[ ! -w $dir ]]; then
+        log "warn" "$dir is not writeable by your shell user. Using sudo to delete"
+        askForSudo "$@" || return 1
+        set -- sudo rm -r "$dir"
+    fi
+    debugCmd "$@"
 }
 
 debugCmd() {

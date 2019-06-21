@@ -8,7 +8,7 @@ fail() {
     local func=$1
     shift
 
-    printf "${blue}${func}${end} ${red}FAIL:${end} %s\n" "$@" >&3
+    printf "${blue}${func}${end} ${red}FAIL:${end} %s\n" "$@"
 }
 
 pass() {
@@ -19,7 +19,7 @@ pass() {
     local func=$1
     shift
 
-    printf "${blue}${func}${end} ${green}PASS:${end} %s\n" "$@" >&3
+    printf "${blue}${func}${end} ${green}PASS:${end} %s\n" "$@"
 }
 
 fileExists() {
@@ -43,24 +43,6 @@ dirExists() {
         return 1
     fi
 }
-function assertFile() {
-    local file=$1
-    local maxwait=${2:-20}
-
-    local tries=0
-    while [[ ! -e $file ]] && (( tries < maxwait )); do
-        echo "Waiting for $file to exist"
-        sleep 1
-        tries=$((tries + 1))
-    done
-
-    if [[ ! -e $file ]]; then
-        fail "timeout reached waiting for $file"
-        return 1
-    fi
-
-    pass "$file exists"
-}
 
 function assertEqual() {
     left=$1
@@ -81,7 +63,6 @@ function assertEqual() {
     echo "$left == $right"
     return 0
 }
-
 
 function assertHttp() {
     local uri=$1
@@ -134,7 +115,65 @@ xor() {
     && (( !(left == 0 && right == 0) ))
 }
 
-function assert() {
+mkRandomFile() {
+    local base=${1:-$BATS_TMPDIR}
+    local file=$(mktemp -p "$base")
+    echo -e "$(date)\n${RANDOM}\n${RANDOM}\n${RANDOM}" > "$file"
+    echo -n "$file"
+}
+
+mkRandomTree() {
+    local base=${1:-$BATS_TMPDIR}
+    local depth=${2:-4}
+    local srcDir=$(mktemp -d -p "$base")
+    local subdir=$srcDir
+    for _ in $(seq 0 "$depth"); do
+        for j in $(seq 0 "$depth"); do
+            mkRandomFile "$subdir" > /dev/null
+        done
+        subdir="${subdir}/${RANDOM} - ${RANDOM}"
+        mkdir -p "$subdir"
+    done
+    echo -n "$srcDir"
+}
+
+sameFileTree() {
+    local left=$1
+    local right=$2
+
+    run sudo diff -r "$left" "$right"
+    assert equal "$output" ""
+    assert equal "$status" 0
+}
+
+stringContains() {
+    local needle=$1
+    local haystack=$2
+    if [[ $haystack == *$needle* ]]; then
+        echo "\`$needle\` is in \`$haystack\`"
+        return 0
+    fi
+    echo "\`$needle\` is not in \`$haystack\`"
+    return 1
+}
+
+atLeast() {
+    local left=$1
+    local right=$2
+
+    local prog="scale=2; $left >= $right"
+    local result
+    result=$(bc <<< "$prog")
+    if (( result == 1)); then
+        echo "$left >= $right"
+        return 0
+    else
+        echo "$left < $right"
+        return 1
+    fi
+}
+
+assert() {
     local inverse=1
     if [[ $1 == not ]]; then
         inverse=0
@@ -154,6 +193,15 @@ function assert() {
             ;;
         dirExists)
             func=dirExists
+            ;;
+        sameFileTree)
+            func=sameFileTree
+            ;;
+        stringContains)
+            func=stringContains
+            ;;
+        atLeast)
+            func=atLeast
             ;;
         *)
             fail "Unknown assertion: $check"
