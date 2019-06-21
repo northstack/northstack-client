@@ -232,6 +232,7 @@ afterInstall() {
 }
 
 updateBashProfile() {
+    return
     local bindir=$1
     local bashFile=$2
 
@@ -331,7 +332,7 @@ setUserOptions() {
         colorText grey "Chosen directory found, continuing"
     else
         colorText grey "Chosen directory not found, attempting to create it"
-        if ! mkdir -p "$appDir";
+        if ! mkdirP "$appDir";
         then
             log error "There was an issue creating the directory $appDir, please manually create the directory and try again."
         else
@@ -382,13 +383,6 @@ complain() {
 install() {
     local context=$1
     local isDev=${2:-0}
-
-    if [ ! -d ~/.northstack ]
-    then
-        mkdir ~/.northstack
-    fi
-
-    cp -Rf ${context}/docker ~/.northstack/
 
     selectInstallMethod
     case $INSTALL_METHOD in
