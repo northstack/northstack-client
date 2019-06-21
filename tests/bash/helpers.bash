@@ -128,6 +128,7 @@ mkRandomTree() {
     local srcDir=$(mktemp -d -p "$base")
     local subdir=$srcDir
     for _ in $(seq 0 "$depth"); do
+        # shellcheck disable=SC2034
         for j in $(seq 0 "$depth"); do
             mkRandomFile "$subdir" > /dev/null
         done
