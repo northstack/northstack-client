@@ -1,10 +1,11 @@
 #!/bin/bash
 
+set -eu
+
 CDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 BASE="$( dirname "$CDIR")"
 
 BIN_DIR="$BASE/bin"
-TEST_DIR=$CDIR/bash
 
 stamp=$(stat -c %Y "$CDIR"/docker/Dockerfile)
 bats_version=$(awk -F= '/^ARG BATS_VERSION/ {print $2}' "$CDIR"/docker/Dockerfile)
@@ -29,7 +30,6 @@ docker run \
     --volume "${BASE}:${BASE}" \
     --workdir "$BASE/tests" \
     -e BIN_DIR="$BIN_DIR" \
-    -e TEST_DIR="$TEST_DIR" \
     --label com.northstack=1 \
     "$current" \
     bash "$@"
