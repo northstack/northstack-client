@@ -86,12 +86,14 @@ getInstallPrefix() {
     printf $(dirname "$binDir")
 }
 
-askForSudo() {
-    local cmd=$@
+shellIsInteractive() {
+    [[ $- == *i* ]]
+}
 
+askForSudo() {
     [[ ${NORTHSTACK_ALLOW_SUDO:-0} == 1 ]] && return 0
     echo "Asking permission to run the following command with sudo:"
-    echo "$cmd"
+    echo "$@"
     echo "You can disable this check by setting NORTHSTACK_ALLOW_SUDO=1"
 
     read -p "Enter y/n : " answer
@@ -106,22 +108,24 @@ copyFiles() {
     local dest=$2
 
     if [[ -d "$src" ]]; then
-        if [[ ! -d "$dest" ]]
-        then
-            mkdir -p "$dest"
+        if [[ ! -d "$dest" ]]; then
+            mkdirP "$dest"
         fi
 
-        debugCmd cp -Rf "$src/*" "$dest/"
+        src=${src%/}; dest=${dest%/}
+        src=${src}/; dest=${dest}/
+
+        debugCmd cp -av "$src" "$dest"
         # rsyncDirs "$src" "$dest"
         return
     fi
 
     dest_dir=$(dirname "$dest")
-    if [[ -w $dest_dir ]] && [[ -w $dest ]]; then
-        debugCmd cp -av "$src" "$dest"
+    if [[ -w $dest_dir ]]; then
+        debugCmd cp -avf "$src" "$dest"
     else
         log "warn" "$dest or $dest_dir is not writeable by your shell user. Using sudo to copy"
-        askForSudo mkdir -pv "$dest_dir" \; cp -av "$src" "$dest"
+        askForSudo mkdir -pv "$dest_dir" \; cp -av "$src" "$dest" || return 1
         debugCmd sudo mkdir -pv "$dest_dir"
         debugCmd sudo cp -av "$src" "$dest"
     fi
@@ -151,13 +155,17 @@ rsyncDirs() {
     debugCmd $rsync "$src" "$dest"
 }
 
+parentDir() {
+    local dir=$1
+    while [[ ! -d $dir ]]; do
+        dir=$(dirname "$dir")
+    done
+    echo -e "$dir"
+}
+
 mkdirP() {
     local dir=$1
-    local parent=$dir
-    while [[ ! -d $parent ]]; do
-        debug "Parent dir not found, making dir: ${parent}"
-        parent=$(dirname "$parent")
-    done
+    local parent=$(parentDir "$dir")
     if [[ -w $parent ]]; then
         debugCmd mkdir -pv "$dir"
     else
@@ -179,9 +187,7 @@ lnS() {
     local ln="ln -vfs"
     local parent=$(dirname "$link")
 
-    if [[ ! -d $parent ]]; then
-        mkdirP "$parent"
-    fi
+    mkdirP "$parent"
 
     if [[ ! -w $parent ]]; then
         askForSudo "$ln" "$target" "$link" && ln="sudo $ln"
@@ -190,38 +196,40 @@ lnS() {
 }
 
 rmFile() {
-    local file=$1
+    local file=${1:?filename required}
 
     local rm="rm -v "
 
+    if [[ ! -e $file ]]; then
+        return 0
+    fi
+
     [[ -w $file ]] || {
         log "warn" "$file is not writeable by your shell user. Using sudo to delete"
-        askForSudo $rm "$file"
-        rm="sudo ${rm}"
+        askForSudo $rm "$file" && rm="sudo ${rm}"
     }
     debugCmd $rm "$file"
 }
 
 debugCmd() {
-    local cmd="$@"
-
-    log info "Running: $cmd"
+    log info "Running: $@"
 
     local tmp=$(mktemp -d)
 
+    local flags="$-"
     set +e
-    $cmd > "$tmp/stdout" 2> "$tmp/stderr"
+    "$@" > "$tmp/stdout" 2> "$tmp/stderr"
 
     local status=$?
 
-    set -e
+    set "-$flags"
 
     if [[ $status -ne 0 ]]; then
         log error "Command returned non-zero: $status"
         log error "stdout:"
-        cat "$tmp/stdout" | log error -
+        log error - < "$tmp/stdout"
         log error "stderr:"
-        cat "$tmp/stderr" | log error -
+        log error - < "$tmp/stderr"
     else
         debug - < "$tmp/stdout"
         debug - < "$tmp/stderr"
