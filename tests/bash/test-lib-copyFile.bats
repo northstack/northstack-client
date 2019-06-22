@@ -88,3 +88,9 @@ teardown() {
     copyFile "$srcFile" "$new"
     assert sameFileTree "$srcFile" "$new"
 }
+
+@test "Trying to copy a directory fails" {
+    run copyFile "$srcDir" "$destDir"
+    assert not equal 0 "$status"
+    assert stringContains "does not exist or is not a regular file" "$output"
+}
