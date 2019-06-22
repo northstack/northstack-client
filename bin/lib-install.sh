@@ -232,7 +232,6 @@ afterInstall() {
 }
 
 updateBashProfile() {
-    return
     local bindir=$1
     local bashFile=$2
 
