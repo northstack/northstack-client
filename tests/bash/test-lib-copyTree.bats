@@ -69,3 +69,19 @@ teardown() {
     assert stringContains "directory already exists--removing" "$output"
     assert sameFileTree "$srcTree" "$destTree"
 }
+
+@test "Trying to copy a file fails" {
+    run copyTree "$srcFile" "$destDir"
+    assert equal 1 "$status"
+    assert stringContains "does not exist or is not a directory" "$output"
+}
+
+@test "Trying to copy to an unsafe path fails" {
+    srcTree=$(mkRandomTree)
+    export NORTHSTACK_ALLOW_SUDO=1
+    assert not sameFileTree "$srcTree" "/root/private"
+    run copyTree "$srcTree" "/root/private"
+    assert not sameFileTree "$srcTree" "/root/private"
+    assert equal 1 "$status"
+    assert stringContains "Refusing to act on unsafe path" "$output"
+}

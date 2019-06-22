@@ -50,11 +50,12 @@ log() {
         -)
             while read -rs line; do
                 printf "$template" "$line" > /dev/stderr
-            done;;
+            done
+            ;;
         *)
-            printf "$template" "$@" > /dev/stderr;;
+            printf "$template" "$@" > /dev/stderr
+            ;;
     esac
-
 }
 
 getCwd() {
@@ -149,57 +150,28 @@ copyTree() {
     local src=${1:?src path required}
     local dest=${2:?dest path required}
 
-    local parent=$(parentDir "$dest")
+    assertSafePath "$dest" || return 1
 
-    if [[ -d "$src" ]]; then
-        if [[ -d "$dest" ]]; then
-            log warn "Destination directory already exists--removing"
-            rmDir "$dest"
-        elif [[ -e $dest ]]; then
-            local filetype=$(stat -c '%F' "$dest")
-            log error "Destination exists but is not a directory: $filetype"
-            return 1
-        else
-            mkdirP "$dest"
-        fi
-
-        src=${src%/}/.
-        dest=${dest%/}
-    else
-        mkdirP "$parent"
+    if [[ ! -d $src ]]; then
+        log error "Source path ($src) does not exist or is not a directory"
+        return 1
     fi
 
-    if [[ -e $dest && ! -w $dest ]] || [[ -e $parent && ! -w $parent ]]; then
-        log "warn" "$dest or its parent directory ($parent) is not writeable by your shell user. Using sudo to copy"
-        askForSudo mkdir -pv "$dest_dir" \; cp -av "$src" "$dest" || return 1
-        debugCmd sudo mkdir -pv "$dest_dir"
+    if [[ -d $dest ]]; then
+        log warn "Destination directory already exists--removing"
+        rmDir "$dest"
+    elif [[ -e $dest ]]; then
+        local filetype=$(stat -c '%F' "$dest")
+        log error "Destination exists but is not a directory: $filetype"
+        return 1
     fi
 
-    debugCmd sudo cp -av "$src" "$dest"
-}
+    mkdirP "$dest"
 
-rsyncDirs() {
-    local src=$1
-    local dest=$2
+    src=${src%/}/.
+    dest=${dest%/}
 
-    src=${src%/}; dest=${dest%/}
-    src=${src}/; dest=${dest}/
-
-    debug "Rsync from $src -> $dest"
-
-    if [[ ! -d $dest ]]; then
-        mkdirP "$dest"
-    fi
-
-    local rsync="rsync -HavzuP --exclude=.git --exclude=.tmp"
-
-    if [[ ! -w $dest ]]; then
-        log "warn" "$dest is not writeable by your shell user; using sudo to copy files"
-        askForSudo $rsync "$src" "$dest"
-        rsync="sudo ${rsync}"
-    fi
-
-    debugCmd $rsync "$src" "$dest"
+    debugCmd cp -av "$src" "$dest"
 }
 
 parentDir() {
@@ -299,12 +271,13 @@ rmFile() {
         return 0
     fi
 
+    set -- rm -v "$file"
     if [[ ! -w $file ]]; then
         log "warn" "$file is not writeable by your shell user. Using sudo to delete"
-        askForSudo rm -v "$file" || return 1
-        debugCmd sudo rm -v "$file"
+        askForSudo "$@" || return 1
+        set -- sudo rm -v "$file"
     fi
-    debugCmd rm -v "$file"
+    debugCmd "$@"
 }
 
 rmDir() {
@@ -318,7 +291,7 @@ rmDir() {
     fi
 
     if [[ ! -d $dir ]]; then
-        log error "rmDir: $dir exists but is not a file"
+        log error "rmDir: $dir exists but is not a directory"
         return 1
     fi
 
@@ -333,7 +306,8 @@ rmDir() {
 }
 
 debugCmd() {
-    log info "Running: $@"
+    local cmd=$(printf '%q ' "$@")
+    log info "Running:" "$cmd"
 
     local tmp=$(mktemp -d)
 

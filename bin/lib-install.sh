@@ -271,7 +271,7 @@ doNativeInstall() {
     local dest="${install_path}/northstack"
 
     mkdirP "$dest"
-    copyFiles "$context" "$dest"
+    copyTree "$context" "$dest"
     lnS "$dest/bin/northstack" "${install_path}/bin/northstack"
 
     afterInstall "$install_path"
@@ -295,8 +295,8 @@ doDockerInstall() {
 
     "$context"/bin/build-wrapper.sh "$wrapperFile" "$BASE" "$isDev"
 
-    copyFiles "$wrapperFile" "${install_path}/bin/northstack"
-    copyFiles "${context}/docker" "${install_path}/northstack/docker"
+    copyFile "$wrapperFile" "${install_path}/bin/northstack"
+    copyTree "${context}/docker" "${install_path}/northstack/docker"
 
     afterInstall "$install_path"
 }
