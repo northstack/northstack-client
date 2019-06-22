@@ -91,17 +91,29 @@ shellIsInteractive() {
     [[ $- == *i* ]]
 }
 
+
+ask() {
+    local question=$1
+    local default=${2:-no}
+
+    if [[ -z ${ASK_FORCE_INTERACTIVE:-} || ! shellIsInteractive ]]; then
+        debug "This is not an interactive shell--no sense in asking"
+        return 2
+    fi
+
+    echo -e "$question"
+    read -r -p "Enter yes/no (default = $default): " answer
+
+    [[ $answer == "yes" ]] || [[ $answer != "no" && $default == "yes" ]]
+}
+
 askForSudo() {
     [[ ${NORTHSTACK_ALLOW_SUDO:-0} == 1 ]] && return 0
-    echo "Asking permission to run the following command with sudo:"
-    echo "$@"
-    echo "You can disable this check by setting NORTHSTACK_ALLOW_SUDO=1"
+    local question="Asking permission to run the following command with sudo:"
+    question="${question}\n$@"
+    question="${question}\nYou can disable this check by setting NORTHSTACK_ALLOW_SUDO=1"
 
-    read -p "Enter y/n : " answer
-
-    [[ $answer == y ]] && return 0
-
-    return 1
+    ask "$question"
 }
 
 copyFile() {

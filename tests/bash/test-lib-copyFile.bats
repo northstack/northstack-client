@@ -84,8 +84,7 @@ teardown() {
     sudo chown root:root "$new"
     assert not sameFileTree "$srcFile" "$new"
 
-    copyFile "$srcFile" "$new" <<< "y"
+    export NORTHSTACK_ALLOW_SUDO=1
+    copyFile "$srcFile" "$new"
     assert sameFileTree "$srcFile" "$new"
 }
-
-

@@ -9,6 +9,7 @@ source "$BIN_DIR/lib-install.sh"
     touch $HOME/.bashrc
     echo "# $RANDOM" >> $HOME/.bashrc
     cp $HOME/.bashrc{,.bak}
-    updateBashProfile "$prefix/bin" "$HOME/.bashrc" < /dev/null
+    run updateBashProfile "$prefix/bin" "$HOME/.bashrc"
+    assert not equal "$status" 0
     assert sameFileTree $HOME/.bashrc $HOME/.bashrc.bak
 }
