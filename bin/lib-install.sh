@@ -235,6 +235,7 @@ updateBashProfile() {
     local bindir=$1
     local bashFile=$2
 
+    ask "How about updating that bashrc for ya?" || return 1
     if grep --quiet $bindir $bashFile; then
         # The user still needs to refresh their terminal window to use the new source
         colorText grey "NorthStack path found in ${bashFile}, continuing without update."
