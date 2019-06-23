@@ -2,10 +2,10 @@
 
 load helpers
 
-source "$BIN_DIR/lib.sh"
+source "$BIN_DIR/lib-install.sh"
 
 @test "iHave returns 0 if \$cmd is in the path" {
-    run iHave bash
+    run iHave ls
     assert equal 0 $status
 }
 
