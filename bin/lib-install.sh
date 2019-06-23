@@ -24,7 +24,7 @@ setError() {
         fi
     done
     IFS=$ifs
-    [[ ! -z $val ]] && val="${val}\n"
+    [[ -n $val ]] && val="${val}\n"
     val=${val}${msg}
     printf -v "$var" "$val"
 }
@@ -71,7 +71,7 @@ getVersion() {
     local version=$("${cmd[@]}")
     local status=$?
 
-    local strCmd=${cmd[@]}
+    local strCmd=$(quoteCmd "${cmd[@]}")
     if [[ $status -ne 0 ]]; then
         log error "Failed to check the installed version of $name" \
             "Command \`$strCmd\` returned $status"
@@ -85,7 +85,7 @@ versionCompare() {
     local left=${1:-0}
     local right=${2:-0}
 
-    [[ $left == $right ]] && return 0
+    [[ $left == "$right" ]] && return 0
 
     if [[ $left =~ ^[[:digit:]]$ ]] && [[ $right =~ ^[[:digit:]]$ ]]; then
         [[ $left -ge $right ]] && return 0
@@ -133,7 +133,7 @@ versionCompare() {
 
     if ((l_num > r_num)); then
         return 0
-    elif ((l_num >= r_num))   && [[ $l_extra == $r_extra || $l_extra > $r_extra ]]; then
+    elif ((l_num >= r_num))   && [[ $l_extra == "$r_extra" || $l_extra > $r_extra ]]; then
         versionCompare "$left" "$right" && return 0
     fi
 
@@ -150,6 +150,7 @@ checkVersion() {
         return 1
     fi
 
+    # shellcheck disable=SC2153
     versionCompare "$VERSION" "$min" && return 0
 
     setError "$name" "Minimum version requirement for $name not met (installed: $VERSION, required: $min)"
@@ -202,30 +203,30 @@ afterInstall() {
 
     # We're just going to attempt to update all of the potential bash profiles that might be used. Everyone is different!
     log info "Attempting to update all possible bash/zsh profiles -- sometimes we've just gotta do that."
-    if [ -w $HOME/.bash_profile ]; then
-        updateBashProfile $bindir $HOME/.bash_profile
+    if [[ -w $HOME/.bash_profile ]]; then
+        updateBashProfile "$bindir" "$HOME"/.bash_profile
         updated=1
     fi
 
-    if [ -w $HOME/.bashrc ]; then
-        updateBashProfile $bindir $HOME/.bashrc
+    if [[ -w $HOME/.bashrc ]]; then
+        updateBashProfile "$bindir" "$HOME"/.bashrc
         updated=1
     fi
 
-    if [ -w $HOME/.zshrc ]; then
-        updateBashProfile $bindir $HOME/.zshrc
+    if [[ -w $HOME/.zshrc ]]; then
+        updateBashProfile "$bindir" "$HOME"/.zshrc
         updated=1
     fi
 
-    if [ $updated == "0" ]; then
-        if [ -f $HOME/.bash_profile ]; then
+    if [[ $updated == "0" ]]; then
+        if [[ -f $HOME/.bash_profile ]]; then
             log error "Please make ~/.bash_profile writable and re-run install.sh"
             exit 1
         fi
 
         log warn "Could not find any bash or zsh profiles to update. Creating ~/.bash_profile"
         touch ~HOME/.bash_profile
-        afterInstall $1
+        afterInstall "$1"
     fi
 
     echo ""
@@ -239,16 +240,16 @@ updateBashProfile() {
     local bashFile=$2
 
     ask "How about updating that bashrc for ya?" || return 1
-    if grep --quiet $bindir $bashFile; then
+    if grep -q "$bindir" "$bashFile"; then
         # The user still needs to refresh their terminal window to use the new source
         colorText grey "NorthStack path found in ${bashFile}, continuing without update."
     else
         colorText grey "NorthStack path not found in ${bashFile}, verifying that the file is writeable."
-        if [ -w $bashFile ]; then
+        if [[ -w $bashFile ]]; then
             colorText grey "${bashFile} is writeable."
             # Add to the bashrc file so the command can be run
-            echo "# NorthStack path: " >> $bashFile
-            echo "export PATH=${bindir}:\$PATH" >> $bashFile
+            echo "# NorthStack path: " >> "$bashFile"
+            echo "export PATH=${bindir}:\$PATH" >> "$bashFile"
 
             # The user still needs to refresh their terminal window to use the new source
             colorText "white" "                                                                 " true "red"
@@ -292,7 +293,7 @@ doDockerInstall() {
 
     local wrapperFile=$(mktemp)
 
-    trap "rm '$wrapperFile'" EXIT
+    trap 'rm "$wrapperFile"' EXIT
 
     local install_path=$(setInstallPrefix)
 
@@ -305,7 +306,7 @@ doDockerInstall() {
 }
 
 setUserOptions() {
-    if [ -f $HOME/.northstack-settings.json ]; then
+    if [[ -f $HOME/.northstack-settings.json ]]; then
         log     info "Previous settings found..."
         return
     fi
@@ -313,7 +314,7 @@ setUserOptions() {
     local appDir="$HOME/northstack/apps"
 
     echo "Use the default recommended directory to store your apps?"
-    read -p "($HOME/northstack/apps) (Y/n)? " choice
+    read -r -p "($HOME/northstack/apps) (Y/n)? " choice
 
     case "$choice" in
         y | Y)
@@ -321,7 +322,7 @@ setUserOptions() {
             ;;
         n | N)
             echo "Please enter the full path of the directory where you'd like to store your local NorthStack apps"
-            read customAppDir
+            read -r customAppDir
             appDir=${customAppDir/#~/$HOME}
             ;;
         *)
@@ -358,15 +359,15 @@ updateUserSettings() {
         colorText yellow "Existing settings file found, backing it up before we proceed."
         local backupDate=$(date '+%Y-%m-%d_%H%M')
         local backupFullPath="$settingsDir/.northstack-settings--backup-$backupDate.json"
-        cp $fullPath $backupFullPath
-        rm $fullPath
+        cp "$fullPath" "$backupFullPath"
+        rm "$fullPath"
     fi
 
     local json="{\"local_apps_dir\":\"$1\"}"
 
-    echo "$json" > $fullPath
+    echo "$json" > "$fullPath"
 
-    if [ ! -w $fullPath ]; then
+    if [[ ! -w $fullPath ]]; then
         chmod
         log error "Looks like $fullPath is not writeable. Please save the following contents to it:"
         log error "$json"
