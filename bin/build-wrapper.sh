@@ -6,8 +6,8 @@ OUT=$1
 BASE=$2
 DEV_MODE=${3:-0}
 
-FUNCTIONS="$(<"$BASE"/bin/wrapper-lib.sh)"
-MAIN="$(<"$BASE"/bin/wrapper-main.sh)"
+FUNCTIONS="$(< "$BASE"/bin/wrapper-lib.sh)"
+MAIN="$(< "$BASE"/bin/wrapper-main.sh)"
 
 cat << EOF > "$OUT"
 #!/usr/bin/env bash

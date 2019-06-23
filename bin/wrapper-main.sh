@@ -13,16 +13,14 @@ main() {
     local NS_UID=$UID
     GID=$(id -g)
 
-    if [[ $(uname) == Darwin ]]
-    then
+    if [[ $(uname) == Darwin ]]; then
         NS_UID=$(($UID + 2000))
         GID=$(($GID + 2000))
     fi
 
     socket=$(dockerSocket)
 
-    if [[ $socket == "$HOME/Library/Containers/com.docker.docker/Data/docker.sock" ]]
-    then
+    if [[ $socket == "$HOME/Library/Containers/com.docker.docker/Data/docker.sock" ]]; then
         VOLUMESOCK="--volume /var/run/docker.sock:/var/run/docker.sock"
     fi
 

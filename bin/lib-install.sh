@@ -56,12 +56,15 @@ getVersion() {
     local cmd
     case $name in
         php)
-            cmd=(php -r 'echo phpversion();');;
+            cmd=(php -r 'echo phpversion();')
+            ;;
         docker)
-            cmd=(docker info --format '{{ .ServerVersion }}');;
+            cmd=(docker info --format '{{ .ServerVersion }}')
+            ;;
         *)
             log error "Can't get version for $name"
             return 1
+            ;;
     esac
 
     local version=$("${cmd[@]}")
@@ -122,12 +125,14 @@ versionCompare() {
     local r_extra=$r_part
     r_num=${r_num%$r_extra}
 
-    l_num=${l_num##0}; l_num=${l_num:-0}
-    r_num=${r_num##0}; r_num=${r_num:-0}
+    l_num=${l_num##0}
+    l_num=${l_num:-0}
+    r_num=${r_num##0}
+    r_num=${r_num:-0}
 
-    if (( l_num > r_num )); then
+    if ((l_num > r_num)); then
         return 0
-    elif (( l_num >= r_num )) && [[ $l_extra == $r_extra || $l_extra > $r_extra ]]; then
+    elif ((l_num >= r_num))   && [[ $l_extra == $r_extra || $l_extra > $r_extra ]]; then
         versionCompare "$left" "$right" && return 0
     fi
 
@@ -153,12 +158,12 @@ checkVersion() {
 nativeInstallOK() {
     {
         iHave php \
-        && checkVersion php "$MIN_PHP_VERSION"
+            && checkVersion php "$MIN_PHP_VERSION"
     } || return 1
 
     {
         iHave docker \
-        && checkVersion docker "$MIN_DOCKER_VERSION"
+            && checkVersion docker "$MIN_DOCKER_VERSION"
     } || return 1
     return 0
 }
@@ -166,9 +171,9 @@ nativeInstallOK() {
 dockerInstallOK() {
     {
         iHave docker \
-        && checkVersion docker "$MIN_DOCKER_VERSION"
+            && checkVersion docker "$MIN_DOCKER_VERSION"
     } || return 1
-    [[ $OSTYPE =~ linux || `uname` =~ Darwin ]] || {
+    [[ $OSTYPE =~ linux || $(uname) =~ Darwin ]] || {
         setError OS "Docker installation is only supported on Linux & Mac"
         return 1
     }
@@ -212,8 +217,7 @@ afterInstall() {
     fi
 
     if [ $updated == "0" ]; then
-        if [ -f $HOME/.bash_profile ]
-        then
+        if [ -f $HOME/.bash_profile ]; then
             log error "Please make ~/.bash_profile writable and re-run install.sh"
             exit 1
         fi
@@ -300,9 +304,8 @@ doDockerInstall() {
 }
 
 setUserOptions() {
-    if [ -f $HOME/.northstack-settings.json ]
-        then
-            log info "Previous settings found..."
+    if [ -f $HOME/.northstack-settings.json ]; then
+        log     info "Previous settings found..."
         return
     fi
 
@@ -312,26 +315,27 @@ setUserOptions() {
     read -p "($HOME/northstack/apps) (Y/n)? " choice
 
     case "$choice" in
-        y|Y )
-             colorText grey "Default directory selected";;
-        n|N )
+        y | Y)
+            colorText  grey "Default directory selected"
+            ;;
+        n | N)
             echo "Please enter the full path of the directory where you'd like to store your local NorthStack apps"
             read customAppDir
-            appDir=${customAppDir/#~/$HOME};;
-        * )
-            colorText yellow "Default choice selected, continuing with default apps directory";;
+            appDir=${customAppDir/#~/$HOME}
+            ;;
+        *)
+            colorText yellow "Default choice selected, continuing with default apps directory"
+            ;;
     esac
 
     colorText grey "Selected directory: $appDir"
 
     # Check to see if the dir already exists -- if not, try to create it
-    if [ -d "$appDir" ]
-    then
+    if [ -d "$appDir" ]; then
         colorText grey "Chosen directory found, continuing"
     else
         colorText grey "Chosen directory not found, attempting to create it"
-        if ! mkdirP "$appDir";
-        then
+        if ! mkdirP "$appDir"; then
             log error "There was an issue creating the directory $appDir, please manually create the directory and try again."
         else
             colorText "green" "NorthStack apps dir successfully created at $appDir"
@@ -347,10 +351,9 @@ updateUserSettings() {
     local settingsFile=".northstack-settings.json"
     local fullPath="$settingsDir/$settingsFile"
 
-    colorText grey "Checking to make sure there's not an existing settings file (if there is, a backup will be saved).";
+    colorText grey "Checking to make sure there's not an existing settings file (if there is, a backup will be saved)."
 
-    if [[ -e $fullPath ]];
-    then
+    if [[ -e $fullPath ]]; then
         colorText yellow "Existing settings file found, backing it up before we proceed."
         local backupDate=$(date '+%Y-%m-%d_%H%M')
         local backupFullPath="$settingsDir/.northstack-settings--backup-$backupDate.json"
@@ -360,7 +363,7 @@ updateUserSettings() {
 
     local json="{\"local_apps_dir\":\"$1\"}"
 
-    echo "$json"> $fullPath
+    echo "$json" > $fullPath
 
     if [ ! -w $fullPath ]; then
         chmod
@@ -385,10 +388,13 @@ install() {
     selectInstallMethod
     case $INSTALL_METHOD in
         native)
-            doNativeInstall "$context";;
+            doNativeInstall "$context"
+            ;;
         docker)
-            doDockerInstall "$context" "$isDev";;
+            doDockerInstall "$context" "$isDev"
+            ;;
         *)
-            complain;;
+            complain
+            ;;
     esac
 }
