@@ -97,7 +97,7 @@ ask() {
     local question=$1
     local default=${2:-no}
 
-    if [[ -z ${ASK_FORCE_INTERACTIVE:-} || ! shellIsInteractive ]]; then
+    if ! shellIsInteractive && [[ -z ${ASK_FORCE_INTERACTIVE:-} ]];  then
         debug "This is not an interactive shell--no sense in asking"
         return 2
     fi
