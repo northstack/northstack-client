@@ -59,7 +59,7 @@ log() {
 }
 
 getCwd() {
-    echo "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    (cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)
 }
 
 debug() {
@@ -80,12 +80,12 @@ setInstallPrefix() {
     else
         log "Using install path: $INSTALL_PATH"
     fi
-    printf ${INSTALL_PATH%*/}
+    printf "${INSTALL_PATH%*/}"
 }
 
 getInstallPrefix() {
     local binDir="$(getCwd)"
-    printf $(dirname "$binDir")
+    printf "$(dirname "$binDir")"
 }
 
 shellIsInteractive() {
@@ -111,7 +111,7 @@ ask() {
 askForSudo() {
     [[ ${NORTHSTACK_ALLOW_SUDO:-0} == 1 ]] && return 0
     local question="Asking permission to run the following command with sudo:"
-    question="${question}\n$@"
+    question="${question}\n$(quoteCmd "$@")"
     question="${question}\nYou can disable this check by setting NORTHSTACK_ALLOW_SUDO=1"
 
     ask "$question"
@@ -305,8 +305,13 @@ rmDir() {
     debugCmd "$@"
 }
 
-debugCmd() {
+quoteCmd() {
     local cmd=$(printf '%q ' "$@")
+    printf "${cmd% }"
+}
+
+debugCmd() {
+    local cmd=$(quoteCmd "$@")
     log info "Running:" "$cmd"
 
     local tmp=$(mktemp -d)
@@ -335,7 +340,7 @@ debugCmd() {
 }
 
 checkDocker() {
-    which docker &>/dev/null || {
+    command -v &>/dev/null || {
         log "error" "No docker executable found. Is docker installed?"
         exit 1
     }
@@ -348,12 +353,12 @@ checkDocker() {
 
 dockerSocket() {
     local possible=(
-        $HOME/Library/Containers/com.docker.docker/Data/docker.sock
+        "$HOME"/Library/Containers/com.docker.docker/Data/docker.sock
         /var/lib/docker.sock
         /var/run/docker.sock
     )
 
-    for sock in ${possible[@]}; do
+    for sock in "${possible[@]}"; do
         if [[ -S $sock ]]; then
             printf "$sock"
             return
@@ -403,11 +408,11 @@ buildDockerImage() {
 
     if [[ $? -ne 0 ]]; then
         log "error" "image build failed:"
-        log "error" - < $outfile
+        log "error" - < "$outfile"
         failed=1
     else
         log info "northstack image built successfully"
-        debug - < $outfile
+        debug - < "$outfile"
     fi
     set -e
     rm "$outfile"
@@ -456,8 +461,7 @@ colorText() {
 
     eval color=\$$color # ʕノ•ᴥ•ʔノ ︵ ┻━┻ variable variables
 
-    if [ -z "$background" ] # if no bg color is defined
-    then
+    if [[ -z "$background" ]]; then
         color=${prefix}${textPrefix}${color}m
     else
         local bgPrefix="48;5;"
@@ -481,8 +485,7 @@ colorText() {
 
 show_spinner_cmd()
 {
-  local cmd="$@"
-  $cmd &
+  "$@" &
   show_spinner_pid
 }
 
