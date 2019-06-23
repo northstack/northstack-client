@@ -46,7 +46,7 @@ showErrors() {
 iHave() {
     local name=$1
     command -v "$name" &> /dev/null
-    return $?
+    [[ $? == 0 ]]
 }
 
 getVersion() {
