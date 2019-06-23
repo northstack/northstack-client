@@ -1,5 +1,7 @@
 # shellcheck shell=bash
-. ${BIN_DIR:-./bin}/lib.sh
+
+# shellcheck source=./bin/lib.sh
+. "${BIN_DIR:-./bin}"/lib.sh
 
 readonly MIN_DOCKER_VERSION=17.09
 readonly MIN_PHP_VERSION=7.2
@@ -15,7 +17,7 @@ setError() {
     local ifs=$IFS
     IFS=$'\n'
     for current in $val; do
-        if [[ $current == $msg ]]; then
+        if [[ $current == "$msg" ]]; then
             # duplicate
             return
         fi
@@ -43,7 +45,7 @@ showErrors() {
 
 iHave() {
     local name=$1
-    which "$name" &> /dev/null
+    command -v "$name" &> /dev/null
     return $?
 }
 
@@ -194,26 +196,22 @@ afterInstall() {
 
     # We're just going to attempt to update all of the potential bash profiles that might be used. Everyone is different!
     log info "Attempting to update all possible bash/zsh profiles -- sometimes we've just gotta do that."
-    if [ -w $HOME/.bash_profile ]
-    then
+    if [ -w $HOME/.bash_profile ]; then
         updateBashProfile $bindir $HOME/.bash_profile
         updated=1
     fi
 
-    if [ -w $HOME/.bashrc ]
-    then
+    if [ -w $HOME/.bashrc ]; then
         updateBashProfile $bindir $HOME/.bashrc
         updated=1
     fi
 
-    if [ -w $HOME/.zshrc ]
-    then
+    if [ -w $HOME/.zshrc ]; then
         updateBashProfile $bindir $HOME/.zshrc
         updated=1
     fi
 
-    if [ $updated == "0" ]
-    then
+    if [ $updated == "0" ]; then
         if [ -f $HOME/.bash_profile ]
         then
             log error "Please make ~/.bash_profile writable and re-run install.sh"
