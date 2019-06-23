@@ -13,6 +13,7 @@ setError() {
     ns=$(strToUpper "$ns")
 
     local var=INSTALL_ERRORS_${ns}
+    declare -g "$var"
     local val=${!var:=}
     local ifs=$IFS
     IFS=$'\n'
