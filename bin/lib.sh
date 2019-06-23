@@ -25,19 +25,24 @@ log() {
     case $level in
         info)
             level_color=$green
-            shift;;
+            shift
+            ;;
         debug)
             level_color=$blue
-            shift;;
+            shift
+            ;;
         warn)
             level_color=$magenta
-            shift;;
+            shift
+            ;;
         error)
             level_color=$red
-            shift;;
+            shift
+            ;;
         *)
             level_color=$green
-            level='info';;
+            level='info'
+            ;;
     esac
 
     local ts=$(date '+%Y-%m-%d %H:%M:%S')
@@ -92,12 +97,11 @@ shellIsInteractive() {
     [[ $- == *i* ]]
 }
 
-
 ask() {
     local question=$1
     local default=${2:-no}
 
-    if ! shellIsInteractive && [[ -z ${ASK_FORCE_INTERACTIVE:-} ]];  then
+    if ! shellIsInteractive && [[ -z ${ASK_FORCE_INTERACTIVE:-} ]]; then
         debug "This is not an interactive shell--no sense in asking"
         return 2
     fi
@@ -247,7 +251,7 @@ lnS() {
 
     assertSafePath "$target" || return 1
 
-    if [[ -f $link ]] && [[ ! -h $link ]]; then
+    if [[ -f $link ]] && [[ ! -L $link ]]; then
         rmFile "$link"
     fi
 
@@ -295,7 +299,6 @@ rmDir() {
         return 1
     fi
 
-
     set -- rm -r "$dir"
     if [[ ! -w $dir ]]; then
         log "warn" "$dir is not writeable by your shell user. Using sudo to delete"
@@ -340,12 +343,12 @@ debugCmd() {
 }
 
 checkDocker() {
-    command -v &>/dev/null || {
+    command -v &> /dev/null || {
         log "error" "No docker executable found. Is docker installed?"
         exit 1
     }
 
-    docker info &>/dev/null || {
+    docker info &> /dev/null || {
         log "error" "Running \`docker info\` failed. Is the docker daemon running?"
         exit 1
     }
@@ -404,7 +407,8 @@ buildDockerImage() {
         -t "$tag" \
         --label "com.northstack=1" \
         "$ctx" \
-    &> "$outfile" & show_spinner_pid
+        &> "$outfile" &
+    show_spinner_pid
 
     if [[ $? -ne 0 ]]; then
         log "error" "image build failed:"
@@ -469,40 +473,38 @@ colorText() {
         color=${prefix}${textPrefix}${color}m${prefix}${bgPrefix}${background}m
     fi
 
-    local defaultMSG="";
-    local defaultNewLine=true;
+    local defaultMSG=""
+    local defaultNewLine=true
 
-    local message=${2:-$defaultMSG};   # Defaults to default message.
-    local newLine=${3:-$defaultNewLine};
+    local message=${2:-$defaultMSG}    # Defaults to default message.
+    local newLine=${3:-$defaultNewLine}
 
-    echo -en "${color}${message}${end}";
-    if [ "$newLine" = true ] ; then
-        echo;
+    echo -en "${color}${message}${end}"
+    if [ "$newLine" = true ]; then
+        echo
     fi
 
-    return;
+    return
 }
 
-show_spinner_cmd()
-{
-  "$@" &
-  show_spinner_pid
+show_spinner_cmd() {
+    "$@" &
+    show_spinner_pid
 }
 
-show_spinner_pid()
-{
-  local -r pid="$!"
-  local -r delay='0.5'
-  local spinstr='\|/-'
-  local temp
-  tput civis
-  while ps a | awk '{print $1}' | grep -q "${pid}"; do
-    temp="${spinstr#?}"
-    printf "[%c]  " "${spinstr}"
-    spinstr=${temp}${spinstr%"${temp}"}
-    sleep "${delay}"
-    printf "\b\b\b\b\b\b"
-  done
-  tput cnorm
-  printf "    \b\b\b\b"
+show_spinner_pid() {
+    local -r pid="$!"
+    local -r delay='0.5'
+    local spinstr='\|/-'
+    local temp
+    tput civis
+    while ps a | awk '{print $1}' | grep -q "${pid}"; do
+        temp="${spinstr#?}"
+        printf "[%c]  " "${spinstr}"
+        spinstr=${temp}${spinstr%"${temp}"}
+        sleep "${delay}"
+        printf "\b\b\b\b\b\b"
+    done
+    tput cnorm
+    printf "    \b\b\b\b"
 }

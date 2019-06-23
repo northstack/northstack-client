@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -eu
 
-CDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+CDIR="$( cd "$( dirname "${BASH_SOURCE[0]}")"  && pwd)"
 BASE="$( dirname "$CDIR")"
 
 . "$CDIR"/lib.sh
@@ -24,8 +24,6 @@ echo "||                        ||"
 echo "||========================||"
 echo ""
 
-
-
 if [[ ${0##*/} == "install-dev.sh" ]]; then
     isDev=1
 else
@@ -33,4 +31,3 @@ else
 fi
 
 install "$BASE" "$isDev"
-
