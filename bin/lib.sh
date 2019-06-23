@@ -343,7 +343,7 @@ debugCmd() {
 }
 
 checkDocker() {
-    command -v &> /dev/null || {
+    command -v docker &> /dev/null || {
         log "error" "No docker executable found. Is docker installed?"
         exit 1
     }
