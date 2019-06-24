@@ -463,13 +463,13 @@ colorText() {
     local white="255"
     local grey="242"
 
-    eval color=\$$color # ʕノ•ᴥ•ʔノ ︵ ┻━┻ variable variables
+    eval color=\$$color
 
     if [[ -z "$background" ]]; then
         color=${prefix}${textPrefix}${color}m
     else
         local bgPrefix="48;5;"
-        eval background=\$$background # ʕノ•ᴥ•ʔノ ︵ ┻━┻ use the same colors but for text bg
+        eval background=\$$background
         color=${prefix}${textPrefix}${color}m${prefix}${bgPrefix}${background}m
     fi
 
