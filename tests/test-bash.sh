@@ -25,7 +25,7 @@ if [[ -z $check ]]; then
         "$CDIR/docker"
 fi
 
-echo "+++ Running tests"
+echo "+++ Running bash tests"
 if [[ $# -eq 0 ]]; then
     set -- bash
 fi
@@ -38,5 +38,26 @@ docker run \
     -e BIN_DIR="$BIN_DIR" \
     -e DEBUG="${DEBUG:-}" \
     --label com.northstack=1 \
-    "$current" \
+    "$repo":latest \
     "$@"
+
+
+echo "+++ Linting bash files"
+files=()
+for f in "$BIN_DIR"/*.sh; do
+    if [[ -f $f ]]; then
+        f=$(basename "$f")
+        files+=("$f")
+    fi
+done
+
+docker run \
+    --rm \
+    --init \
+    --volume "${BASE}:${BASE}:ro" \
+    --workdir "$BIN_DIR" \
+    -e BIN_DIR="$BIN_DIR" \
+    --label com.northstack=1 \
+    --entrypoint /bin/shellcheck \
+    "$repo":latest \
+    ${files[*]}

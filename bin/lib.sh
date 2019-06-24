@@ -78,6 +78,7 @@ setInstallPrefix() {
     local default=$HOME/.local
     ${INSTALL_PATH:=}
 
+    declare -g INSTALL_PATH
     if [[ -z $INSTALL_PATH ]]; then
         log "Using default install prefix ($default)"
         log "You can change this behavior by setting the \$INSTALL_PATH environment variable"
@@ -85,7 +86,7 @@ setInstallPrefix() {
     else
         log "Using install path: $INSTALL_PATH"
     fi
-    printf "${INSTALL_PATH%*/}"
+    INSTALL_PATH=${INSTALL_PATH%*/}
 }
 
 getInstallPrefix() {
@@ -209,7 +210,13 @@ assertSafePath() {
     if [[ -n ${TMPDIR:-} ]]; then
         safeDirs+=("${TMPDIR%/}")
     fi
+    if [[ -n ${INSTALL_PATH} ]]; then
+        safeDirs+=("$INSTALL_PATH"/northstack)
+        safeFiles+=("$INSTALL_PATH"/bin/northstack)
+    fi
 
+    debug "safe files:" ${safeFiles[@]}
+    debug "safe dirs:" ${safeDirs[@]}
     local file
     for file in "${safeFiles[@]}"; do
         if [[ $path == "$file" ]]; then
@@ -225,12 +232,13 @@ assertSafePath() {
         fi
     done
 
-    log error "Refusing to act on unsafe path: $path"
+    log error "[${FUNCNAME[1]}] Refusing to act on unsafe path: $path"
     return 1
 }
 
 mkdirP() {
     local dir=$1
+    [[ -d $dir ]] && return 0
     assertSafePath "$dir" || return 1
     local parent=$(parentDir "$dir")
     if [[ -w $parent ]]; then
@@ -443,6 +451,7 @@ installComposerDeps() {
 # @param $message
 # param bool $newline return at the end of the line(defaults to true)
 #param $backgroundColor optional, defaults to transparent
+# shellcheck disable=SC2034
 colorText() {
     local color=$1
     local prefix=$'\e['
@@ -463,13 +472,13 @@ colorText() {
     local white="255"
     local grey="242"
 
-    eval color=\$$color
+    color=${!color:=}
 
     if [[ -z "$background" ]]; then
         color=${prefix}${textPrefix}${color}m
     else
         local bgPrefix="48;5;"
-        eval background=\$$background
+        background=${!background:=}
         color=${prefix}${textPrefix}${color}m${prefix}${bgPrefix}${background}m
     fi
 
