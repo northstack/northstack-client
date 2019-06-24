@@ -33,6 +33,31 @@ fileExists() {
     fi
 }
 
+symlinked() {
+    local target=$1
+    local link=$2
+
+    if [[ ! -e $target ]]; then
+        echo "Link target ($target) does not exist"
+        return 1
+    fi
+
+    if [[ ! -h $link ]]; then
+        echo "Link ($link) does not exist or is not a symlink"
+        return 1
+    fi
+
+    local actual=$(readlink "$link")
+
+    if [[ $actual == "$target" ]]; then
+        echo "$link -> $target"
+        return 0
+    fi
+
+    echo "expected: $link -> $target, actual: $link -> $actual"
+    return 1
+}
+
 dirExists() {
     local file=$1
     if [[ -d $file ]]; then
@@ -203,6 +228,9 @@ assert() {
             ;;
         atLeast)
             func=atLeast
+            ;;
+        symlinked)
+            func=symlinked
             ;;
         *)
             fail "Unknown assertion: $check"

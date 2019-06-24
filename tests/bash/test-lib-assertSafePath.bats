@@ -13,14 +13,17 @@ source "$BIN_DIR/lib.sh"
 }
 
 @test "Known paths in the install prefix are safe" {
+    export DEBUG=1
+    export INSTALL_PATH=$HOME/.local
     try=(
-        "$(getInstallPrefix)/bin/northstack"
-        "$(getInstallPrefix)/northstack"
-        "$(getInstallPrefix)/northstack/some/subdir"
+        "$INSTALL_PATH/bin/northstack"
+        "$INSTALL_PATH/northstack"
+        "$INSTALL_PATH/northstack/some/subdir"
     )
     for p in "${try[@]}"; do
         run assertSafePath "$p"
         printf "%s -> %s\n" "$p" "$status"
+        echo "$output"
         assert equal 0 "$status"
     done
 }
@@ -41,6 +44,17 @@ source "$BIN_DIR/lib.sh"
     done
 
 }
+
+@test "Relative paths are resolved" {
+    skip "We can't really make this work in a portable way yet"
+    cd /tmp
+    assertSafePath "."
+
+    mkdir -p /tmp/src/dir
+    cd /tmp/src/dir
+    assertSafePath "../../new"
+}
+
 
 @test "Not providing a path yields an error" {
     run assertSafePath
