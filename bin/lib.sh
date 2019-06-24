@@ -143,7 +143,7 @@ copyFile() {
 
     set -- cp -va "$src" "$dest"
 
-    if [[ -f $dest && ! -w $dest ]]; then
+    if [[ ! -w $parent ]] || [[ -f $dest && ! -w $dest ]]; then
         askForSudo "$@" || return 1
         set -- sudo "$@"
     fi
