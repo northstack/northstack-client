@@ -193,30 +193,23 @@ userOwnership() {
 
 assertSafePath() {
     local path=${1:?path required}
-
     path=${path%/}
 
-    local installPrefix=$(getInstallPrefix)
-    installPrefix=${installPrefix%/}
+    local safeFiles=()
+    local safeDirs=(/tmp)
 
-    local safeFiles=(
-        "${installPrefix}/bin/northstack"
-    )
-
-    local safeDirs=(
-        /tmp
-        "${installPrefix}/northstack"
-    )
     if [[ -n ${TMPDIR:-} ]]; then
         safeDirs+=("${TMPDIR%/}")
     fi
+
     if [[ -n ${INSTALL_PATH} ]]; then
         safeDirs+=("$INSTALL_PATH"/northstack)
         safeFiles+=("$INSTALL_PATH"/bin/northstack)
     fi
 
-    debug "safe files:" ${safeFiles[@]}
-    debug "safe dirs:" ${safeDirs[@]}
+    debug "safe files:" "${safeFiles[@]}"
+    debug "safe dirs:" "${safeDirs[@]}"
+
     local file
     for file in "${safeFiles[@]}"; do
         if [[ $path == "$file" ]]; then
@@ -257,21 +250,30 @@ lnS() {
     local target=$1
     local link=$2
 
-    assertSafePath "$target" || return 1
+    if [[ -L $link ]]; then
+        local existing
+        existing=$(readlink "$link")
+        if [[ $target == "$existing" ]]; then
+            return 0
+        fi
+    fi
+
+    assertSafePath "$link" || return 1
 
     if [[ -f $link ]] && [[ ! -L $link ]]; then
         rmFile "$link"
     fi
 
-    local ln="ln -vfs"
+    set -- ln -vfs "$target" "$link"
     local parent=$(dirname "$link")
 
     mkdirP "$parent"
 
     if [[ ! -w $parent ]]; then
-        askForSudo "$ln" "$target" "$link" && ln="sudo $ln"
+        askForSudo "$@" || return 1
+        set -- sudo "$@"
     fi
-    debugCmd "$ln" "$target" "$link"
+    debugCmd "$@"
 }
 
 rmFile() {
