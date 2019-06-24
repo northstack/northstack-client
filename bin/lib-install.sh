@@ -268,17 +268,17 @@ doNativeInstall() {
 
     log info "Installing natively"
 
-    local install_path=$(setInstallPrefix)
+    setInstallPrefix
     installComposerDeps "$context"
 
-    debug "Install path: ${install_path}"
-    local dest="${install_path}/northstack"
+    debug "Install path: ${INSTALL_PATH}"
+    local dest="${INSTALL_PATH}/northstack"
 
     mkdirP "$dest"
     copyTree "$context" "$dest"
-    lnS "$dest/bin/northstack" "${install_path}/bin/northstack"
+    lnS "$dest/bin/northstack" "${INSTALL_PATH}/bin/northstack"
 
-    afterInstall "$install_path"
+    afterInstall "$INSTALL_PATH"
 }
 
 doDockerInstall() {
@@ -295,14 +295,14 @@ doDockerInstall() {
 
     trap 'rm "$wrapperFile"' EXIT
 
-    local install_path=$(setInstallPrefix)
+    setInstallPrefix
 
     "$context"/bin/build-wrapper.sh "$wrapperFile" "$BASE" "$isDev"
 
-    copyFile "$wrapperFile" "${install_path}/bin/northstack"
-    copyTree "${context}/docker" "${install_path}/northstack/docker"
+    copyFile "$wrapperFile" "${INSTALL_PATH}/bin/northstack"
+    copyTree "${context}/docker" "${INSTALL_PATH}/northstack/docker"
 
-    afterInstall "$install_path"
+    afterInstall "$INSTALL_PATH"
 }
 
 setUserOptions() {
