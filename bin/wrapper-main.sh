@@ -10,56 +10,49 @@ main() {
     checkDocker
     checkPaths
 
+    local args=("$@")
+
     local NS_UID=$UID
     GID=$(id -g)
 
     if [[ $(uname) == Darwin ]]; then
-        NS_UID=$(($UID + 2000))
-        GID=$(($GID + 2000))
+        NS_UID=$((UID + 2000))
+        GID=$((GID + 2000))
     fi
 
     socket=$(dockerSocket)
-
-    if [[ $socket == "$HOME/Library/Containers/com.docker.docker/Data/docker.sock" ]]; then
-        VOLUMESOCK="--volume /var/run/docker.sock:/var/run/docker.sock"
-    fi
 
     prefix="$(getInstallPrefix)"
     ns_lib="${prefix}/lib/northstack"
 
     local DEBUG=${DEBUG:-0}
 
+    set -- docker run \
+        -ti \
+        --rm \
+        -e DEBUG="$DEBUG" \
+        -e HOME="$HOME" \
+        -e NS_PWD="$NS_PWD" \
+        -e NORTHSTACK_UID=$NS_UID \
+        -e NORTHSTACK_GID=$GID \
+        --volume "$NS_PWD:$NS_PWD" \
+        --volume "$HOME":"$HOME" $VOLUMESOCK \
+        --volume "$socket":"$socket" \
+        --init
+
     if [[ $DEV_MODE == 1 ]]; then
-
         debug "Running in DEV mode"
-        ns_lib=$DEV_SOURCE
-
-        docker run -ti --rm \
-            -e DEBUG=$DEBUG \
-            -e HOME=$HOME \
-            -e NS_PWD="$NS_PWD" \
-            -e NS_LIB="$ns_lib" \
-            -e NORTHSTACK_UID=$NS_UID \
-            -e NORTHSTACK_GID=$GID \
-            --volume "$NS_PWD:$NS_PWD" \
-            --volume $HOME:$HOME \
-            --volume "$socket":"$socket" $VOLUMESOCK \
+        set -- "$@" \
             --volume "$DEV_SOURCE":/app \
-            --init \
-            northstack "$@"
+            -e NS_LIB="$DEV_SOURCE"
     else
-        docker run -ti --rm \
-            -e DEBUG=$DEBUG \
-            -e HOME=$HOME \
-            -e NS_PWD="$NS_PWD" \
-            -e NS_LIB="$ns_lib" \
-            -e NORTHSTACK_UID=$NS_UID \
-            -e NORTHSTACK_GID=$GID \
-            --volume "$NS_PWD:$NS_PWD" \
-            --volume $HOME:$HOME $VOLUMESOCK \
-            --volume "$socket":"$socket" \
-            --init \
-            northstack "$@"
+        set -- "$@" -e NS_LIB="$ns_lib"
     fi
 
+    if [[ $socket == "$HOME/Library/Containers/com.docker.docker/Data/docker.sock" ]]; then
+        set -- "$@" --volume /var/run/docker.sock:/var/run/docker.sock
+    fi
+
+    set -- "$@" northstack "${args[@]}"
+    exec "$@"
 }
