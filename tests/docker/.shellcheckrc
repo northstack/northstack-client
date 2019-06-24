@@ -1,0 +1,23 @@
+# Assume everything is bash
+shell=bash
+
+# Disable checks for some fairly benign things:
+#
+# - SC2059
+#   - using printf with a variable in the template is harmless enough
+#   - https://github.com/koalaman/shellcheck/wiki/SC2059
+#
+# - SC2155
+#   - assign/execute in same expression ie 'local stamp=$(date)'
+#   - https://github.com/koalaman/shellcheck/wiki/SC2155
+#
+# - SC1090 + SC1091
+#   - don't complain when shellcheck can't find a sourced file
+#   - https://github.com/koalaman/shellcheck/wiki/SC1090
+#   - https://github.com/koalaman/shellcheck/wiki/SC1091
+#
+# - SC2181
+#   - checking the last command's return code with `$?`
+#   - https://github.com/koalaman/shellcheck/wiki/SC2181
+
+disable=SC2059,SC2155,SC1090,SC1091,SC2181

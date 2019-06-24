@@ -1,2 +1,6 @@
+.buildkite
+.git
+.github
 .gitignore
 .tmp
+bin/*.sh
