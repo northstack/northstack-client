@@ -149,7 +149,7 @@ copyTree() {
     fi
 
     if [[ -d $dest ]]; then
-        log warn "Destination directory already exists--removing"
+        log warn "Destination directory ($dest) already exists--removing"
         rmDir "$dest"
     elif [[ -e $dest ]]; then
         local filetype=$(stat -c '%F' "$dest")
@@ -162,7 +162,7 @@ copyTree() {
     src=${src%/}/.
     dest=${dest%/}
 
-    debugCmd cp -av "$src" "$dest"
+    debugCmd cp --force -a "$src" "$dest"
 }
 
 parentDir() {
@@ -197,15 +197,14 @@ assertSafePath() {
 
     if [[ -n ${INSTALL_PATH} ]]; then
         safeDirs+=("$INSTALL_PATH"/northstack)
+        safeFiles+=("$INSTALL_PATH"/bin)
         safeFiles+=("$INSTALL_PATH"/bin/northstack)
     fi
-
-    debug "safe files:" "${safeFiles[@]}"
-    debug "safe dirs:" "${safeDirs[@]}"
 
     local file
     for file in "${safeFiles[@]}"; do
         if [[ $path == "$file" ]]; then
+            debug "safe file match $path == $file"
             return 0
         fi
     done
@@ -213,6 +212,7 @@ assertSafePath() {
     local dir
     for dir in "${safeDirs[@]}"; do
         if [[ $path == "$dir" || $path == $dir/* ]]; then
+            debug "safe dir match $path =~ $dir"
             return 0
         fi
     done
@@ -280,7 +280,7 @@ rmDir() {
         return 1
     fi
 
-    debugCmd rm -rv "$dir"
+    debugCmd rm -rf "$dir"
 }
 
 quoteCmd() {
