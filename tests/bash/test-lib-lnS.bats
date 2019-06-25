@@ -93,5 +93,3 @@ teardown() {
     assert equal 0 $status
     assert equal "" "$output"
 }
-
-

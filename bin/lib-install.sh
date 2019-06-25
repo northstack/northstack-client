@@ -68,7 +68,8 @@ getVersion() {
             ;;
     esac
 
-    local version=$("${cmd[@]}")
+    local version
+    version=$("${cmd[@]}")
     local status=$?
 
     local strCmd=$(quoteCmd "${cmd[@]}")
@@ -183,17 +184,23 @@ dockerInstallOK() {
 }
 
 selectInstallMethod() {
-    dockerInstallOK && {
-        printf -v INSTALL_METHOD "docker"
-        return 0
-    }
+    declare -g INSTALL_METHOD=${INSTALL_METHOD:-}
+    if [[ -n $INSTALL_METHOD ]]; then
+        debug "INSTALL_METHOD has been overriden to: $INSTALL_METHOD"
+        return
+    fi
 
-    nativeInstallOK && {
-        printf -v INSTALL_METHOD "native"
-        return 0
-    }
+    if dockerInstallOK; then
+        INSTALL_METHOD=docker
+        return
+    fi
 
-    printf -v INSTALL_METHOD "none"
+    if nativeInstallOK; then
+        INSTALL_METHOD=native
+        return
+    fi
+
+    INSTALL_METHOD=none
 }
 
 afterInstall() {
@@ -225,7 +232,7 @@ afterInstall() {
         fi
 
         log warn "Could not find any bash or zsh profiles to update. Creating ~/.bash_profile"
-        touch ~HOME/.bash_profile
+        touch "$HOME/.bash_profile"
         afterInstall "$1"
     fi
 
@@ -263,22 +270,64 @@ updateBashProfile() {
     fi
 }
 
+checkPathPermissions() {
+    local prefix=$1
+    log info "Checking installation paths for writeability"
+
+    local failed=0
+
+    local toCheck=(
+        "$prefix/bin/northstack"
+        "$prefix/northstack"
+    )
+
+    for p in "${toCheck[@]}"; do
+        local parent=$(parentDir "$p")
+        if [[ -e $p && ! -w $p ]] || [[ ! -w $parent ]]; then
+            log error \
+                "Could not confirm writeability for the following location:" \
+                "  -   Path: $p" \
+                "  - Parent: $parent"
+                    failed=1
+        fi
+    done
+
+    return "$failed"
+}
+
 doNativeInstall() {
     local context=$1
 
     log info "Installing natively"
 
-    setInstallPrefix
     installComposerDeps "$context"
 
-    debug "Install path: ${INSTALL_PATH}"
-    local dest="${INSTALL_PATH}/northstack"
-
-    mkdirP "$dest"
-    copyTree "$context" "$dest"
-    lnS "$dest/bin/northstack" "${INSTALL_PATH}/bin/northstack"
+    copyTree "$context" "$INSTALL_PATH/northstack"
+    lnS "$INSTALL_PATH/northstack/bin/northstack" "${INSTALL_PATH}/bin/northstack"
 
     afterInstall "$INSTALL_PATH"
+}
+
+buildWrapper() {
+    local out=$1
+    local base=$2
+    local dev=${3:-0}
+
+    cat << EOF > "$out"
+#!/usr/bin/env bash
+
+set -eu
+
+DEV_MODE=$dev
+DEV_SOURCE=$base
+
+$(< "$base"/bin/wrapper-lib.sh)
+
+$(< "$base"/bin/wrapper-main.sh)
+
+main "\$@"
+EOF
+    chmod +x "$out"
 }
 
 doDockerInstall() {
@@ -293,11 +342,10 @@ doDockerInstall() {
 
     local wrapperFile=$(mktemp)
 
-    trap 'rm "$wrapperFile"' EXIT
+    # shellcheck disable=SC2064
+    trap "rm '$wrapperFile'" EXIT
 
-    setInstallPrefix
-
-    "$context"/bin/build-wrapper.sh "$wrapperFile" "$BASE" "$isDev"
+    buildWrapper "$wrapperFile" "$context" "$isDev"
 
     copyFile "$wrapperFile" "${INSTALL_PATH}/bin/northstack"
     copyTree "${context}/docker" "${INSTALL_PATH}/northstack/docker"
@@ -349,6 +397,7 @@ setUserOptions() {
 }
 
 updateUserSettings() {
+    local appDir=$1
     local settingsDir="$HOME"
     local settingsFile=".northstack-settings.json"
     local fullPath="$settingsDir/$settingsFile"
@@ -359,16 +408,15 @@ updateUserSettings() {
         colorText yellow "Existing settings file found, backing it up before we proceed."
         local backupDate=$(date '+%Y-%m-%d_%H%M')
         local backupFullPath="$settingsDir/.northstack-settings--backup-$backupDate.json"
-        cp "$fullPath" "$backupFullPath"
-        rm "$fullPath"
+        copyFile "$fullPath" "$backupFullPath"
+        rmFile "$fullPath"
     fi
 
-    local json="{\"local_apps_dir\":\"$1\"}"
+    local json="{\"local_apps_dir\":\"$appDir\"}"
 
     echo "$json" > "$fullPath"
 
     if [[ ! -w $fullPath ]]; then
-        chmod
         log error "Looks like $fullPath is not writeable. Please save the following contents to it:"
         log error "$json"
         showErrors
@@ -388,6 +436,8 @@ install() {
     local isDev=${2:-0}
 
     selectInstallMethod
+    setInstallPrefix
+    checkPathPermissions "$INSTALL_PATH"
     case $INSTALL_METHOD in
         native)
             doNativeInstall "$context"

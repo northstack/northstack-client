@@ -36,10 +36,10 @@ getCoverage() {
 
 @test "We have coverage for all functions in lib.sh" {
     coverage=$(getCoverage "${BIN_DIR}/lib.sh")
-    assert atLeast "$coverage" 50
+    assert atLeast "$coverage" 75
 }
 
 @test "We have coverage for all functions in lib-install.sh" {
     coverage=$(getCoverage "${BIN_DIR}/lib-install.sh")
-    assert atLeast "$coverage" 50
+    assert atLeast "$coverage" 75
 }

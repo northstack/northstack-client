@@ -1,5 +1,45 @@
 # shellcheck shell=bash
 
+declare -g CLEANUP=()
+
+setup() {
+    export MOCK_ROOT=$(mktemp -d -p ${BATS_TMPDIR})
+    mkdir -p "$MOCK_ROOT/bin" "$MOCK_ROOT/data"
+    CLEANUP+=("$MOCK_ROOT")
+}
+
+teardown() {
+    for path in "${CLEANUP[@]}"; do
+        rm -rfv "$path"
+    done
+}
+
+mock() {
+    local cmd=$1
+    cat <<EOF > "$MOCK_ROOT/bin/$cmd"
+#!/bin/bash
+touch $MOCK_ROOT/data/${cmd}.called
+echo "\$(basename "\$0") \$@" > "$MOCK_ROOT/data/${cmd}.args"
+EOF
+    chmod +x "$MOCK_ROOT/bin/$cmd"
+    if [[ $PATH != *"$MOCK_ROOT/bin"* ]]; then
+        export PATH=${MOCK_ROOT}/bin:$PATH
+    fi
+}
+
+wasCalled() {
+    local cmd=$1
+    assert fileExists "$MOCK_ROOT/data/${cmd}.called"
+}
+
+wasCalledWith() {
+    local cmd=$1
+    local str=$2
+    assert fileExists "$MOCK_ROOT/data/${cmd}.called"
+    assert fileExists "$MOCK_ROOT/data/${cmd}.args"
+    assert stringContains "$str" "$(< "$MOCK_ROOT/data/${cmd}.args")"
+}
+
 fail() {
     local red=$'\e[1;91m'
     local end=$'\e[0m'
@@ -231,6 +271,12 @@ assert() {
             ;;
         symlinked)
             func=symlinked
+            ;;
+        wasCalled)
+            func=wasCalled
+            ;;
+        wasCalledWith)
+            func=wasCalledWith
             ;;
         *)
             fail "Unknown assertion: $check"
