@@ -183,6 +183,7 @@ copyTree() {
 
 parentDir() {
     local dir=$1
+    dir=$(dirname "$dir")
     while [[ ! -d $dir ]]; do
         dir=$(dirname "$dir")
     done

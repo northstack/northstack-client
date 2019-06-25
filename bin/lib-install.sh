@@ -403,38 +403,18 @@ setUserOptions() {
     fi
 
     local appDir="$HOME/northstack/apps"
-
-    echo "Use the default recommended directory to store your apps?"
-    read -r -p "($HOME/northstack/apps) (Y/n)? " choice
-
-    case "$choice" in
-        y | Y)
-            colorText  grey "Default directory selected"
-            ;;
-        n | N)
-            echo "Please enter the full path of the directory where you'd like to store your local NorthStack apps"
-            read -r customAppDir
-            appDir=${customAppDir/#~/$HOME}
-            ;;
-        *)
-            colorText yellow "Default choice selected, continuing with default apps directory"
-            ;;
-    esac
-
-    colorText grey "Selected directory: $appDir"
-
-    # Check to see if the dir already exists -- if not, try to create it
-    if [ -d "$appDir" ]; then
-        colorText grey "Chosen directory found, continuing"
+    if [[ -n ${NORTHSTACK_APPDIR:-} ]]; then
+        debug "Using user-specified appDir: $NORTHSTACK_APPDIR"
+        appDir=$NORTHSTACK_APPDIR
     else
-        colorText grey "Chosen directory not found, attempting to create it"
-        if ! mkdirP "$appDir"; then
-            log error "There was an issue creating the directory $appDir, please manually create the directory and try again."
-        else
-            colorText "green" "NorthStack apps dir successfully created at $appDir"
-        fi
+        log info "Using the default appDir ($appDir)." \
+            "Set the \$NORTHSTACK_APPDIR variable to override this during installation," \
+            "or edit your settings file (~/.northstack-settings.json) to change it later."
     fi
 
+    if [[ ! -d $appDir ]]; then
+        mkdirP "$appDir"
+    fi
     # Save that directory path to a new user settings file
     updateUserSettings "$appDir"
 }
