@@ -205,35 +205,30 @@ selectInstallMethod() {
 
 afterInstall() {
     local path=$1
-    local bindir=$path/bin
+    local bindir=${path%/}/bin
     local updated="0"
 
-    # We're just going to attempt to update all of the potential bash profiles that might be used. Everyone is different!
-    log info "Attempting to update all possible bash/zsh profiles -- sometimes we've just gotta do that."
-    if [[ -w $HOME/.bash_profile ]]; then
-        updateBashProfile "$bindir" "$HOME"/.bash_profile
-        updated=1
-    fi
-
-    if [[ -w $HOME/.bashrc ]]; then
-        updateBashProfile "$bindir" "$HOME"/.bashrc
-        updated=1
-    fi
-
-    if [[ -w $HOME/.zshrc ]]; then
-        updateBashProfile "$bindir" "$HOME"/.zshrc
-        updated=1
-    fi
-
-    if [[ $updated == "0" ]]; then
-        if [[ -f $HOME/.bash_profile ]]; then
-            log error "Please make ~/.bash_profile writable and re-run install.sh"
-            exit 1
+    local pat=":?$bindir:?"
+    if [[ $PATH =~ $pat ]]; then
+        log info "Looks like $bindir is already in your \$PATH"
+    else
+        log warn "$bindir is not in your \$PATH" "> $PATH"
+        if ask "Would you like us to update your .bashrc/.zshrc files?"; then
+            local files=(
+                "$HOME/.bashrc"
+                "$HOME/.zshrc"
+            )
+            local updated=0
+            for rc in "${files[@]}"; do
+                updateBashProfile "$bindir" "$rc"
+                updated=$((updated + 1))
+            done
+            if (( updated == 0 )); then
+                log warn \
+                    "Could not find any rc files. You should create one with:" \
+                    "echo \"PATH=${bindir}:\$PATH\" >> \"$HOME/.bashrc\""
+            fi
         fi
-
-        log warn "Could not find any bash or zsh profiles to update. Creating ~/.bash_profile"
-        touch "$HOME/.bash_profile"
-        afterInstall "$1"
     fi
 
     echo ""
@@ -246,28 +241,47 @@ updateBashProfile() {
     local bindir=$1
     local bashFile=$2
 
-    ask "How about updating that bashrc for ya?" || return 1
-    if grep -q "$bindir" "$bashFile"; then
-        # The user still needs to refresh their terminal window to use the new source
-        colorText grey "NorthStack path found in ${bashFile}, continuing without update."
-    else
-        colorText grey "NorthStack path not found in ${bashFile}, verifying that the file is writeable."
-        if [[ -w $bashFile ]]; then
-            colorText grey "${bashFile} is writeable."
-            # Add to the bashrc file so the command can be run
-            echo "# NorthStack path: " >> "$bashFile"
-            echo "export PATH=${bindir}:\$PATH" >> "$bashFile"
+    local checksumPre=$(md5sum "$bashFile" | awk '{print $1}')
+    local new=$(mktemp)
 
-            # The user still needs to refresh their terminal window to use the new source
-            colorText "white" "                                                                 " true "red"
-            log warn "**** New path added to your bash profile, please start a new terminal session. ****"
-            colorText "white" "                                                                 " true "red"
-        else
-            log error "Looks like ${bashFile} is not writeable. Please add the following to it and then open a new terminal session: "
-            log error "export PATH=${bindir}:\$PATH"
-            showErrors
-        fi
+    local startLine
+
+    startLine=$(sed -n -e '/^# NorthStack START$/=' < "$bashFile")
+
+    if [[ -n $startLine ]]; then
+        head -n "$startLine" "$bashFile" > "$new"
+    else
+        cat "$bashFile" > "$new"
+        echo '# NorthStack START' >> "$new"
     fi
+
+    echo "PATH=${bindir}:\$PATH" >> "$new"
+
+    local endLine
+    endLine=$(sed -n -e '/^# NorthStack END$/=' < "$bashFile")
+
+    if [[ -n $endLine ]]; then
+        local total=$(wc -l "$bashFile" | awk '{print $1}')
+        local lastN=$((total - endLine + 1))
+        tail -n "$lastN" "$bashFile" >> "$new"
+    else
+        echo '# NorthStack END' >> "$new"
+    fi
+
+    local checksumPost=$(md5sum "$bashFile" | awk '{print $1}')
+
+    if [[ $checksumPre != "$checksumPost" ]]; then
+        log error "RC file ($bashFile) changed while we were updating it"
+        return 1
+    fi
+
+    if ! diff "$bashFile" "$new"; then
+        cat "$new" > "$bashFile"
+        log info "Updated: $bashFile"
+    else
+        debug "No changes detected--moving on"
+    fi
+    rmFile "$new"
 }
 
 checkPathPermissions() {
