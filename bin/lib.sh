@@ -76,9 +76,8 @@ debug() {
 
 setInstallPrefix() {
     local default=$HOME/.local
-    ${INSTALL_PATH:=}
 
-    declare -g INSTALL_PATH
+    declare -g INSTALL_PATH=${INSTALL_PATH:-}
     if [[ -z $INSTALL_PATH ]]; then
         log "Using default install prefix ($default)"
         log "You can change this behavior by setting the \$INSTALL_PATH environment variable"
@@ -195,9 +194,15 @@ assertSafePath() {
     local path=${1:?path required}
     path=${path%/}
 
-    local safeFiles=()
-    local safeDirs=(/tmp)
+    local safeFiles=(
+        "$HOME/.northstack-settings.json"
+    )
 
+    local safeDirs=(
+        /tmp
+    )
+
+    # if the user has a custom tmpdir defined let's add that the safe paths
     if [[ -n ${TMPDIR:-} ]]; then
         safeDirs+=("${TMPDIR%/}")
     fi
@@ -220,7 +225,6 @@ assertSafePath() {
     local dir
     for dir in "${safeDirs[@]}"; do
         if [[ $path == "$dir" || $path == $dir/* ]]; then
-            echo "$path is safe because: $dir"
             return 0
         fi
     done
@@ -325,7 +329,7 @@ quoteCmd() {
 
 debugCmd() {
     local cmd=$(quoteCmd "$@")
-    log info "Running:" "$cmd"
+    debug "Running:" "$cmd"
 
     local tmp=$(mktemp -d)
 
@@ -405,35 +409,15 @@ buildDockerImage() {
     local ctx=$1
     local tag=${2:-northstack}
 
-    local sock="$(dockerSocket)"
-
     log info "building the northstack docker image"
 
-    local outfile=$(mktemp)
     local failed=0
 
-    set +e
-    docker build \
+    show_spinner_cmd debugCmd docker \
+        build \
         -t "$tag" \
         --label "com.northstack=1" \
-        "$ctx" \
-        &> "$outfile" &
-    show_spinner_pid
-
-    if [[ $? -ne 0 ]]; then
-        log "error" "image build failed:"
-        log "error" - < "$outfile"
-        failed=1
-    else
-        log info "northstack image built successfully"
-        debug - < "$outfile"
-    fi
-    set -e
-    rm "$outfile"
-
-    if [[ $failed == 1 ]]; then
-        exit 1
-    fi
+        "$ctx"
 }
 
 installComposerDeps() {
@@ -441,10 +425,28 @@ installComposerDeps() {
 
     debug "Installing dependencies in $ctx"
 
-    debugCmd docker run --rm \
-        --volume "${ctx}:/app" \
-        composer install --ignore-platform-reqs
+    set -- composer install --ignore-platform-reqs
 
+    if iHave composer; then
+        debug "Using natively-installed composer"
+        set -- "$@" -d "$ctx"
+    else
+        debug "Composer not found--using docker to install"
+
+        docker \
+            volume \
+            create \
+            --label com.northstack=1 \
+            ns-composer-cache
+
+        set -- docker run \
+            --rm \
+            --user "$(id -u):$(id -g)" \
+            --volume ns-composer-cache:/tmp \
+            --volume "${ctx}:/app" \
+            "$@"
+    fi
+    show_spinner_cmd debugCmd "$@"
     debug "Completed all of the composer install stuff. Onward!"
 }
 
@@ -505,8 +507,12 @@ show_spinner_cmd() {
 
 show_spinner_pid() {
     local -r pid="$!"
-    local -r delay='0.5'
+    local -r delay='0.25'
     local spinstr='\|/-'
+    if ! command -v tput > /dev/null || ! shellIsInteractive; then
+        wait
+        return
+    fi
     local temp
     tput civis
     while ps a | awk '{print $1}' | grep -q "${pid}"; do

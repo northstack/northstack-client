@@ -7,7 +7,6 @@ source "$BIN_DIR/lib.sh"
 @test "debugCmd runs a command" {
     run debugCmd echo "hi"
     assert equal 0 "$status"
-    assert stringContains "echo hi" "${lines[1]}"
 }
 
 @test "debugCmd displays the output when DEBUG=1" {
