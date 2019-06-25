@@ -345,7 +345,20 @@ doNativeInstall() {
 
     installComposerDeps "$context"
 
-    copyTree "$context" "$INSTALL_PATH/northstack"
+    for p in "$context"/*; do
+        local name=$(basename "$p")
+        if [[ "$p" =~ (\.(git|buildkite|github|tmp)$) ]]; then
+            continue
+        fi
+        if [[ -d "$p" ]]; then
+            copyTree "$p" "$INSTALL_PATH/northstack/$name"
+        elif [[ -f "$p" ]]; then
+            copyFile "$p" "$INSTALL_PATH/northstack/$name"
+        else
+            log warn "Unknown file type: $p"
+        fi
+    done
+
     lnS "$INSTALL_PATH/northstack/bin/northstack" "${INSTALL_PATH}/bin/northstack"
 
     afterInstall "$INSTALL_PATH"
@@ -397,7 +410,7 @@ doDockerInstall() {
 }
 
 setUserOptions() {
-    if [[ -f $HOME/.northstack-settings.json ]]; then
+    if [[ -e $HOME/.northstack-settings.json ]]; then
         log info "Previous settings found..."
         return
     fi
@@ -415,37 +428,31 @@ setUserOptions() {
     if [[ ! -d $appDir ]]; then
         mkdirP "$appDir"
     fi
-    # Save that directory path to a new user settings file
+
     updateUserSettings "$appDir"
+    local json="{\"local_apps_dir\":\"$appDir\"}"
 }
 
 updateUserSettings() {
     local appDir=$1
-    local settingsDir="$HOME"
-    local settingsFile=".northstack-settings.json"
-    local fullPath="$settingsDir/$settingsFile"
 
-    colorText grey "Checking to make sure there's not an existing settings file (if there is, a backup will be saved)."
+    local settingsFile=".northstack-settings.json"
+    local fullPath="$HOME/$settingsFile"
 
     if [[ -e $fullPath ]]; then
-        colorText yellow "Existing settings file found, backing it up before we proceed."
-        local backupDate=$(date '+%Y-%m-%d_%H%M')
-        local backupFullPath="$settingsDir/.northstack-settings--backup-$backupDate.json"
-        copyFile "$fullPath" "$backupFullPath"
-        rmFile "$fullPath"
+        log info "Existing ~/.northstack-settings.json found; not continuing"
+        return
     fi
 
     local json="{\"local_apps_dir\":\"$appDir\"}"
-
     echo "$json" > "$fullPath"
 
     if [[ ! -w $fullPath ]]; then
         log error "Looks like $fullPath is not writeable. Please save the following contents to it:"
         log error "$json"
-        showErrors
     fi
 
-    colorText grey "User settings update complete"
+    log info "User settings update complete"
 }
 
 complain() {
