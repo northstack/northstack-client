@@ -1,7 +1,15 @@
 ---
 steps:
-  - label: 'Run Tests :cat:'
+  - label: 'Build bats image'
+    command: ./tests/build-bats.sh
+
+  - wait
+
+  - label: 'Run client tests :cat:'
     command: ./tests/test.sh
+
+  - label: 'Lint bash'
+    command: ./tests/lint-bash.sh
 
   - label: 'Run bash installer tests'
     command: ./tests/test-bash.sh
