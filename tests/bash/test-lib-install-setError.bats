@@ -28,3 +28,13 @@ source "$BIN_DIR/lib-install.sh"
     assert stringContains "my second error" "$INSTALL_ERRORS_FOO"
     assert stringContains "my third error" "$INSTALL_ERRORS_FOO"
 }
+
+@test "setError takes input from stdin" {
+    assert equal "" "${INSTALL_ERRORS_FOO:-}"
+    setError foo - <<< "my error"
+    setError foo - <<< "my second error"
+    setError foo - <<< "my third error"
+    assert stringContains "my error" "$INSTALL_ERRORS_FOO"
+    assert stringContains "my second error" "$INSTALL_ERRORS_FOO"
+    assert stringContains "my third error" "$INSTALL_ERRORS_FOO"
+}

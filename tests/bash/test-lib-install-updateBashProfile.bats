@@ -8,7 +8,6 @@ source "$BIN_DIR/lib-install.sh"
     rc=$(mktemp)
     run updateBashProfile "/tmp/bin" "$rc"
     assert equal "$status" 0
-    assert stringContains "Updated: $rc" "$output"
     grep -q 'PATH=/tmp/bin:' "$rc"
 }
 

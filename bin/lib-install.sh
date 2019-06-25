@@ -9,6 +9,9 @@ readonly MIN_PHP_VERSION=7.2
 setError() {
     local ns=$1
     local msg=$2
+    if [[ $msg == "-" ]]; then
+        msg=$(< /dev/stdin)
+    fi
 
     ns=$(strToUpper "$ns")
 
@@ -30,18 +33,29 @@ setError() {
 }
 
 showErrors() {
+    local errors=${!INSTALL_ERRORS_*}
+
+    if [[ -z $errors ]]; then
+        log info "No errors detected during installation pre-flight checks"
+        return 0
+    fi
+
+    log error "Could not verify the minimum installation requirements for your system"
+
     for e in ${!INSTALL_ERRORS_*}; do
         local ns=${e#INSTALL_ERRORS_}
         local name=INSTALL_ERRORS_${ns}
         local var=${!name}
-        printf "$ns errors:\n"
+        log error "$ns errors:"
         local ifs=$IFS
         IFS=$'\n'
         for err in $var; do
-            printf '  * %s\n' "$err" 1>&2
+            log error "  * $err"
         done
         IFS=$ifs
     done
+
+    return 1
 }
 
 iHave() {
@@ -220,8 +234,9 @@ afterInstall() {
             )
             local updated=0
             for rc in "${files[@]}"; do
-                updateBashProfile "$bindir" "$rc"
-                updated=$((updated + 1))
+                if updateBashProfile "$bindir" "$rc"; then
+                    updated=$((updated + 1))
+                fi
             done
             if (( updated == 0 )); then
                 log warn \
@@ -240,6 +255,17 @@ afterInstall() {
 updateBashProfile() {
     local bindir=$1
     local bashFile=$2
+
+    if [[ ! -e $bashFile ]]; then
+        debug "file ($bashFile) not found--skipping"
+        return 1
+    elif [[ ! -f $bashFile ]]; then
+        debug "file ($bashFile) exists but isn't a regular file--skipping"
+        return 1
+    elif [[ ! -w $bashFile ]]; then
+        debug "file ($bashFile) exists but is not writable--skipping"
+        return 1
+    fi
 
     local checksumPre=$(md5sum "$bashFile" | awk '{print $1}')
     local new=$(mktemp)
@@ -276,37 +302,42 @@ updateBashProfile() {
     fi
 
     if ! diff "$bashFile" "$new"; then
+        log info "Updating: $bashFile"
         cat "$new" > "$bashFile"
-        log info "Updated: $bashFile"
     else
         debug "No changes detected--moving on"
     fi
     rmFile "$new"
 }
 
+readableStat() {
+    local p=$1
+    stat -c "File: %n\nType: %F\nMode: (%a / %A)\nOwner: (%u / %U)\nGroup: (%g / %G)" \
+        "$p" \
+    || printf "ERROR: failed to call stat on '%s' failed" "$p"
+}
+
 checkPathPermissions() {
     local prefix=$1
     log info "Checking installation paths for writeability"
 
-    local failed=0
-
     local toCheck=(
-        "$prefix/bin/northstack"
-        "$prefix/northstack"
+        "binary:$prefix/bin/northstack"
+        "library:$prefix/northstack"
     )
 
-    for p in "${toCheck[@]}"; do
-        local parent=$(parentDir "$p")
-        if [[ -e $p && ! -w $p ]] || [[ ! -w $parent ]]; then
-            log error \
-                "Could not confirm writeability for the following location:" \
-                "  -   Path: $p" \
-                "  - Parent: $parent"
-                    failed=1
+    for item in "${toCheck[@]}"; do
+        local name=${item%%:*}
+        local path=${item#*:}
+        local parent=$(parentDir "$path")
+        if [[ -e $path && ! -w $path ]]; then
+            setError "${name}_path" "$name path ($path) exists but is not writable."
+            setError "${name}_path" "$(readableStat "$path")"
+        elif [[ ! -w $parent ]]; then
+            setError "${name}_path" "$name path ($path) does not exist, and its parent ($parent) is not writable."
+            setError "${name}_path" "$(readableStat "$parent")"
         fi
     done
-
-    return "$failed"
 }
 
 doNativeInstall() {
@@ -452,6 +483,7 @@ install() {
     selectInstallMethod
     setInstallPath
     checkPathPermissions "$INSTALL_PATH"
+    showErrors
     case $INSTALL_METHOD in
         native)
             doNativeInstall "$context"
