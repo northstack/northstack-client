@@ -246,10 +246,8 @@ afterInstall() {
         fi
     fi
 
-    echo ""
-
     setUserOptions
-    colorText "green" "NorthStack client successfully installed at $path/bin/northstack ✅"
+    log info "NorthStack client successfully installed at $path/bin/northstack ✅"
 }
 
 updateBashProfile() {
@@ -400,7 +398,7 @@ doDockerInstall() {
 
 setUserOptions() {
     if [[ -f $HOME/.northstack-settings.json ]]; then
-        log     info "Previous settings found..."
+        log info "Previous settings found..."
         return
     fi
 
