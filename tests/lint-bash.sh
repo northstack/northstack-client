@@ -5,6 +5,8 @@ set -eu
 CDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 BASE="$( dirname "$CDIR")"
 
+"$CDIR"/build-bats.sh
+
 BIN_DIR="$BASE/bin"
 REPO=northstack/bats
 
