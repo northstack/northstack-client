@@ -94,16 +94,19 @@ getInstallPrefix() {
 }
 
 shellIsInteractive() {
-    [[ $- == *i* ]]
+    [[ -t 0 ]]
+    #[[ -t 0 || -p /dev/stdin ]]
 }
 
 ask() {
     local question=$1
     local default=${2:-no}
 
-    if ! shellIsInteractive && [[ -z ${ASK_FORCE_INTERACTIVE:-} ]]; then
-        debug "This is not an interactive shell--no sense in asking"
-        return 2
+    if ! shellIsInteractive; then
+        if [[ -z ${ASK_FORCE_INTERACTIVE:-} ]]; then
+            debug "This is not an interactive shell--no sense in asking"
+            return 2
+        fi
     fi
 
     echo -e "$question"
@@ -501,8 +504,12 @@ colorText() {
 }
 
 show_spinner_cmd() {
-    "$@" &
-    show_spinner_pid
+    if shellIsInteractive; then
+        "$@" &
+        show_spinner_pid
+    else
+        "$@"
+    fi
 }
 
 show_spinner_pid() {
