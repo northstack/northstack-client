@@ -1,6 +1,8 @@
 # northstack-client
 CLI Client and PHP Library to access the NorthStack NorthStack APIs
 
+[![Build status](https://badge.buildkite.com/2d264d3659e60558cad75f40aa6fc49162620c5f36fa34e00a.svg)](https://buildkite.com/pagely/northstack-client)
+
 # Installation
 
 ## Requirements
