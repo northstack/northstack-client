@@ -38,7 +38,7 @@ teardown() {
     destTree=$(mktemp -d -p /tmp/dest)
     run copyTree "$srcTree" "$destTree"
     assert equal 0 $status
-    assert stringContains "directory already exists--removing" "$output"
+    assert stringContains "already exists--removing" "$output"
     assert sameFileTree "$srcTree" "$destTree"
 }
 
@@ -50,7 +50,7 @@ teardown() {
     run copyTree "$srcTree" "$destTree" < /dev/null
     assert not equal 0 "$status"
     assert not sameFileTree "$srcTree" "$destTree"
-    assert stringContains "directory already exists--removing" "$output"
+    assert stringContains "already exists--removing" "$output"
 }
 
 @test "Copying a directory tree removes dangling files in the destination" {
@@ -62,7 +62,7 @@ teardown() {
     mkRandomFile "$dir"
     assert not sameFileTree "$srcTree" "$destTree"
     run copyTree "$srcTree" "$destTree"
-    assert stringContains "directory already exists--removing" "$output"
+    assert stringContains "already exists--removing" "$output"
     assert sameFileTree "$srcTree" "$destTree"
 }
 
