@@ -3,7 +3,7 @@
 namespace Test;
 
 use Auryn\Injector;
-use duncan3dc\Console\Application;
+use Symfony\Component\Console\Application;
 use NorthStack\NorthStackClient\Command\Loader;
 use NorthStack\NorthStackClient\Helper;
 use NorthStack\NorthStackClient\UserSettingsHelper;
