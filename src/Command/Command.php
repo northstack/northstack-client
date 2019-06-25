@@ -7,10 +7,9 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\Question;
 
-class Command extends \duncan3dc\Console\Command
+class Command extends \Symfony\Component\Console\Command\Command
 {
     use LoginRequiredTrait;
-    protected $lock = false;
     protected $args;
 
     public function printBlock(OutputInterface $output, array $messages, string $style = 'error', bool $large = true)

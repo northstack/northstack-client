@@ -8,7 +8,7 @@ if (file_exists(dirname(__DIR__).'/vendor/autoload.php')){
     exit("Can't find autoload\n");
 }
 
-use duncan3dc\Console\Application;
+use Symfony\Component\Console\Application;
 use Auryn\Injector;
 use NorthStack\NorthStackClient\Command\Loader;
 use NorthStack\NorthStackClient\Helper;

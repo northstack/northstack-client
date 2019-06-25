@@ -20,7 +20,6 @@
         "php": "^7.1",
         "ext-json": "*",
         "rdlowrey/auryn": "^1.4",
-        "duncan3dc/console": "^0.4.1",
         "guzzlehttp/guzzle": "^6.3",
         "vlucas/phpdotenv": "^2.4",
         "monolog/monolog": "^1.21",
@@ -32,7 +31,8 @@
         "giggsey/libphonenumber-for-php": "^8.9",
         "docker-php/docker-php": "^2.0",
         "alchemy/zippy": "dev-master",
-        "equip/data": "^2.4"
+        "equip/data": "^2.4",
+        "symfony/console": "^4.3"
     },
     "require-dev": {
         "phpstan/phpstan": "^0.10.5",
