@@ -10,7 +10,8 @@ RUN apk add \
         sudo \
         bash \
         bc \
-        util-linux
+        util-linux \
+        socat
 
 RUN addgroup -g 9999 -S northstack \
     && adduser -u 9999 -D -S -G northstack northstack \
