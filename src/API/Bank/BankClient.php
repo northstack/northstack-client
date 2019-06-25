@@ -26,26 +26,17 @@ class BankClient extends BaseApiClient
             ->get("bank/stats/$statType/sapp/$sappId", $args);
     }
 
-    public function statsForAppPostPipelineRefactor(
+    public function statsForOrg(
         $accessToken,
         $orgId,
-        array $sappId = [],
-        array $statType = [],
-        $to = null,
-        $from = null
+        $statType,
+        array $filters
     )
     {
-        $args = [];
-        if (!empty($to)) {
-            $args['toDate'] = $to;
-        }
-        if (!empty($from)) {
-            $args['fromDate'] = $from;
-        }
+        $args = $filters;
         $args['appIds'] = $sappId;
-        $args['type'] = $statType;
 
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->get("bank/stats/{$orgId}/traffic", ['query' => $args]);
+            ->get("bank/stats/{$orgId}/{$statType}", ['query' => $args]);
     }
 }
