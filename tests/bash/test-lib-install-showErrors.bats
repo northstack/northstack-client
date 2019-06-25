@@ -7,7 +7,7 @@ source "$BIN_DIR/lib-install.sh"
 @test "showErrors shows nothing if there are no errors" {
     run showErrors
     assert equal 0 "$status"
-    assert equal "" "$output"
+    assert stringContains "No errors detected" "$output"
 }
 
 @test "showErrors shows any recorded errors from setError" {
