@@ -450,7 +450,7 @@ install() {
     local isDev=${2:-0}
 
     selectInstallMethod
-    setInstallPrefix
+    setInstallPath
     checkPathPermissions "$INSTALL_PATH"
     case $INSTALL_METHOD in
         native)
