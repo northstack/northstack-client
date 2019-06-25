@@ -17,7 +17,7 @@ source "$BIN_DIR/lib.sh"
     rmFile "$file"
 }
 
-@test "rmFile fails if it doesn't have perms and we don't allow sudo" {
+@test "rmFile fails if it doesn't have perms" {
     file=$(sudo mktemp)
     assert fileExists "$file"
     run rmFile "$file" < /dev/null

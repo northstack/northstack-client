@@ -46,11 +46,6 @@ teardown() {
     echo "$output"
     assert not equal "$status" 0
     assert not fileExists "$dest"
-
-    # now give permission for sudo
-    NORTHSTACK_ALLOW_SUDO=1 run copyFile "$srcFile" "$dest"
-    assert equal "$status" 0
-    assert sameFileTree "$srcFile" "$dest"
 }
 
 @test "Copy a single file into a _new_ directory we don't own" {
@@ -61,11 +56,6 @@ teardown() {
     run copyFile "$srcFile" "$dest" < /dev/null
     assert not equal "$status" 0
     assert not fileExists "$dest"
-
-    # now give permission for sudo
-    NORTHSTACK_ALLOW_SUDO=1 run copyFile "$srcFile" "$dest"
-    assert equal "$status" 0
-    assert sameFileTree "$srcFile" "$dest"
 }
 
 @test "Overwrite an existing file" {
@@ -74,17 +64,6 @@ teardown() {
     run diff "$srcFile" "$new"
     assert not equal "$status" 0
 
-    copyFile "$srcFile" "$new"
-    assert sameFileTree "$srcFile" "$new"
-}
-
-@test "Overwrite an existing file w/ sudo" {
-    new=$(mktemp)
-    echo hi > "$new"
-    sudo chown root:root "$new"
-    assert not sameFileTree "$srcFile" "$new"
-
-    export NORTHSTACK_ALLOW_SUDO=1
     copyFile "$srcFile" "$new"
     assert sameFileTree "$srcFile" "$new"
 }

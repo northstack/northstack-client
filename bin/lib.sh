@@ -115,15 +115,6 @@ ask() {
     [[ $answer == "yes" ]] || [[ $answer != "no" && $default == "yes" ]]
 }
 
-askForSudo() {
-    [[ ${NORTHSTACK_ALLOW_SUDO:-0} == 1 ]] && return 0
-    local question="Asking permission to run the following command with sudo:"
-    question="${question}\n$(quoteCmd "$@")"
-    question="${question}\nYou can disable this check by setting NORTHSTACK_ALLOW_SUDO=1"
-
-    ask "$question"
-}
-
 copyFile() {
     local src=${1:?src path required}
     local dest=${2:?dest path required}
@@ -143,14 +134,7 @@ copyFile() {
     local parent=$(dirname "$dest")
     mkdirP "$parent" || return 1
 
-    set -- cp -va "$src" "$dest"
-
-    if [[ ! -w $parent ]] || [[ -f $dest && ! -w $dest ]]; then
-        askForSudo "$@" || return 1
-        set -- sudo "$@"
-    fi
-
-    debugCmd "$@"
+    debugCmd cp -va "$src" "$dest"
 }
 
 copyTree() {
@@ -241,17 +225,7 @@ mkdirP() {
     local dir=$1
     [[ -d $dir ]] && return 0
     assertSafePath "$dir" || return 1
-    local parent=$(parentDir "$dir")
-    if [[ -w $parent ]]; then
-        debugCmd mkdir -pv "$dir"
-    else
-        log "warn" "Parent directory $parent is not writeable by your shell user. Using sudo to create $dir"
-        chownTo=$(userOwnership)
-        askForSudo mkdir -pv "$dir" \; chown "$chownTo" "$dir" || return 1
-        debugCmd sudo mkdir -pv "$dir"
-        debugCmd sudo chown "$chownTo" "$dir"
-    fi
-
+    debugCmd mkdir -vp "$dir"
 }
 
 lnS() {
@@ -272,16 +246,11 @@ lnS() {
         rmFile "$link"
     fi
 
-    set -- ln -vfs "$target" "$link"
     local parent=$(dirname "$link")
 
     mkdirP "$parent"
 
-    if [[ ! -w $parent ]]; then
-        askForSudo "$@" || return 1
-        set -- sudo "$@"
-    fi
-    debugCmd "$@"
+    debugCmd ln -vfs "$target" "$link"
 }
 
 rmFile() {
@@ -293,13 +262,7 @@ rmFile() {
         return 0
     fi
 
-    set -- rm -v "$file"
-    if [[ ! -w $file ]]; then
-        log "warn" "$file is not writeable by your shell user. Using sudo to delete"
-        askForSudo "$@" || return 1
-        set -- sudo rm -v "$file"
-    fi
-    debugCmd "$@"
+    debugCmd rm -v "$file"
 }
 
 rmDir() {
@@ -317,13 +280,7 @@ rmDir() {
         return 1
     fi
 
-    set -- rm -r "$dir"
-    if [[ ! -w $dir ]]; then
-        log "warn" "$dir is not writeable by your shell user. Using sudo to delete"
-        askForSudo "$@" || return 1
-        set -- sudo rm -r "$dir"
-    fi
-    debugCmd "$@"
+    debugCmd rm -rv "$dir"
 }
 
 quoteCmd() {
