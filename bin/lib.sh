@@ -74,7 +74,7 @@ debug() {
     fi
 }
 
-setInstallPrefix() {
+setInstallPath() {
     local default=$HOME/.local
 
     declare -g INSTALL_PATH=${INSTALL_PATH:-}
