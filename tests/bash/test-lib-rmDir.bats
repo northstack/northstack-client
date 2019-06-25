@@ -17,7 +17,7 @@ source "$BIN_DIR/lib.sh"
     rmDir "$dir"
 }
 
-@test "rmDir fails if it doesn't have perms and we don't allow sudo" {
+@test "rmDir fails if it doesn't have perms" {
     dir=$(sudo mktemp -d)
     assert dirExists "$dir"
     run rmDir "$dir" < /dev/null

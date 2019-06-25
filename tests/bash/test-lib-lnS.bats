@@ -53,11 +53,6 @@ teardown() {
     run lnS "$srcFile" /tmp/dest/new/file
     assert not symlinked "$srcFile" /tmp/dest/new/file
     assert not equal 0 $status
-
-    export NORTHSTACK_ALLOW_SUDO=1
-    run lnS "$srcFile" /tmp/dest/new/file
-    assert symlinked "$srcFile" /tmp/dest/new/file
-    assert equal 0 $status
 }
 
 @test "symlink a file over an existing non-writeable symlink" {
@@ -70,11 +65,6 @@ teardown() {
     run lnS "$new" "$destDir"/new
     assert not symlinked "$new" "$destDir"/new
     assert not equal 0 $status
-
-    export NORTHSTACK_ALLOW_SUDO=1
-    run lnS "$new" "$destDir"/new
-    assert symlinked "$new" "$destDir"/new
-    assert equal 0 $status
 }
 
 @test "symlink is a noop if the link is already correct" {

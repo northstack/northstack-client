@@ -22,7 +22,7 @@ setup() {
 }
 
 teardown() {
-    rm -r /tmp/src /tmp/dest
+    sudo rm -rf /tmp/src /tmp/dest
 }
 
 
@@ -37,11 +37,12 @@ teardown() {
     srcTree=$(mkRandomTree /tmp/src)
     destTree=$(mktemp -d -p /tmp/dest)
     run copyTree "$srcTree" "$destTree"
+    assert equal 0 $status
     assert stringContains "directory already exists--removing" "$output"
     assert sameFileTree "$srcTree" "$destTree"
 }
 
-@test "Overwriting a directory tree with sudo" {
+@test "Overwriting a directory tree we don't own" {
     srcTree=$(mkRandomTree /tmp/src)
     destTree=$(mktemp -d -p /tmp/dest)
     sudo chown -R root:root "$destTree"
@@ -49,11 +50,6 @@ teardown() {
     run copyTree "$srcTree" "$destTree" < /dev/null
     assert not equal 0 "$status"
     assert not sameFileTree "$srcTree" "$destTree"
-    assert stringContains "directory already exists--removing" "$output"
-
-    # now give permission for sudo
-    NORTHSTACK_ALLOW_SUDO=1 copyTree "$srcTree" "$destTree"
-    assert sameFileTree "$srcTree" "$destTree"
     assert stringContains "directory already exists--removing" "$output"
 }
 
@@ -78,7 +74,6 @@ teardown() {
 
 @test "Trying to copy to an unsafe path fails" {
     srcTree=$(mkRandomTree)
-    export NORTHSTACK_ALLOW_SUDO=1
     assert not sameFileTree "$srcTree" "/root/private"
     run copyTree "$srcTree" "/root/private"
     assert not sameFileTree "$srcTree" "/root/private"
