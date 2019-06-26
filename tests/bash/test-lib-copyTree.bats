@@ -5,47 +5,39 @@ load helpers
 source "$BIN_DIR/lib.sh"
 
 setup() {
-    if [[ -e /tmp/src ]]; then
-        rm -r /tmp/src
-    fi
-
-    mkdir /tmp/src
-    srcFile=$(mkRandomFile /tmp/src)
+    srcDir="$BATS_TMPDIR"/copy/src
+    mkdir -p "$srcDir"
+    srcFile=$(mkRandomFile "$srcDir")
     srcFilename=$(basename "$srcFile")
-    srcDir=/tmp/src
 
-    if [[ -e /tmp/dest ]]; then
-        rm -r /tmp/dest
-    fi
-    mkdir /tmp/dest
-    destDir=/tmp/dest
+    destDir="$BATS_TMPDIR"/copy/dest
+    mkdir -p "$destDir"
 }
 
 teardown() {
-    sudo rm -rf /tmp/src /tmp/dest
+   _sudo rm -rf "$BATS_TMPDIR/copy"
 }
 
 
 @test "Copy a directory tree" {
-    srcTree=$(mkRandomTree)
-    destTree=$(mktemp -d)/new
-    copyTree "$srcTree" "$destTree"
-    assert sameFileTree "$srcTree" "$destTree"
+    srcTree=$(mkRandomTree "$srcDir")
+    copyTree "$srcTree" "$destDir/new"
+    assert sameFileTree "$srcTree" "$destDir/new"
 }
 
 @test "Overwriting a directory tree" {
-    srcTree=$(mkRandomTree /tmp/src)
-    destTree=$(mktemp -d -p /tmp/dest)
-    run copyTree "$srcTree" "$destTree"
+    srcTree=$(mkRandomTree "$srcDir")
+    mkdir -p "$destDir"
+    run copyTree "$srcTree" "$destDir"
     assert equal 0 $status
     assert stringContains "already exists--removing" "$output"
-    assert sameFileTree "$srcTree" "$destTree"
+    assert sameFileTree "$srcTree" "$destDir"
 }
 
 @test "Overwriting a directory tree we don't own" {
-    srcTree=$(mkRandomTree /tmp/src)
-    destTree=$(mktemp -d -p /tmp/dest)
-    sudo chown -R root:root "$destTree"
+    srcTree=$(mkRandomTree "$srcDir")
+    destTree=$(mkRandomTree "$destDir")
+   _sudo chown -R root "$destDir"
     # try once and expect failure
     run copyTree "$srcTree" "$destTree" < /dev/null
     assert not equal 0 "$status"
@@ -54,8 +46,8 @@ teardown() {
 }
 
 @test "Copying a directory tree removes dangling files in the destination" {
-    srcTree=$(mkRandomTree)
-    destTree=$(mktemp -d)
+    srcTree=$(mkRandomTree "$srcDir")
+    destTree=$(mkRandomTree "$destDir")
     copyTree "$srcTree" "$destTree"
     assert sameFileTree "$srcTree" "$destTree"
     dir=$(find "$destTree" -mindepth 2 -type d | shuf | head -1)
@@ -73,7 +65,7 @@ teardown() {
 }
 
 @test "Trying to copy to an unsafe path fails" {
-    srcTree=$(mkRandomTree)
+    srcTree=$(mkRandomTree "$srcDir")
     assert not sameFileTree "$srcTree" "/root/private"
     run copyTree "$srcTree" "/root/private"
     assert not sameFileTree "$srcTree" "/root/private"

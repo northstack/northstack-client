@@ -5,7 +5,7 @@ load helpers
 listFuncs() {
     local file=$1
     # Really really un-fun trying to do this programmatically, so let's just mash it
-    sed -n -r -e 's/^([a-zA-Z0-9_:]+)[ ]*\(\).*/\1/p' < "$file"
+    sed_r -n -e 's/^([a-zA-Z0-9_:]+)[ ]*\(\).*/\1/p' < "$file"
 }
 
 getCoverage() {
@@ -35,11 +35,13 @@ getCoverage() {
 }
 
 @test "We have coverage for all functions in lib.sh" {
+    #if [[ $OSTYPE =~ "darwin" ]]; then skip; fi
     coverage=$(getCoverage "${BIN_DIR}/lib.sh")
     assert atLeast "$coverage" 75
 }
 
 @test "We have coverage for all functions in lib-install.sh" {
+    #if [[ $OSTYPE =~ "darwin" ]]; then skip; fi
     coverage=$(getCoverage "${BIN_DIR}/lib-install.sh")
     assert atLeast "$coverage" 75
 }

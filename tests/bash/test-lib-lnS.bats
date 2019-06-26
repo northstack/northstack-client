@@ -5,24 +5,17 @@ load helpers
 source "$BIN_DIR/lib.sh"
 
 setup() {
-    if [[ -e /tmp/src ]]; then
-        rm -r /tmp/src
-    fi
-
-    mkdir /tmp/src
-    srcFile=$(mkRandomFile /tmp/src)
+    srcDir="$BATS_TMPDIR/src"
+    mkdir "$srcDir"
+    srcFile=$(mkRandomFile "$srcDir")
     srcFilename=$(basename "$srcFile")
-    srcDir=/tmp/src
 
-    if [[ -e /tmp/dest ]]; then
-        rm -r /tmp/dest
-    fi
-    mkdir /tmp/dest
-    destDir=/tmp/dest
+    destDir="$BATS_TMPDIR/dest"
+    mkdir "$destDir"
 }
 
 teardown() {
-    sudo rm -r /tmp/src /tmp/dest
+   _sudo rm -r "$srcDir" "$destDir"
 }
 
 @test "symlink a file" {
@@ -40,18 +33,18 @@ teardown() {
 }
 
 @test "symlink in a non-existent directory causes the directory to be created" {
-    assert not dirExists /tmp/dest/new
-    lnS "$srcFile" /tmp/dest/new/file
-    assert dirExists /tmp/dest/new
-    assert symlinked "$srcFile" /tmp/dest/new/file
+    assert not dirExists "$destDir"/new
+    lnS "$srcFile" "$destDir"/new/file
+    assert dirExists "$destDir"/new
+    assert symlinked "$srcFile" "$destDir"/new/file
 }
 
 
 @test "symlink in a non-writeable directory" {
-    mkdir -p /tmp/dest/new
-    sudo chown root:root /tmp/dest/new
-    run lnS "$srcFile" /tmp/dest/new/file
-    assert not symlinked "$srcFile" /tmp/dest/new/file
+    mkdir -p "$destDir"/new
+   _sudo chown root "$destDir"/new
+    run lnS "$srcFile" "$destDir"/new/file
+    assert not symlinked "$srcFile" "$destDir"/new/file
     assert not equal 0 $status
 }
 
@@ -59,7 +52,7 @@ teardown() {
     lnS "$srcFile" "$destDir"/new
     assert symlinked "$srcFile" "$destDir"/new
 
-    sudo chown root:root "$destDir" "$destDir/new"
+   _sudo chown root "$destDir" "$destDir/new"
 
     local new=$(mktemp)
     run lnS "$new" "$destDir"/new
@@ -73,7 +66,7 @@ teardown() {
 
     inodeBefore=$(stat -c "%i" "$destDir/new")
 
-    sudo chown root "$destDir/new"
+   _sudo chown root "$destDir/new"
     run lnS "$srcFile" "$destDir"/new
 
     inodeAfter=$(stat -c "%i" "$destDir/new")

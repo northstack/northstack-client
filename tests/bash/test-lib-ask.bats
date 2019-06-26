@@ -5,7 +5,7 @@ load helpers
 source "$BIN_DIR/lib.sh"
 
 @test "ask exits prematurely if no interactive shell is detected" {
-    run ask "how about this?"
+    run ask "how about this?" < /dev/null
     assert equal $status 2
     assert equal "" "$output"
 }

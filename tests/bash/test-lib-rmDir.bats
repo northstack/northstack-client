@@ -18,7 +18,7 @@ source "$BIN_DIR/lib.sh"
 }
 
 @test "rmDir fails if it doesn't have perms" {
-    dir=$(sudo mktemp -d)
+    dir=$_sudo mktemp -d)
     assert dirExists "$dir"
     run rmDir "$dir" < /dev/null
     assert not equal 0 "$status"

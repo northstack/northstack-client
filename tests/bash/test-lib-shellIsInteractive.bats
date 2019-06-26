@@ -4,12 +4,7 @@ load helpers
 
 source "$BIN_DIR/lib.sh"
 
-setup() {
-    sudo apk add expect
-}
-
 @test "shellIsInteractive checks if a shell is interactive" {
+    skip "haven't found a reliable way to fake an interactive shell :("
     ! shellIsInteractive
-
-    # haven't found a reliable way to fake an interactive shell :(
 }
