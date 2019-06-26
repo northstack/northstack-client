@@ -343,7 +343,6 @@ doNativeInstall() {
 
     installComposerDeps "$context"
 
-    local saveGlob
     shopt -s dotglob nullglob
     for p in "$context"/*; do
         local name=$(basename "$p")
