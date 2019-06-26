@@ -8,6 +8,7 @@ readonly MIN_PHP_VERSION=7.2
 
 declare INSTALL_METHOD
 declare INSTALL_PATH
+declare NORTHSTACK_APPDIR
 
 setError() {
     local ns=$1
@@ -414,21 +415,21 @@ setUserOptions() {
         return
     fi
 
-    local appDir="$HOME/northstack/apps"
+    local default="$HOME/northstack/apps"
     if [[ -n ${NORTHSTACK_APPDIR:-} ]]; then
         debug "Using user-specified appDir: $NORTHSTACK_APPDIR"
-        appDir=$NORTHSTACK_APPDIR
     else
-        log info "Using the default appDir ($appDir)." \
+        log info "Using the default appDir ($default)." \
             "Set the \$NORTHSTACK_APPDIR variable to override this during installation," \
             "or edit your settings file (~/.northstack-settings.json) to change it later."
+        NORTHSTACK_APPDIR=$default
     fi
 
-    if [[ ! -d $appDir ]]; then
-        mkdirP "$appDir"
+    if [[ ! -d $NORTHSTACK_APPDIR ]]; then
+        mkdirP "$NORTHSTACK_APPDIR"
     fi
 
-    updateUserSettings "$appDir"
+    updateUserSettings "$NORTHSTACK_APPDIR"
 }
 
 updateUserSettings() {

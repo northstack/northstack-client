@@ -210,6 +210,9 @@ assertSafePath() {
         safeFiles+=("$INSTALL_PATH"/bin/northstack)
     fi
 
+    if [[ -n ${NORTHSTACK_APPDIR:-} ]]; then
+        safeDirs+=("$NORTHSTACK_APPDIR")
+    fi
     local file
     for file in "${safeFiles[@]}"; do
         if [[ $path == "$file" ]]; then
