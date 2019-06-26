@@ -25,13 +25,32 @@ cd northstack-client
 ./bin/install.sh
 ```
 
+Some installation settings are configurable via CLI arguments:
+
+```
+  -a <path>          Set the app directory       (default = $HOME/northstack/apps)
+  -p <path>          Set the install prefix      (default = $HOME/.local)
+  -m docker|native   Set the install method      (default = auto)
+  -d                 Install in dev mode         (default = false)
+  -n                 Don't prompt for any input  (default = no)
+```
+
 ## Post-install
 
-By default the installation script installs the CLI to `~/.local/bin`, so you'll want to add this directory to your `$PATH`:
+The CLI is installed to `$INSTALL_PREFIX/bin` (default `~/.local/bin`), which may or may not already be in your `$PATH`. The installer attempt to update your rc files for you if this is the case:
 
-```bash
-$ echo "PATH=\$HOME/.local/bin:\$PATH" >> ~/.bashrc
 ```
+[2019-06-26 14:50:00] [warn] /home/ns/.local/bin is not in your $PATH
+Would you like us to update your .bashrc/.zshrc files?
+Enter yes/no (default = no): yes
+101a102,104
+> # NorthStack START
+> PATH=/home/ns/.local/bin:$PATH
+> # NorthStack END
+[2019-06-26 14:51:39] [info] Updating: /home/ns/.bashrc
+```
+
+Make sure to `source ~/.bashrc` after this!
 
 The CLI also supports tab-completion. The process for enabling this varies from platform to platform, but in a pinch you can also just add the completion hook to your bashrc:
 
