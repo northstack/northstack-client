@@ -48,19 +48,19 @@ while getopts "dnha:p:m:" opt; do
             exit 0
             ;;
         a)
-            INSTALL_APPDIR=${OPTARG%/}
+            export INSTALL_APPDIR=${OPTARG%/}
             ;;
         p)
-            INSTALL_PREFIX=${OPTARG%/}
+            export INSTALL_PREFIX=${OPTARG%/}
             ;;
         n)
-            NON_INTERACTIVE=1
+            export NON_INTERACTIVE=1
             ;;
         m)
-            INSTALL_METHOD=$(strToLower "$OPTARG")
+            export INSTALL_METHOD=$(strToLower "$OPTARG")
             ;;
         d)
-            INSTALL_DEV_MODE=1
+            export INSTALL_DEV_MODE=1
             ;;
         ?)
             usage
