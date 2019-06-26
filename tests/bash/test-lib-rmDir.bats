@@ -1,8 +1,8 @@
 #!/usr/bin/env bats
 
-load helpers
-
 source "$BIN_DIR/lib.sh"
+
+load helpers
 
 @test "rmDir removes a directory" {
     f=$(mktemp -d)

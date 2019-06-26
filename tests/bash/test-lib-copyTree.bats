@@ -1,23 +1,8 @@
 #!/usr/bin/env bats
 
-load helpers
-
 source "$BIN_DIR/lib.sh"
 
-setup() {
-    srcDir="$BATS_TMPDIR"/copy/src
-    mkdir -p "$srcDir"
-    srcFile=$(mkRandomFile "$srcDir")
-    srcFilename=$(basename "$srcFile")
-
-    destDir="$BATS_TMPDIR"/copy/dest
-    mkdir -p "$destDir"
-}
-
-teardown() {
-   _sudo rm -rf "$BATS_TMPDIR/copy"
-}
-
+load helpers
 
 @test "Copy a directory tree" {
     srcTree=$(mkRandomTree "$srcDir")
@@ -37,7 +22,7 @@ teardown() {
 @test "Overwriting a directory tree we don't own" {
     srcTree=$(mkRandomTree "$srcDir")
     destTree=$(mkRandomTree "$destDir")
-   _sudo chown -R root "$destDir"
+    _sudo chown -R root "$destDir"
     # try once and expect failure
     run copyTree "$srcTree" "$destTree" < /dev/null
     assert not equal 0 "$status"

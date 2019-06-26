@@ -1,29 +1,8 @@
 #!/usr/bin/env bats
 
-load helpers
-
 source "$BIN_DIR/lib.sh"
 
-setup() {
-    if [[ -e /tmp/src ]]; then
-        rm -r /tmp/src
-    fi
-
-    mkdir /tmp/src
-    srcFile=$(mkRandomFile /tmp/src)
-    srcFilename=$(basename "$srcFile")
-    srcDir=/tmp/src
-
-    if [[ -e /tmp/dest ]]; then
-        rm -r /tmp/dest
-    fi
-    mkdir /tmp/dest
-    destDir=/tmp/dest
-}
-
-teardown() {
-    rm -r /tmp/src /tmp/dest
-}
+load helpers
 
 @test "Copy a single file in a directory" {
     copyFile "$srcFile" "${srcFile}.copy"
@@ -31,7 +10,7 @@ teardown() {
 }
 
 @test "Copy a single file into a new directory" {
-    newDir=$(mktemp -p /tmp/dest -d)
+    newDir=$(mktemp -d)
     dest="${newDir}/sub/directory/${srcFilename}.copy"
     copyFile "$srcFile" "$dest"
     assert sameFileTree "$srcFile" "$dest"

@@ -5,11 +5,12 @@ source "$BIN_DIR/lib.sh"
 load helpers
 
 @test "The global tmp dir is safe" {
+    unset TMPDIR
     assertSafePath "/tmp"
 }
 
 @test "The user's TMPDIR is safe" {
-    TMPDIR=$HOME/custom-tmp assertSafePath "$HOME/custom-tmp/foo/bar.txt"
+    assertSafePath "$TMPDIR/custom-tmp/foo/bar.txt"
 }
 
 @test "Known paths in the install prefix are safe" {
@@ -47,12 +48,6 @@ load helpers
 
 @test "Relative paths are resolved" {
     skip "We can't really make this work in a portable way yet"
-    cd /tmp
-    assertSafePath "."
-
-    mkdir -p /tmp/src/dir
-    cd /tmp/src/dir
-    assertSafePath "../../new"
 }
 
 
