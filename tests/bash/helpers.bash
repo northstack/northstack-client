@@ -3,10 +3,10 @@
 CLEANUP=()
 
 _sudo() {
-    sudo --non-interactive "$@" >&3 || {
-        echo "Calling sudo failed"
-        echo "Command: $@"
-        exit 1
+    sudo --non-interactive "$@" || {
+        echo "Calling sudo failed" >&3
+        echo "Command: $@" >&3
+        return 1
     }
 }
 
