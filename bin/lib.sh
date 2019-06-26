@@ -1,4 +1,6 @@
 # shellcheck shell=bash
+declare INSTALL_PATH
+
 strToUpper() {
     tr '[:lower:]' '[:upper:]' <<< "$@"
 }
@@ -77,7 +79,7 @@ debug() {
 setInstallPath() {
     local default=$HOME/.local
 
-    declare -g INSTALL_PATH=${INSTALL_PATH:-}
+    INSTALL_PATH=${INSTALL_PATH:-}
     if [[ -z $INSTALL_PATH ]]; then
         log "Using default install prefix ($default)"
         log "You can change this behavior by setting the \$INSTALL_PATH environment variable"
@@ -94,7 +96,7 @@ getInstallPrefix() {
 }
 
 shellIsInteractive() {
-    [[ -t 0 ]]
+    [[ -t 0 ]] && [[ -z ${NON_INTERACTIVE:-} ]]
     #[[ -t 0 || -p /dev/stdin ]]
 }
 
@@ -102,6 +104,12 @@ ask() {
     local question=$1
     local default=${2:-no}
 
+    if [[ -n ${NON_INTERACTIVE:-} ]]; then
+        if [[ $default == yes ]]; then
+            return 0
+        fi
+        return 1
+    fi
     if ! shellIsInteractive; then
         if [[ -z ${ASK_FORCE_INTERACTIVE:-} ]]; then
             debug "This is not an interactive shell--no sense in asking"
@@ -162,7 +170,8 @@ copyTree() {
     src=${src%/}/.
     dest=${dest%/}
 
-    debugCmd cp --force -a "$src" "$dest"
+    debugCmd cp -v --force -a "$src" "$dest"
+    #rsync -HavzuP --delete "$src" "$dest"
 }
 
 parentDir() {
@@ -318,15 +327,15 @@ debugCmd() {
 }
 
 checkDocker() {
-    command -v docker &> /dev/null || {
-        log "error" "No docker executable found. Is docker installed?"
-        exit 1
-    }
+    if ! iHave docker; then
+        log error "No docker executable found. Is docker installed?"
+        return 1
+    fi
 
-    docker info &> /dev/null || {
-        log "error" "Running \`docker info\` failed. Is the docker daemon running?"
-        exit 1
-    }
+    if ! docker info &> /dev/null; then
+        log error "Running \`docker info\` failed. Is the docker daemon running?"
+        return 1
+    fi
 }
 
 dockerSocket() {
@@ -379,6 +388,12 @@ buildDockerImage() {
         -t "$tag" \
         --label "com.northstack=1" \
         "$ctx"
+}
+
+iHave() {
+    local name=$1
+    command -v "$name" &> /dev/null
+    [[ $? == 0 ]]
 }
 
 installComposerDeps() {

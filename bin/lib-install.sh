@@ -6,6 +6,9 @@
 readonly MIN_DOCKER_VERSION=17.09
 readonly MIN_PHP_VERSION=7.2
 
+declare INSTALL_METHOD
+declare INSTALL_PATH
+
 setError() {
     local ns=$1
     local msg=$2
@@ -16,7 +19,6 @@ setError() {
     ns=$(strToUpper "$ns")
 
     local var=INSTALL_ERRORS_${ns}
-    declare -g "$var"
     local val=${!var:=}
     local ifs=$IFS
     IFS=$'\n'
@@ -58,12 +60,6 @@ showErrors() {
     return 1
 }
 
-iHave() {
-    local name=$1
-    command -v "$name" &> /dev/null
-    [[ $? == 0 ]]
-}
-
 getVersion() {
     local name=$1
     local dest=$2
@@ -83,13 +79,14 @@ getVersion() {
     esac
 
     local version
-    version=$("${cmd[@]}")
+    version=$("${cmd[@]}" 2>&1)
     local status=$?
 
     local strCmd=$(quoteCmd "${cmd[@]}")
     if [[ $status -ne 0 ]]; then
         log error "Failed to check the installed version of $name" \
-            "Command \`$strCmd\` returned $status"
+            "Command \`$strCmd\` returned $status" \
+            "Output: '$version'"
         version=0
     fi
     printf -v "$dest" "$version"
@@ -173,13 +170,14 @@ checkVersion() {
 }
 
 nativeInstallOK() {
-    {
-        iHave php \
-            && checkVersion php "$MIN_PHP_VERSION"
-    } || return 1
+    if ! iHave php; then
+        setError php "No php binary preset in \$PATH - is PHP installed?"
+        return 1
+    fi
+    checkVersion php "$MIN_PHP_VERSION"
 
     {
-        iHave docker \
+        checkDocker \
             && checkVersion docker "$MIN_DOCKER_VERSION"
     } || return 1
     return 0
@@ -187,7 +185,7 @@ nativeInstallOK() {
 
 dockerInstallOK() {
     {
-        iHave docker \
+        checkDocker \
             && checkVersion docker "$MIN_DOCKER_VERSION"
     } || return 1
     [[ $OSTYPE =~ linux || $(uname) =~ Darwin ]] || {
@@ -198,7 +196,7 @@ dockerInstallOK() {
 }
 
 selectInstallMethod() {
-    declare -g INSTALL_METHOD=${INSTALL_METHOD:-}
+    INSTALL_METHOD=${INSTALL_METHOD:-}
     if [[ -n $INSTALL_METHOD ]]; then
         debug "INSTALL_METHOD has been overriden to: $INSTALL_METHOD"
         return
@@ -345,6 +343,8 @@ doNativeInstall() {
 
     installComposerDeps "$context"
 
+    local saveGlob
+    shopt -s dotglob nullglob
     for p in "$context"/*; do
         local name=$(basename "$p")
         if [[ "$p" =~ (\.(git|buildkite|github|tmp)$) ]]; then
@@ -399,7 +399,7 @@ doDockerInstall() {
     local wrapperFile=$(mktemp)
 
     # shellcheck disable=SC2064
-    trap "rm '$wrapperFile'" EXIT
+    #trap "rm -f '$wrapperFile'" EXIT
 
     buildWrapper "$wrapperFile" "$context" "$isDev"
 
@@ -430,7 +430,6 @@ setUserOptions() {
     fi
 
     updateUserSettings "$appDir"
-    local json="{\"local_apps_dir\":\"$appDir\"}"
 }
 
 updateUserSettings() {
