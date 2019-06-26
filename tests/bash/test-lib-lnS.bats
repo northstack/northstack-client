@@ -4,20 +4,6 @@ load helpers
 
 source "$BIN_DIR/lib.sh"
 
-setup() {
-    srcDir="$BATS_TMPDIR/src"
-    mkdir "$srcDir"
-    srcFile=$(mkRandomFile "$srcDir")
-    srcFilename=$(basename "$srcFile")
-
-    destDir="$BATS_TMPDIR/dest"
-    mkdir "$destDir"
-}
-
-teardown() {
-   _sudo rm -r "$srcDir" "$destDir"
-}
-
 @test "symlink a file" {
     lnS "$srcFile" "$destDir"/new
     assert symlinked "$srcFile" "$destDir"/new

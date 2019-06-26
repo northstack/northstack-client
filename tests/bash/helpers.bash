@@ -31,11 +31,19 @@ setup() {
     PREFIX=$(mktemp -d "${BATS_TMPDIR}/prefix.XXXXXX")
     export INSTALL_PREFIX=$PREFIX
     CLEANUP+=("$PREFIX")
+
+    mkdir "$TMPDIR/src"
+    export srcDir="$TMPDIR/src"
+    export srcFile=$(mkRandomFile "$TMPDIR/src")
+    export srcFilename=$(basename "$srcFile")
+
+    mkdir "$TMPDIR/dest"
+    export destDir="$TMPDIR/dest"
 }
 
 teardown() {
-    for path in "${CLEANUP[@]}"; do
-        _sudo rm -rfv "${path:?why is this path empty}"
+    for p in "${CLEANUP[@]}"; do
+        _sudo rm -rfv "${p:?WHAT}"
     done
 }
 
@@ -234,7 +242,7 @@ xor() {
 }
 
 mkRandomFile() {
-    local base=${1:-$BATS_TMPDIR}
+    local base=${1:-$TMPDIR}
     local file
     file=$(mktemp "${base}/${RANDOM}.XXXXXX") || return 1
     echo -e "$(date)\n${RANDOM}\n${RANDOM}\n${RANDOM}" > "$file"
@@ -242,7 +250,7 @@ mkRandomFile() {
 }
 
 mkRandomTree() {
-    local base=${1:-$BATS_TMPDIR}
+    local base=${1:-$TMPDIR}
     local depth=${2:-4}
     local srcDir
     mkdir -p "$base"
@@ -263,7 +271,7 @@ sameFileTree() {
     local left=$1
     local right=$2
 
-    run _sudo diff -r "$left" "$right" >&3
+    run _sudo diff -r "$left" "$right"
     assert equal "$output" ""
     assert equal "$status" 0
 }
