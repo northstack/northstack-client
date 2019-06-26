@@ -174,7 +174,7 @@ nativeInstallOK() {
         setError php "No php binary preset in \$PATH - is PHP installed?"
         return 1
     fi
-    checkVersion php "$MIN_PHP_VERSION"
+    checkVersion php "$MIN_PHP_VERSION" || return 1
 
     {
         checkDocker \
@@ -454,12 +454,6 @@ updateUserSettings() {
     log info "User settings update complete"
 }
 
-complain() {
-    log error "Could not verify the minimum installation requirements for your system"
-    showErrors
-    exit 1
-}
-
 install() {
     local context=$1
     local isDev=${2:-0}
@@ -476,7 +470,8 @@ install() {
             doDockerInstall "$context" "$isDev"
             ;;
         *)
-            complain
+            log error "Unknown installation method: $INSTALL_METHOD"
+            exit 1
             ;;
     esac
 }

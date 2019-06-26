@@ -13,10 +13,10 @@ getCoverage() {
 
     local count=0
     local covered=0
-    local report=$(mktemp)
+    local REPORT=$(mktemp)
     local stub=$(basename "$path")
     stub=${stub%.sh}
-    echo "Missing:" >&3
+    echo "Missing:" > "$REPORT"
     for func in $(listFuncs $path); do
         count=$((count +1))
         testFile="${BATS_TEST_DIRNAME}/test-${stub}-${func}.bats"
@@ -25,23 +25,29 @@ getCoverage() {
         else
             echo "$func $(basename "$testFile")"
         fi
-    done > "$report"
-    sort "$report" | column -t >&3
+    done >> "$REPORT"
 
-    echo "Total functions: $count" >&3
-    echo "Total covered:   $covered" >&3
+    echo "Total functions: $count" >> "$REPORT"
+    echo "Total covered:   $covered" >> "$REPORT"
 
-    bc <<< "scale=2; ($covered / $count ) * 100"
+    printf "Coverage Percent: " >> "$REPORT"
+    bc <<< "scale=2; ($covered / $count ) * 100" >> "$REPORT"
+
+    printf "$REPORT"
 }
 
 @test "We have coverage for all functions in lib.sh" {
     #if [[ $OSTYPE =~ "darwin" ]]; then skip; fi
-    coverage=$(getCoverage "${BIN_DIR}/lib.sh")
+    report=$(getCoverage "${BIN_DIR}/lib.sh")
+    cat "$report"
+    coverage=$(awk '/^Coverage Percent:/ {print $3}' < "$report")
     assert atLeast "$coverage" 75
 }
 
 @test "We have coverage for all functions in lib-install.sh" {
     #if [[ $OSTYPE =~ "darwin" ]]; then skip; fi
-    coverage=$(getCoverage "${BIN_DIR}/lib-install.sh")
+    report=$(getCoverage "${BIN_DIR}/lib-install.sh")
+    cat "$report"
+    coverage=$(awk '/^Coverage Percent:/ {print $3}' < "$report")
     assert atLeast "$coverage" 75
 }
