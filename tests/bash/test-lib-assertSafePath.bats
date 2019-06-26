@@ -1,8 +1,8 @@
 #!/usr/bin/env bats
 
-load helpers
-
 source "$BIN_DIR/lib.sh"
+
+load helpers
 
 @test "The global tmp dir is safe" {
     assertSafePath "/tmp"
@@ -14,11 +14,11 @@ source "$BIN_DIR/lib.sh"
 
 @test "Known paths in the install prefix are safe" {
     export DEBUG=1
-    export INSTALL_PATH=$HOME/.local
+    export INSTALL_PREFIX=$HOME/.local
     try=(
-        "$INSTALL_PATH/bin/northstack"
-        "$INSTALL_PATH/northstack"
-        "$INSTALL_PATH/northstack/some/subdir"
+        "$INSTALL_PREFIX/bin/northstack"
+        "$INSTALL_PREFIX/northstack"
+        "$INSTALL_PREFIX/northstack/some/subdir"
     )
     for p in "${try[@]}"; do
         run assertSafePath "$p"

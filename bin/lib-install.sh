@@ -7,8 +7,9 @@ readonly MIN_DOCKER_VERSION=17.09
 readonly MIN_PHP_VERSION=7.2
 
 declare INSTALL_METHOD
-declare INSTALL_PATH
-declare NORTHSTACK_APPDIR
+declare INSTALL_PREFIX
+declare INSTALL_APPDIR
+declare INSTALL_DEV_MODE
 
 setError() {
     local ns=$1
@@ -184,25 +185,42 @@ nativeInstallOK() {
     return 0
 }
 
+validateOptions() {
+
+    INSTALL_METHOD=${INSTALL_METHOD:-auto}
+    log info "Checking system requirements for install method: $INSTALL_METHOD"
+    case $INSTALL_METHOD in
+        docker)
+            dockerInstallOK || true
+            ;;
+        native)
+            nativeInstallOK || true
+            ;;
+        auto)
+            selectInstallMethod
+            ;;
+        *)
+            setError opts "Unknown install method ($INSTALL_METHOD). Please chose one of docker/native/auto"
+            ;;
+    esac
+
+    INSTALL_PREFIX=${INSTALL_PREFIX:-$HOME/.local}
+    INSTALL_APPDIR=${INSTALL_APPDIR:-$HOME/northstack/apps}
+    checkPathPermissions
+}
+
 dockerInstallOK() {
-    {
-        checkDocker \
-            && checkVersion docker "$MIN_DOCKER_VERSION"
-    } || return 1
-    [[ $OSTYPE =~ linux || $(uname) =~ Darwin ]] || {
+    if ! checkDocker; then
+        return 1
+    elif ! checkVersion docker "$MIN_DOCKER_VERSION"; then
+        return 1
+    elif ! [[ $OSTYPE =~ linux || $OSTYPE =~ darwin ]]; then
         setError OS "Docker installation is only supported on Linux & Mac"
         return 1
-    }
-    return 0
+    fi
 }
 
 selectInstallMethod() {
-    INSTALL_METHOD=${INSTALL_METHOD:-}
-    if [[ -n $INSTALL_METHOD ]]; then
-        debug "INSTALL_METHOD has been overriden to: $INSTALL_METHOD"
-        return
-    fi
-
     if dockerInstallOK; then
         INSTALL_METHOD=docker
         return
@@ -315,12 +333,14 @@ readableStat() {
 }
 
 checkPathPermissions() {
-    local prefix=$1
+    local prefix=$INSTALL_PREFIX
+    local appdir=$INSTALL_APPDIR
     log info "Checking installation paths for writeability"
 
     local toCheck=(
         "binary:$prefix/bin/northstack"
         "library:$prefix/northstack"
+        "appdir:$appdir"
     )
 
     for item in "${toCheck[@]}"; do
@@ -351,17 +371,17 @@ doNativeInstall() {
             continue
         fi
         if [[ -d "$p" ]]; then
-            copyTree "$p" "$INSTALL_PATH/northstack/$name"
+            copyTree "$p" "$INSTALL_PREFIX/northstack/$name"
         elif [[ -f "$p" ]]; then
-            copyFile "$p" "$INSTALL_PATH/northstack/$name"
+            copyFile "$p" "$INSTALL_PREFIX/northstack/$name"
         else
             log warn "Unknown file type: $p"
         fi
     done
 
-    lnS "$INSTALL_PATH/northstack/bin/northstack" "${INSTALL_PATH}/bin/northstack"
+    lnS "$INSTALL_PREFIX/northstack/bin/northstack" "${INSTALL_PREFIX}/bin/northstack"
 
-    afterInstall "$INSTALL_PATH"
+    afterInstall "$INSTALL_PREFIX"
 }
 
 buildWrapper() {
@@ -388,7 +408,7 @@ EOF
 
 doDockerInstall() {
     local context=$1
-    local isDev=$2
+    local isDev=${INSTALL_DEV_MODE:-0}
 
     log info "Installing with docker"
 
@@ -403,71 +423,40 @@ doDockerInstall() {
 
     buildWrapper "$wrapperFile" "$context" "$isDev"
 
-    copyFile "$wrapperFile" "${INSTALL_PATH}/bin/northstack"
-    copyTree "${context}/docker" "${INSTALL_PATH}/northstack/docker"
+    copyFile "$wrapperFile" "${INSTALL_PREFIX}/bin/northstack"
+    copyTree "${context}/docker" "${INSTALL_PREFIX}/northstack/docker"
 
-    afterInstall "$INSTALL_PATH"
+    afterInstall "$INSTALL_PREFIX"
 }
 
 setUserOptions() {
-    if [[ -e $HOME/.northstack-settings.json ]]; then
-        log info "Previous settings found..."
+    local path=$HOME/.northstack-settings.json
+    if [[ -e $path ]]; then
+        log info "Existing ~/.northstack-settings.json found"
         return
     fi
 
-    local default="$HOME/northstack/apps"
-    if [[ -n ${NORTHSTACK_APPDIR:-} ]]; then
-        debug "Using user-specified appDir: $NORTHSTACK_APPDIR"
-    else
-        log info "Using the default appDir ($default)." \
-            "Set the \$NORTHSTACK_APPDIR variable to override this during installation," \
-            "or edit your settings file (~/.northstack-settings.json) to change it later."
-        NORTHSTACK_APPDIR=$default
-    fi
+    log info "Creating ~/.northstack-settings.json"
 
-    if [[ ! -d $NORTHSTACK_APPDIR ]]; then
-        mkdirP "$NORTHSTACK_APPDIR"
-    fi
+    mkdirP "$INSTALL_APPDIR"
 
-    updateUserSettings "$NORTHSTACK_APPDIR"
-}
-
-updateUserSettings() {
-    local appDir=$1
-
-    local settingsFile=".northstack-settings.json"
-    local fullPath="$HOME/$settingsFile"
-
-    if [[ -e $fullPath ]]; then
-        log info "Existing ~/.northstack-settings.json found; not continuing"
-        return
-    fi
-
-    local json="{\"local_apps_dir\":\"$appDir\"}"
-    echo "$json" > "$fullPath"
-
-    if [[ ! -w $fullPath ]]; then
-        log error "Looks like $fullPath is not writeable. Please save the following contents to it:"
-        log error "$json"
-    fi
+    local json="{\"local_apps_dir\":\"$INSTALL_APPDIR\"}"
+    echo "$json" > "$path"
 
     log info "User settings update complete"
 }
 
 install() {
     local context=$1
-    local isDev=${2:-0}
 
-    selectInstallMethod
-    setInstallPath
-    checkPathPermissions "$INSTALL_PATH"
+    validateOptions
     showErrors
     case $INSTALL_METHOD in
         native)
             doNativeInstall "$context"
             ;;
         docker)
-            doDockerInstall "$context" "$isDev"
+            doDockerInstall "$context"
             ;;
         *)
             log error "Unknown installation method: $INSTALL_METHOD"
