@@ -1,5 +1,6 @@
 # shellcheck shell=bash
-declare INSTALL_PATH
+declare INSTALL_PREFIX
+declare NON_INTERACTIVE
 
 strToUpper() {
     tr '[:lower:]' '[:upper:]' <<< "$@"
@@ -74,20 +75,6 @@ debug() {
     if [[ $DEBUG == 1 ]]; then
         log "debug" "$@"
     fi
-}
-
-setInstallPath() {
-    local default=$HOME/.local
-
-    INSTALL_PATH=${INSTALL_PATH:-}
-    if [[ -z $INSTALL_PATH ]]; then
-        log "Using default install prefix ($default)"
-        log "You can change this behavior by setting the \$INSTALL_PATH environment variable"
-        INSTALL_PATH=$default
-    else
-        log "Using install path: $INSTALL_PATH"
-    fi
-    INSTALL_PATH=${INSTALL_PATH%*/}
 }
 
 getInstallPrefix() {
@@ -204,14 +191,14 @@ assertSafePath() {
         safeDirs+=("${TMPDIR%/}")
     fi
 
-    if [[ -n ${INSTALL_PATH} ]]; then
-        safeDirs+=("$INSTALL_PATH"/northstack)
-        safeFiles+=("$INSTALL_PATH"/bin)
-        safeFiles+=("$INSTALL_PATH"/bin/northstack)
+    if [[ -n ${INSTALL_PREFIX} ]]; then
+        safeDirs+=("$INSTALL_PREFIX"/northstack)
+        safeFiles+=("$INSTALL_PREFIX"/bin)
+        safeFiles+=("$INSTALL_PREFIX"/bin/northstack)
     fi
 
-    if [[ -n ${NORTHSTACK_APPDIR:-} ]]; then
-        safeDirs+=("$NORTHSTACK_APPDIR")
+    if [[ -n ${INSTALL_APPDIR:-} ]]; then
+        safeDirs+=("$INSTALL_APPDIR")
     fi
     local file
     for file in "${safeFiles[@]}"; do
@@ -234,15 +221,15 @@ assertSafePath() {
 }
 
 mkdirP() {
-    local dir=$1
+    local dir=${1:?dir name required}
     [[ -d $dir ]] && return 0
     assertSafePath "$dir" || return 1
     debugCmd mkdir -vp "$dir"
 }
 
 lnS() {
-    local target=$1
-    local link=$2
+    local target=${1:?target required}
+    local link=${2:?link name required}
 
     if [[ -L $link ]]; then
         local existing

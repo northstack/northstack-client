@@ -11,15 +11,31 @@ _sudo() {
 }
 
 setup() {
+    HOME_TMP=$(mktemp -d "${BATS_TMPDIR}/home.XXXXXX")
+    export HOME=$HOME_TMP
+    CLEANUP+=("$HOME_TMP")
+
     MOCK_ROOT=$(mktemp -d "${BATS_TMPDIR}/mock.XXXXXX")
     export MOCK_ROOT
     mkdir -p "$MOCK_ROOT/bin" "$MOCK_ROOT/data"
     CLEANUP+=("$MOCK_ROOT")
+
+    _TMPDIR=$(mktemp -d "${BATS_TMPDIR}/tmpdir.XXXXXX")
+    export TMPDIR=$_TMPDIR
+    CLEANUP+=("$_TMPDIR")
+
+    APPDIR=$(mktemp -d "${BATS_TMPDIR}/apps.XXXXXX")
+    export INSTALL_APPDIR=$APPDIR
+    CLEANUP+=("$APPDIR")
+
+    PREFIX=$(mktemp -d "${BATS_TMPDIR}/prefix.XXXXXX")
+    export INSTALL_PREFIX=$PREFIX
+    CLEANUP+=("$PREFIX")
 }
 
 teardown() {
     for path in "${CLEANUP[@]}"; do
-        rm -rfv "$path"
+        _sudo rm -rfv "${path:?why is this path empty}"
     done
 }
 

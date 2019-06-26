@@ -1,11 +1,23 @@
 #!/usr/bin/env bats
 
-load helpers
-
 source "$BIN_DIR/lib-install.sh"
 
-@test "setUserOptions defaults to \$HOME/northstack/docker" {
-    export HOME=$(mktemp -d "$BATS_TMPDIR/home.XXXXXX")
-    run setUserOptions
-    assert stringContains "Using the default appDir" "$output"
+load helpers
+
+@test "setUserOptions defaults updates ~/northstack-settings.json" {
+    setUserOptions
+    assert dirExists "$INSTALL_APPDIR"
+    assert fileExists "$HOME/.northstack-settings.json"
+    run cat "$HOME/.northstack-settings.json"
+    assert stringContains "$INSTALL_APPDIR" "$output"
+}
+
+@test "setUserOptions won't clobber an existing file" {
+    setUserOptions
+    _INSTALL_APPDIR=$INSTALL_APPDIR
+    export INSTALL_APPDIR=$HOME/northstack/new-apps
+    setUserOptions
+    assert fileExists "$HOME/.northstack-settings.json"
+    run cat "$HOME/.northstack-settings.json"
+    assert not stringContains "new-apps" "$output"
 }

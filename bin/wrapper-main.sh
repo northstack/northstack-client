@@ -54,5 +54,6 @@ main() {
     fi
 
     set -- "$@" northstack "${args[@]}"
+    debug "Running docker:" "$(quoteCmd "$@")"
     exec "$@"
 }
