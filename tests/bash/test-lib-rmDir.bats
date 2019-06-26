@@ -18,11 +18,13 @@ source "$BIN_DIR/lib.sh"
 }
 
 @test "rmDir fails if it doesn't have perms" {
-    dir=$_sudo mktemp -d)
+    dir=$(mktemp -d)
+    mkdir -p "$dir/foo"
+    _sudo chown -R root "$dir"
     assert dirExists "$dir"
-    run rmDir "$dir" < /dev/null
+    run rmDir "$dir/foo" < /dev/null
     assert not equal 0 "$status"
-    assert dirExists "$dir"
+    run assert dirExists "$dir/foo"
 }
 
 @test "rmDir bails out on things we shouldn't touch" {

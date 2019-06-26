@@ -279,6 +279,13 @@ rmDir() {
 
     assertSafePath "$dir" || return 1
 
+    local parent
+    parent=$(parentDir "$dir")
+    if ! [[ -r $parent ]]; then
+        debug "rmDir: can't check things because the parent ($parent) is not readable"
+        return 1
+    fi
+
     if [[ ! -e $dir ]]; then
         debug "rmDir: $dir does not exist"
         return 0

@@ -93,7 +93,7 @@ pass() {
 
 fileExists() {
     local file=$1
-    if [[ -f $file ]]; then
+    if _sudo test -f "$file"; then
         echo "\`$file\` exists"
         return 0
     else
@@ -129,7 +129,7 @@ symlinked() {
 
 dirExists() {
     local file=$1
-    if [[ -d $file ]]; then
+    if _sudo test -d "$file"; then
         echo "\`$file\` exists"
         return 0
     else
