@@ -1,9 +1,18 @@
 # shellcheck shell=bash
 
-declare -g CLEANUP=()
+CLEANUP=()
+
+_sudo() {
+    sudo --non-interactive "$@" >&3 || {
+        echo "Calling sudo failed"
+        echo "Command: $@"
+        exit 1
+    }
+}
 
 setup() {
-    export MOCK_ROOT=$(mktemp -d -p ${BATS_TMPDIR})
+    MOCK_ROOT=$(mktemp -d "${BATS_TMPDIR}/mock.XXXXXX")
+    export MOCK_ROOT
     mkdir -p "$MOCK_ROOT/bin" "$MOCK_ROOT/data"
     CLEANUP+=("$MOCK_ROOT")
 }
@@ -16,15 +25,35 @@ teardown() {
 
 mock() {
     local cmd=$1
+    local return=${2:-0}
+    local output=${3:-}
+
     cat <<EOF > "$MOCK_ROOT/bin/$cmd"
 #!/bin/bash
 touch $MOCK_ROOT/data/${cmd}.called
 echo "\$(basename "\$0") \$@" > "$MOCK_ROOT/data/${cmd}.args"
+
+printf "$output"
+exit $return
 EOF
     chmod +x "$MOCK_ROOT/bin/$cmd"
     if [[ $PATH != *"$MOCK_ROOT/bin"* ]]; then
         export PATH=${MOCK_ROOT}/bin:$PATH
     fi
+}
+
+iHave() {
+    local cmd=$1
+    if [[ -e "$MOCK_ROOT/absent" ]] && grep -q "$cmd" "$MOCK_ROOT/absent"; then
+        return 1
+    fi
+    command -v "$cmd" > /dev/null
+}
+
+mockAbsent() {
+    local bin=$1
+    echo "$bin" >> "$MOCK_ROOT/absent"
+    export -f iHave
 }
 
 wasCalled() {
@@ -109,7 +138,7 @@ dirExists() {
     fi
 }
 
-function assertEqual() {
+assertEqual() {
     left=$1
     right=$2
     local trim=${3:-1}
@@ -125,11 +154,11 @@ function assertEqual() {
         return 1
     fi
 
-    echo "$left == $right"
+    printf "'%s' == '%s'\n" "$left"  "$right"
     return 0
 }
 
-function assertHttp() {
+assertHttp() {
     local uri=$1
     local status=${2:-200}
 
@@ -144,11 +173,19 @@ function assertHttp() {
     assertEqual "$status" "$ret" && pass "$req returned $status"
 }
 
-function sed_i() {
+sed_i() {
     if [[ $OSTYPE =~ darwin ]]; then
         sed -i '' "$@"
     else
         sed -i'' "$@"
+    fi
+}
+
+sed_r() {
+    if [[ $OSTYPE =~ darwin ]]; then
+        sed -E "$@"
+    else
+        sed -r "$@"
     fi
 }
 
@@ -182,7 +219,8 @@ xor() {
 
 mkRandomFile() {
     local base=${1:-$BATS_TMPDIR}
-    local file=$(mktemp -p "$base")
+    local file
+    file=$(mktemp "${base}/${RANDOM}.XXXXXX") || return 1
     echo -e "$(date)\n${RANDOM}\n${RANDOM}\n${RANDOM}" > "$file"
     echo -n "$file"
 }
@@ -190,15 +228,17 @@ mkRandomFile() {
 mkRandomTree() {
     local base=${1:-$BATS_TMPDIR}
     local depth=${2:-4}
-    local srcDir=$(mktemp -d -p "$base")
+    local srcDir
+    mkdir -p "$base"
+    srcDir=$(mktemp -d "$base/$RANDOM.XXXXXX") || return 1
     local subdir=$srcDir
     for _ in $(seq 0 "$depth"); do
         # shellcheck disable=SC2034
         for j in $(seq 0 "$depth"); do
-            mkRandomFile "$subdir" > /dev/null
+            mkRandomFile "$subdir" > /dev/null || return 1
         done
         subdir="${subdir}/${RANDOM} - ${RANDOM}"
-        mkdir -p "$subdir"
+        mkdir -p "$subdir" || return 1
     done
     echo -n "$srcDir"
 }
@@ -207,7 +247,7 @@ sameFileTree() {
     local left=$1
     local right=$2
 
-    run sudo diff -r "$left" "$right"
+    run _sudo diff -r "$left" "$right" >&3
     assert equal "$output" ""
     assert equal "$status" 0
 }

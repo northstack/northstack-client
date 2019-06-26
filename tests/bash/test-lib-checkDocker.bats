@@ -5,6 +5,7 @@ load helpers
 source "$BIN_DIR/lib.sh"
 
 @test "checkDocker requires the docker binary present" {
+    if [[ $OSTYPE =~ "darwin" ]]; then skip; fi
     ! command -v docker
     run checkDocker
     assert equal 1 $status

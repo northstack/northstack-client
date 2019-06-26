@@ -6,10 +6,10 @@ source "$BIN_DIR/lib.sh"
 
 @test "dockerSocket checks common docker socket paths" {
     skip
-    sudo socat -v unix-listen:/var/lib/docker.sock stdout &
+   _sudo socat -v unix-listen:/var/lib/docker.sock stdout &
     pid=$!
     assert equal /var/lib/docker.sock "$(dockerSocket)"
-    sudo kill "$pid"
+   _sudo kill "$pid"
 
     run dockerSocket
     assert equal 1 "$status"

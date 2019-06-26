@@ -39,8 +39,8 @@ teardown() {
 
 @test "Copy a single file into a directory we don't own" {
     newDir=$(mktemp -d)
-    sudo chown -R root:root "$newDir"
-    sudo chmod 755 "$newDir"
+    _sudo chown -R root "$newDir"
+    _sudo chmod 755 "$newDir"
     dest="${newDir}/${srcFilename}.copy"
     run copyFile "$srcFile" "$dest" < /dev/null
     echo "$output"
@@ -50,8 +50,8 @@ teardown() {
 
 @test "Copy a single file into a _new_ directory we don't own" {
     newDir=$(mktemp -d)
-    sudo chown -R root:root "$newDir"
-    sudo chmod 755 "$newDir"
+    _sudo chown -R root "$newDir"
+    _sudo chmod 755 "$newDir"
     dest="${newDir}/sub/dir spaces/${srcFilename}.copy"
     run copyFile "$srcFile" "$dest" < /dev/null
     assert not equal "$status" 0
