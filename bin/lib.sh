@@ -183,7 +183,7 @@ assertSafePath() {
     )
 
     local safeDirs=(
-        ${TMPDIR:-/tmp}
+        "${TMPDIR:-/tmp}"
     )
 
     if [[ -n ${INSTALL_PREFIX} ]]; then
