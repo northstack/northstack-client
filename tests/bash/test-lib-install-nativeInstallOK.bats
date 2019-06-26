@@ -13,9 +13,10 @@ load helpers
 }
 
 @test "nativeInstallOK requires a minimum version of php" {
+    mock docker 0 $MIN_DOCKER_VERSION
     mock php 0 $MIN_PHP_VERSION
-    run nativeInstallOK
-    assert equal 0 $status
+    nativeInstallOK
+    showErrors
 
     mock php 0 '7.1'
     nativeInstallOK || run showErrors
@@ -25,9 +26,10 @@ load helpers
 }
 
 @test "nativeInstallOK requires a minimum version of docker" {
+    mock php 0 $MIN_PHP_VERSION
     mock docker 0 "$MIN_DOCKER_VERSION"
-    run nativeInstallOK
-    assert equal 0 $status
+    nativeInstallOK
+    showErrors
 
     mock docker 0 16.5
     nativeInstallOK || run showErrors
