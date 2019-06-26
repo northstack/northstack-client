@@ -38,10 +38,11 @@ usage() {
     -m docker|native   Set the install method      (default = auto)
     -d                 Install in dev mode         (default = false)
     -n                 Don't prompt for any input  (default = no)
+    -v                 Be verbose                  (default = no)
 "
 }
 
-while getopts "dnha:p:m:" opt; do
+while getopts "vdnha:p:m:" opt; do
     case "$opt" in
         h)
             usage
@@ -61,6 +62,9 @@ while getopts "dnha:p:m:" opt; do
             ;;
         d)
             export INSTALL_DEV_MODE=1
+            ;;
+        v)
+            export DEBUG=1
             ;;
         ?)
             usage
