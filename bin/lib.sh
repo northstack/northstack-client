@@ -183,13 +183,8 @@ assertSafePath() {
     )
 
     local safeDirs=(
-        /tmp
+        ${TMPDIR:-/tmp}
     )
-
-    # if the user has a custom tmpdir defined let's add that the safe paths
-    if [[ -n ${TMPDIR:-} ]]; then
-        safeDirs+=("${TMPDIR%/}")
-    fi
 
     if [[ -n ${INSTALL_PREFIX} ]]; then
         safeDirs+=("$INSTALL_PREFIX"/northstack)
