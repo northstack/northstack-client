@@ -43,7 +43,8 @@ class Command extends \Symfony\Component\Console\Command\Command
                 continue;
             }
 
-            $question = new Question($settings->getDescription() . ': ');
+            $description = $settings->getDescription() ?: ucwords($settings->getName());
+            $question = new Question($description . ': ');
             // since this is required... You shall not pass! We will keep asking... forever...
             while (null === $userInput[$argName]) {
                 $userInput[$argName] = $qh->ask($input, $output, $question);

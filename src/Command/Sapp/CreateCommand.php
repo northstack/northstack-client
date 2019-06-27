@@ -65,7 +65,7 @@ class CreateCommand extends Command
             ->setDescription('NorthStack App Create')
             ->addArgument('name', InputArgument::REQUIRED, 'App name')
             ->addArgument('primaryDomain', InputArgument::REQUIRED, 'Primary Domain')
-            ->addArgument('stack', InputArgument::REQUIRED, 'Application stack type (one of: [wordpress, static, jekyll])')
+            ->addArgument('stack', InputArgument::REQUIRED, 'Application stack type (one of: [wordpress, static, jekyll, gatsby])')
             ->addOption('frameworkVersion', null, InputOption::VALUE_REQUIRED, 'Framework version (if not static app)')
             ->addOption('frameworkConfig', null, InputOption::VALUE_REQUIRED, 'Framework config object')
             ->addOption('cluster', null, InputOption::VALUE_REQUIRED, 'Deployment region', 'us-east-1')
@@ -74,7 +74,7 @@ class CreateCommand extends Command
             ->addOption('appSlug', null, InputOption::VALUE_REQUIRED, 'Name to use for the app\'s local directory and local reference')
         ;
 
-        foreach (array_merge(BaseType::getArgs(), StaticType::getArgs(), JekyllType::getArgs(), WordPressType::getArgs()) as $optKey => $optArgs) {
+        foreach (array_merge(BaseType::getArgs(), StaticType::getArgs(), JekyllType::getArgs(), WordPressType::getArgs(), GatsbyType::getArgs()) as $optKey => $optArgs) {
             if ('frameworkVersion' === $optKey) {
                 continue;
             }

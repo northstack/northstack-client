@@ -9,7 +9,6 @@ use NorthStack\NorthStackClient\Command\Sapp\SappEnvironmentTrait;
 use NorthStack\NorthStackClient\Command\UserSettingsCommandTrait;
 use NorthStack\NorthStackClient\Docker;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -49,15 +48,13 @@ abstract class AbstractLocalDevCmd extends Command
         parent::configure();
         $this
             ->setDescription($this->commandDescription)
-            ->addArgument('name', InputArgument::REQUIRED)
-            ->addOption('env', 'e', InputOption::VALUE_REQUIRED, 'Environment (prod, test, dev, or local)', self::$defaultEnv)
+            ->addArgument('name', InputArgument::REQUIRED, 'Local app dir name')
         ;
     }
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $env = $input->getOption('env');
-        $this->appData = $this->getSapp($input->getArgument('name'), $env);
+        $this->appData = $this->getSapp($input->getArgument('name'), 'local');
 
         $this->localAppRoot = $this->findDefaultAppsDir($input, $output, $this->getHelper('question'))
             .'/'.$input->getArgument('name');
