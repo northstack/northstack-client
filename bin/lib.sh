@@ -16,10 +16,10 @@ log() {
 
     local red=$'\e[1;91m'
     local green=$'\e[1;32m'
-    local yellow=$'\e[1;33m'
+    #local yellow=$'\e[1;33m'
     local blue=$'\e[1;34m'
     local magenta=$'\e[1;35m'
-    local cyan=$'\e[1;36m'
+    #local cyan=$'\e[1;36m'
     local white=$'\e[1;37m'
     local end=$'\e[0m'
 
