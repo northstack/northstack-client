@@ -157,7 +157,7 @@ copyTree() {
     src=${src%/}/.
     dest=${dest%/}
 
-    debugCmd cp -v --force -a "$src" "$dest"
+    debugCmd cp -v -f -a "$src" "$dest"
     #rsync -HavzuP --delete "$src" "$dest"
 }
 
