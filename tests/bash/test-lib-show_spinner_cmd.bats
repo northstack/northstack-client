@@ -29,3 +29,11 @@ load helpers
     run show_spinner_cmd cat
     assert equal 0 $status
 }
+
+@test "show_spinner_cmd doesn't hide the output of a command" {
+    t=$(mktemp)
+    echo $RANDOM > "$t"
+    run show_spinner_cmd cat "$t"
+    assert stringContains "$(< "$t")" "$output"
+    assert equal 0 $status
+}
