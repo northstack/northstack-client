@@ -84,7 +84,6 @@ getInstallPrefix() {
 
 shellIsInteractive() {
     [[ -t 0 ]] && [[ -z ${NON_INTERACTIVE:-} ]]
-    #[[ -t 0 || -p /dev/stdin ]]
 }
 
 ask() {
@@ -158,7 +157,6 @@ copyTree() {
     dest=${dest%/}
 
     debugCmd cp -v -f -a "$src" "$dest"
-    #rsync -HavzuP --delete "$src" "$dest"
 }
 
 parentDir() {
