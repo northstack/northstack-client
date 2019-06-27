@@ -32,7 +32,7 @@
         "docker-php/docker-php": "^2.0",
         "alchemy/zippy": "dev-master",
         "equip/data": "^2.4",
-        "symfony/console": "^4.3"
+        "symfony/console": "^3.1"
     },
     "require-dev": {
         "phpstan/phpstan": "^0.10.5",
