@@ -48,7 +48,7 @@ log() {
             ;;
     esac
 
-    local ts=$(date '+%Y-%m-%d %H:%M:%S')
+    local ts; ts=$(date '+%Y-%m-%d %H:%M:%S')
     local template="[$ts] [$level] %s\n"
     if [[ -t 2 ]]; then
         template="[${white}${ts}${end}] [${level_color}${level}${end}] %s\n"
@@ -78,7 +78,7 @@ debug() {
 }
 
 getInstallPrefix() {
-    local binDir="$(getCwd)"
+    local binDir; binDir="$(getCwd)"
     printf "$(dirname "$binDir")"
 }
 
@@ -125,7 +125,7 @@ copyFile() {
         return 1
     fi
 
-    local parent=$(dirname "$dest")
+    local parent; parent=$(dirname "$dest")
     mkdirP "$parent" || return 1
 
     debugCmd cp -va "$src" "$dest"
@@ -146,7 +146,7 @@ copyTree() {
         log warn "Destination directory ($dest) already exists--removing"
         rmDir "$dest"
     elif [[ -e $dest ]]; then
-        local filetype=$(stat -c '%F' "$dest")
+        local filetype; filetype=$(stat -c '%F' "$dest")
         log error "Destination exists but is not a directory: $filetype"
         return 1
     fi
@@ -238,7 +238,7 @@ lnS() {
         rmFile "$link"
     fi
 
-    local parent=$(dirname "$link")
+    local parent; parent=$(dirname "$link")
 
     mkdirP "$parent"
 
@@ -283,15 +283,14 @@ rmDir() {
 }
 
 quoteCmd() {
-    local cmd=$(printf '%q ' "$@")
+    local cmd; cmd=$(printf '%q ' "$@")
     printf "${cmd% }"
 }
 
 debugCmd() {
-    local cmd=$(quoteCmd "$@")
-    debug "Running:" "$cmd"
+    debug "Running:" "$(quoteCmd "$@")"
 
-    local tmp=$(mktemp -d)
+    local tmp; tmp=$(mktemp -d)
 
     local flags="$-"
     set +e
@@ -347,7 +346,7 @@ dockerSocket() {
 }
 
 checkPaths() {
-    local prefix=$(getInstallPrefix)
+    local prefix; prefix=$(getInstallPrefix)
     local failed=0
 
     if [[ $DEV_MODE == 1 ]] && [[ ! -d $DEV_SOURCE ]]; then

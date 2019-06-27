@@ -80,11 +80,10 @@ getVersion() {
             ;;
     esac
 
-    local version
-    version=$("${cmd[@]}" 2>&1)
+    local version; version=$("${cmd[@]}" 2>&1)
     local status=$?
 
-    local strCmd=$(quoteCmd "${cmd[@]}")
+    local strCmd; strCmd=$(quoteCmd "${cmd[@]}")
     if [[ $status -ne 0 ]]; then
         log error "Failed to check the installed version of $name" \
             "Command \`$strCmd\` returned $status" \
@@ -282,11 +281,10 @@ updateBashProfile() {
         return 1
     fi
 
-    local checksumPre=$(md5sum "$bashFile" | awk '{print $1}')
-    local new=$(mktemp)
+    local checksumPre; checksumPre=$(md5sum "$bashFile" | awk '{print $1}')
+    local new; new=$(mktemp)
 
     local startLine
-
     startLine=$(sed -n -e '/^# NorthStack START$/=' < "$bashFile")
 
     if [[ -n $startLine ]]; then
@@ -302,14 +300,14 @@ updateBashProfile() {
     endLine=$(sed -n -e '/^# NorthStack END$/=' < "$bashFile")
 
     if [[ -n $endLine ]]; then
-        local total=$(wc -l "$bashFile" | awk '{print $1}')
-        local lastN=$((total - endLine + 1))
+        local total; total=$(wc -l "$bashFile" | awk '{print $1}')
+        local lastN; lastN=$((total - endLine + 1))
         tail -n "$lastN" "$bashFile" >> "$new"
     else
         echo '# NorthStack END' >> "$new"
     fi
 
-    local checksumPost=$(md5sum "$bashFile" | awk '{print $1}')
+    local checksumPost; checksumPost=$(md5sum "$bashFile" | awk '{print $1}')
 
     if [[ $checksumPre != "$checksumPost" ]]; then
         log error "RC file ($bashFile) changed while we were updating it"
@@ -346,7 +344,7 @@ checkPathPermissions() {
     for item in "${toCheck[@]}"; do
         local name=${item%%:*}
         local path=${item#*:}
-        local parent=$(parentDir "$path")
+        local parent; parent=$(parentDir "$path")
         if [[ -e $path && ! -w $path ]]; then
             setError "${name}_path" "$name path ($path) exists but is not writable."
             setError "${name}_path" "$(readableStat "$path")"
@@ -366,7 +364,7 @@ doNativeInstall() {
 
     shopt -s dotglob nullglob
     for p in "$context"/*; do
-        local name=$(basename "$p")
+        local name; name=$(basename "$p")
         if [[ "$p" =~ (\.(git|buildkite|github|tmp)$) ]]; then
             continue
         fi
@@ -416,7 +414,7 @@ doDockerInstall() {
     [[ $isDev == 1 ]] && installComposerDeps "$context"
     buildDockerImage "$context"
 
-    local wrapperFile=$(mktemp)
+    local wrapperFile; wrapperFile=$(mktemp)
 
     # shellcheck disable=SC2064
     #trap "rm -f '$wrapperFile'" EXIT

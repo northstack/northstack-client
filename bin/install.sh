@@ -58,7 +58,8 @@ while getopts "vdnha:p:m:" opt; do
             export NON_INTERACTIVE=1
             ;;
         m)
-            export INSTALL_METHOD=$(strToLower "$OPTARG")
+            method=$(strToLower "$OPTARG")
+            export INSTALL_METHOD=$method
             ;;
         d)
             export INSTALL_DEV_MODE=1
