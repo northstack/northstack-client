@@ -470,30 +470,35 @@ colorText() {
 
 show_spinner_cmd() {
     if shellIsInteractive; then
-        "$@" &
-        show_spinner_pid
+        # we don't want anything to try to read from stdin in this context
+        "$@" < /dev/null &
+        local pid=$!
+        show_spinner_pid "$pid"
     else
         "$@"
     fi
 }
 
 show_spinner_pid() {
-    local -r pid="$!"
+    local -r pid=$1
     local -r delay='0.25'
     local spinstr='\|/-'
     if ! command -v tput > /dev/null || ! shellIsInteractive; then
-        wait
-        return
+        wait "$pid"
+        return $?
     fi
     local temp
     tput civis
-    while ps a | awk '{print $1}' | grep -q "${pid}"; do
+    while [[ -e /proc/$pid ]]; do
         temp="${spinstr#?}"
         printf "[%c]  " "${spinstr}"
         spinstr=${temp}${spinstr%"${temp}"}
         sleep "${delay}"
         printf "\b\b\b\b\b\b"
     done
+    wait "$pid"
+    local status=$?
     tput cnorm
     printf "    \b\b\b\b"
+    return $status
 }
