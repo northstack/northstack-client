@@ -4,7 +4,7 @@ set -eu
 
 CDIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-stamp=$(stat -c %Y "$CDIR"/docker/Dockerfile)
+stamp=$(stat -c %Y "$CDIR"/docker)
 bats_version=$(awk -F= '/^ARG BATS_VERSION/ {print $2}' "$CDIR"/docker/Dockerfile)
 
 repo=northstack/bats
