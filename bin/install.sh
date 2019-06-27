@@ -1,11 +1,11 @@
 #!/usr/bin/env bash
 set -eu
 
-CDIR="$( cd "$( dirname "${BASH_SOURCE[0]}")"  && pwd)"
-BASE="$( dirname "$CDIR")"
+BIN_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}")"  && pwd)"
+BASE="$( dirname "$BIN_DIR")"
 
-. "$CDIR"/lib.sh
-. "$CDIR"/lib-install.sh
+. "$BIN_DIR"/lib.sh
+. "$BIN_DIR"/lib-install.sh
 
 showBanner() {
     local NS_RED='\033[0;31m'
