@@ -7,6 +7,8 @@ export PATH="$PATH:/usr/local/bin/gatsby"
 git config --global user.email "localdev@northstack.test"
 git config --global user.name "NorthStack"
 
+echo "Starting Gatsby local dev environment..."
+
 # Initialize Gatsby or run NPM install if needed
 if [ ! -f "$DIR/package.json" ]
 then

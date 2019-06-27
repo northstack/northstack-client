@@ -95,10 +95,6 @@ trait SappEnvironmentTrait
                 $configs[$configType] = Merger::merge($json, file_get_contents($envFile));
             }
 
-            if ($decode) {
-                $configs[$configType] = json_decode($configs[$configType]);
-            }
-
             switch ($configType) {
                 case 'config':
                     $configs['configObject'] = new AppConfig(json_decode($configs[$configType], true));
@@ -107,7 +103,12 @@ trait SappEnvironmentTrait
                     $configs['buildObject'] = new BuildConfig(json_decode($configs[$configType], true));
                     break;
             }
+
+            if ($decode) {
+                $configs[$configType] = json_decode($configs[$configType]);
+            }
         }
+
         return $configs;
     }
 }
