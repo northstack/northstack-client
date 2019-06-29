@@ -1,5 +1,13 @@
 FROM node:12-alpine
 
+ARG APP_APP
+ARG FRAMEWORK_VERSION
+
+#ENV APP_APP $APP_APP
+#ENV FRAMEWORK_VERSION $FRAMEWORK_VERSION
+
+WORKDIR $APP_APP
+
 EXPOSE 8000
 
 RUN apk update && \
@@ -7,9 +15,7 @@ RUN apk update && \
     apk add python && \
     rm -rf /var/cache/apk/*
 
-RUN npm install --global gatsby --no-optional gatsby@${FRAMEWORK_VERSION}
-
-WORKDIR ${APP_APP}
+RUN npm install --global gatsby --no-optional gatsby@$FRAMEWORK_VERSION
 
 ENTRYPOINT ["/bin/sh", "-c"]
 

@@ -22,6 +22,7 @@ class ComposeContainer extends ContainerHelper
      * @var string
      */
     protected $name;
+    protected $nsLib;
 
     public function __construct(string $stack, string $name, DockerClient $docker, $outputHandler = null)
     {
@@ -32,17 +33,17 @@ class ComposeContainer extends ContainerHelper
 
     protected function getWorkingDir()
     {
-        return getenv('HOME').'/.local/northstack/docker';
+        return $this->getNsLib() . '/docker';
     }
 
     protected function getMounts()
     {
-        $HOME = getenv('HOME');
+        $nsLib = $this->getNsLib();
 
         return [
             [
-                'src' => "${HOME}/.local/northstack",
-                'dest' => "${HOME}/.local/northstack",
+                'src' => $nsLib,
+                'dest' => $nsLib,
             ],
             [
                 'src' => $this->getRoot(),
@@ -95,28 +96,44 @@ class ComposeContainer extends ContainerHelper
 
     protected function getEnv()
     {
-        $HOME = getenv('HOME');
+        $stack = strtolower($this->stack);
+        // check NS_LIB env variable
+        $nsLib = $this->getNsLib();
 
         /** @noinspection DegradedSwitchInspection */
-        switch ($this->stack) {
+        switch ($stack) {
             case 'static':
-                $composeFiles = "docker-compose.yml";
+                $composeFiles = "{$nsLib}/docker/docker-compose.yml";
                 break;
             case 'wordpress':
-                $composeFiles = "docker-compose.yml:docker-compose-{$this->stack}.yml";
+                $composeFiles = "{$nsLib}/docker/docker-compose.yml:{$nsLib}/docker/docker-compose-{$stack}.yml";
                 break;
             default:
-                $composeFiles = "docker-compose-{$this->stack}.yml";
+                $composeFiles = "{$nsLib}/docker/docker-compose-{$stack}.yml";
                 break;
         }
 
         return array_merge(
             [
-                "COMPOSE_ROOT_HOST=${HOME}/.local/northstack/docker",
-                "COMPOSE_ROOT=${HOME}/.local/northstack/docker",
+                "COMPOSE_ROOT_HOST=${nsLib}/docker",
+                "COMPOSE_ROOT=${nsLib}/docker",
                 "COMPOSE_FILE=${composeFiles}",
             ],
             $this->env
         );
+    }
+
+    protected function getNsLib()
+    {
+        if (!$this->nsLib) {
+            // check NS_LIB env variable, if not set, this is based on the actual parent of the file currently being run
+            $this->nsLib = getenv('NS_LIB');
+            if (!$this->nsLib) {
+                $this->nsLib = dirname(__FILE__, 4);
+            }
+        }
+
+
+        return $this->nsLib;
     }
 }
