@@ -19,11 +19,6 @@ class StartAction extends BaseAction
     protected function prepare()
     {
         $cmd = ['up'];
-        switch ($this->appData['config']->app_type) {
-            case 'GATSBY':
-                $cmd[] = 'docker-compose-gatsby.yml';
-                break;
-        }
 
         if ($this->background) {
             $cmd[] = '-d';

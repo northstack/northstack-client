@@ -23,7 +23,7 @@ main() {
     socket=$(dockerSocket)
 
     prefix="$(getInstallPrefix)"
-    ns_lib="${prefix}/lib/northstack"
+    ns_lib="${prefix}/northstack"
 
     local DEBUG=${DEBUG:-0}
 

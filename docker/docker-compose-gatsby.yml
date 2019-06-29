@@ -3,9 +3,12 @@ version: '3.4'
 
 services:
   web:
-    image: northstack-gatsby
+    container_name: ns-gatsby-${APP_ID}
     build:
       context: ./images/gatsby
+      args:
+        APP_APP: "${APP_APP}"
+        FRAMEWORK_VERSION: "${FRAMEWORK_VERSION}"
     ports:
       - 4000:4000
       - 8000:8000
@@ -19,3 +22,5 @@ services:
       - PRIMARY_DOMAIN
       - STACK
       - EXPOSE_HTTP_PORT
+      - APP_APP
+      - FRAMEWORK_VERSION
