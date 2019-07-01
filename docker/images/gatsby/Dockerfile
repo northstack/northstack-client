@@ -15,6 +15,7 @@ EXPOSE 8000
 #    rm -rf /var/cache/apk/*
 
 RUN apk add --no-cache python make g++ \
+ && apk add git && \
  && apk add vips-dev fftw-dev build-base \
         --update-cache \
         --repository https://alpine.global.ssl.fastly.net/alpine/edge/community \
