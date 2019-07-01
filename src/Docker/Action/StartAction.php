@@ -18,7 +18,8 @@ class StartAction extends BaseAction
 
     protected function prepare()
     {
-        $cmd = ['up'];
+        // set the force-recreate flag to make sure the builds are fresh every time
+        $cmd = ['up', '--force-recreate'];
 
         if ($this->background) {
             $cmd[] = '-d';

@@ -14,6 +14,7 @@ services:
       - 8000:8000
     volumes:
       - "${APP_APP}:/app"
+      - ./images/gatsby/gatsby-init:/gatsby-init
     labels:
       com.northstack: 1
       com.northstack.localdev: 1

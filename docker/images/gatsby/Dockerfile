@@ -19,6 +19,4 @@ RUN npm install --global gatsby --no-optional gatsby@$FRAMEWORK_VERSION
 
 ENTRYPOINT ["/bin/sh", "-c"]
 
-COPY "gatsby-init" "/gatsby-init"
-
 CMD ["/gatsby-init"]
