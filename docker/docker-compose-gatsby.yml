@@ -10,10 +10,9 @@ services:
         APP_APP: "${APP_APP}"
         FRAMEWORK_VERSION: "${FRAMEWORK_VERSION}"
     ports:
-      - 4000:4000
       - 8000:8000
     volumes:
-      - "${APP_APP}:/app"
+      - "${APP_APP}:${APP_APP}"
       - ./images/gatsby/gatsby-init:/gatsby-init
     labels:
       com.northstack: 1
@@ -24,4 +23,6 @@ services:
       - STACK
       - EXPOSE_HTTP_PORT
       - APP_APP
-      - FRAMEWORK_VERSION
+      - APP_ROOT
+      - NODE_ENV=development
+      - GATSBY_WEBPACK_PUBLICPATH=/
