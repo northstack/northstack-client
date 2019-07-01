@@ -42,7 +42,7 @@ trait SappEnvironmentTrait
                 }
             },
             [
-                '/app/public',
+                '/app',
                 '/config/shared-build.json',
                 '/config/shared-config.json',
                 '/config/environment.json',
