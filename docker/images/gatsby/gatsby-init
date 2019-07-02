@@ -8,34 +8,53 @@ echo "Starting Gatsby local dev environment..."
 
 echo "Webpack public path is $GATSBY_WEBPACK_PUBLICPATH"
 
-# Initialize Gatsby or run NPM install if needed
-if [ ! -f "$DIR/package.json" ]
+# See if BUILD_APP_ENV === 'local', if it's dev, test, or prod it should just get built since the server is using it
+if [ $BUILD_APP_ENV == 'local' ];
 then
-  echo "Initializing Gatsby..."
-  # create a new dir at the root level to avoid git throwing a destination path error
-  git clone https://github.com/gatsbyjs/gatsby-starter-hello-world.git /gatsby -q
 
-  # remove the existing .git history, leave the .gitignore though since that's handy
-  rm -rf /gatsby/.git
-
-  echo "Copying Gatsby assets to app folder..."
-  # copy all of the contents above into /app and run npm install
-  cp -rf /gatsby/. $DIR
-  echo "Running yarn install"
-  yarn install
-  echo "Removing helper dir"
-  rm -rf /gatsby
-
-else
-  if [ ! -e "$DIR/node_modules/" ]
+  # Initialize Gatsby or run NPM install if needed
+  if [ ! -f "$DIR/package.json" ]
   then
-    echo "Running yarn install..."
+    echo "Initializing Gatsby..."
+    # create a new dir at the root level to avoid git throwing a destination path error
+    git clone https://github.com/gatsbyjs/gatsby-starter-hello-world.git /gatsby -q
+
+    # remove the existing .git history, leave the .gitignore though since that's handy
+    rm -rf /gatsby/.git
+
+    echo "Copying Gatsby assets to app folder..."
+    # copy all of the contents above into /app and run npm install
+    cp -rf /gatsby/. $DIR
+    echo "Running yarn install"
     yarn install
+    echo "Removing helper dir"
+    rm -rf /gatsby
+
+  else
+    if [ ! -e "$DIR/node_modules/" ]
+    then
+      echo "Running yarn install..."
+      yarn install
+    fi
   fi
-fi
 
 echo "Serving local development site..."
 
 rm -rf $DIR/public
 echo $PWD
 gatsby develop --host 0.0.0.0
+
+else
+# we're doing a build on a server if we're here
+  if [ ! -f "$DIR/package.json" ]
+  then
+    echo "Error: no package.json found. Unable to build Gatsby"
+    exit
+  fi
+
+  # run yarn install as part of the build process
+  yarn install
+
+  # TODO: allow user-specified debugging atts so we can add flags like `--no-uglify`
+  gatsby build
+fi

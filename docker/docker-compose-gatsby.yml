@@ -24,5 +24,6 @@ services:
       - EXPOSE_HTTP_PORT
       - APP_APP
       - APP_ROOT
+      - BUILD_APP_ENV
       - NODE_ENV=development
       - GATSBY_WEBPACK_PUBLICPATH=/
