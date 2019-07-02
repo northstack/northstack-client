@@ -112,6 +112,7 @@ abstract class AbstractLocalDevCmd extends Command
             'APP_APP' => "$this->localAppRoot/app",
             'APP_PUBLIC' => "$this->localAppRoot/${public}",
             'PRIMARY_DOMAIN' => 'localhost',
+            'BUILD_APP_ENV' => 'local',
             'COMPOSE_PROJECT_NAME' => $appName,
 
             'NORTHSTACK_USER' => $user,
@@ -125,7 +126,6 @@ abstract class AbstractLocalDevCmd extends Command
         if ($stack === 'WORDPRESS') {
             $install = $build->framework_config;
             $wp = [
-
                 'WORDPRESS_TITLE' => $install->title,
                 'WORDPRESS_URL' => $install->url,
                 'WORDPRESS_ADMIN_USER' => $install->admin_user,
