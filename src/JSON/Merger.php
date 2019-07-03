@@ -21,7 +21,7 @@ class Merger
             $merge = Json5Decoder::decode($mergeJson);
             if (is_object($merge)) {
                 foreach (get_object_vars($merge) as $key => $value) {
-                    if (isset($new->{$key}) && is_array($new->{$key})) {
+                    if (isset($new->{$key}) && is_array($new->{$key}) && !empty($value)) {
                         array_push($new->{$key}, ...$value);
                     } else {
                         $new->{$key} = $value;

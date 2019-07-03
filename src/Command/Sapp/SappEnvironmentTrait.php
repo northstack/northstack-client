@@ -74,25 +74,17 @@ trait SappEnvironmentTrait
         if (file_exists("{$appFolder}/config/shared-gateway.json")) {
             $configs['gateway'] = file_get_contents("{$appFolder}/config/shared-gateway.json");
         } else {
-            $configs['gateway'] = '{}';
+            $configs['gateway'] = '';
         }
 
         foreach ($configs as $configType => $json) {
             $envFile = "{$appFolder}/config/{$environment}/{$configType}.json";
             if (file_exists($envFile)) {
-                // fix domains if they are in the old format
-                if ($configType === 'domains') {
-                    $domains = json_decode(file_get_contents($envFile));
-                    if (!is_array($domains)) {
-                        if (is_object($domains) && $domains->domains) {
-                            $json = json_encode($domains->domains);
-                            file_put_contents($envFile, $json);
-                        } else {
-                            throw new \RuntimeException('Invalid structure in: ' . $envFile);
-                        }
-                    }
+                $fileContents = file_get_contents($envFile);
+                // check to see if the file is empty -- no need to merge if it is
+                if (!empty(json_decode($fileContents))) {
+                    $configs[$configType] = Merger::merge($json, $fileContents);
                 }
-                $configs[$configType] = Merger::merge($json, file_get_contents($envFile));
             }
 
             switch ($configType) {
