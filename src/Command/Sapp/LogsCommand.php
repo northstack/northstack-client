@@ -35,7 +35,7 @@ class LogsCommand extends Command
      */
     private $merger;
 
-    const LOG_TOPICS = ['access', 'error', 'build'];
+    const LOG_TOPICS = ['access', 'error', 'build', 'event'];
 
     public function __construct(
         LogsClient $api
@@ -52,7 +52,7 @@ class LogsCommand extends Command
             ->setDescription('NorthStack App Logs')
             ->addArgument('name', InputArgument::REQUIRED, 'App name')
             ->addArgument('environment', InputArgument::REQUIRED, 'Environment (prod, test, or dev)')
-            ->addArgument('topic', InputArgument::REQUIRED, 'Log type (access, error, build)')
+            ->addArgument('topic', InputArgument::REQUIRED, 'Log type (access, error, build, event)')
             ->addOption('topicOverride', 't', InputOption::VALUE_REQUIRED, 'Override Topic (You should know what you are doing if you are using this)')
             ->addOption('json', null, InputOption::VALUE_NONE, 'Output raw json', null);
         $this->addOauthOptions();
@@ -74,9 +74,14 @@ class LogsCommand extends Command
                 $output->writeln('<error>Log topic must be one of the following: ' . implode(',', self::LOG_TOPICS) . '</error>');
                 return;
             }
-            $topic = "{$sappId}_{$args['topic']}";
+            $topic = [
+                'sappId' => $sappId,
+                'topic' => $args['topic'],
+            ];
         } else {
-            $topic = $options['topicOverride'];
+            $topic = [
+                'topic' => $args['topicOverride'],
+            ];
         }
 
         $formatHint = $options['json'] ? 'json' : $args['topic'];

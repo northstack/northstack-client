@@ -17,7 +17,7 @@ class LogsClient extends BaseApiClient
     protected $topic;
     protected $accessToken;
 
-    public function streamTopic(string $accessToken, callable $sender, string $topic, OutputInterface $output = null)
+    public function streamTopic(string $accessToken, callable $sender, array $topic, OutputInterface $output = null)
     {
         $this->sender = $sender;
         $this->topic = $topic;
