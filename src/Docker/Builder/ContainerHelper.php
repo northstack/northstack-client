@@ -74,12 +74,14 @@ class ContainerHelper
 
     public function setVolumesFrom(array $volumesFrom)
     {
+        $this->log('Setting volumes from ' . var_export($volumesFrom, true));
         $this->volumesFrom = $volumesFrom;
         return $this;
     }
 
     public function setRoot($appRoot)
     {
+        $this->log("Setting app root to `$appRoot`");
         $this->appRoot = $appRoot;
         return $this;
     }
@@ -297,6 +299,7 @@ class ContainerHelper
 
     public function createContainer()
     {
+        $this->log('Creating container...');
         if (!$this->needsNewContainer()) {
             return;
         }

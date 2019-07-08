@@ -69,17 +69,14 @@ class DockerClient
             );
             return true;
 
-        } catch (ContainerCreateConflictException $e)
-        {
-            if ($destroyIfExists)
-            {
+        } catch (ContainerCreateConflictException $e) {
+            if ($destroyIfExists) {
                 $this->deleteContainer($name, $stopIfExists);
                 return $this->createContainer($name, $conf);
             }
 
             throw new ContainerExistsException($name);
-        } catch (ContainerCreateNotFoundException $e)
-        {
+        } catch (ContainerCreateNotFoundException $e) {
             $this->pullImage($conf->getImage());
             return $this->createContainer(
               $name,

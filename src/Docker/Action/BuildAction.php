@@ -51,7 +51,6 @@ class BuildAction extends BaseAction
                 $this->container
                     ->setRoot($this->localAppFolder)
                     ->setEntryPoint(['gatsby.sh'])
-                    ->setEnv(['GATSBY_VERSION' => $buildConfig->framework_version])
                     ->createContainer();
 
                 $this->containerStreamHandler = $this->container->attachOutput($this->output, $this->attachInput, $this->handleSignals);
