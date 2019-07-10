@@ -119,7 +119,7 @@ abstract class AbstractLocalDevCmd extends Command
             'NORTHSTACK_UID' => getenv('NORTHSTACK_UID') ?: $uid,
             'NORTHSTACK_GROUP' => $group,
             'NORTHSTACK_GID' => getenv('NORTHSTACK_GID') ?: $gid,
-            'FRAMEWORK_VERSION' => $build->framework_version,
+            'FRAMEWORK_VERSION' => !empty($build->framework_version) ? $build->framework_version : null,
         ];
 
         // TODO: move this logic somewhere else
