@@ -38,7 +38,7 @@ trait SappEnvironmentTrait
             function ($path) use ($dir) {
                 $path = $dir . $path;
                 if (!file_exists($path)) {
-                    throw new \Exception("Command must be executed inside an app directory (missing: {$path})");
+                    throw new \Exception("No app directory found (missing: {$path})");
                 }
             },
             [
