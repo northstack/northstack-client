@@ -15,7 +15,7 @@ class BasicInput extends AbstractUserInput implements UserInputInterface
             null,
             InputOption::VALUE_REQUIRED,
             $this->getDescription(),
-            $this->getDefault(),
+            $this->getDefault()
         );
     }
 
