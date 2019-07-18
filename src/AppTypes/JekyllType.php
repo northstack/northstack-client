@@ -2,12 +2,14 @@
 
 namespace NorthStack\NorthStackClient\AppTypes;
 
+use NorthStack\NorthStackClient\UserInput\BasicInput;
+
 class JekyllType extends BaseType
 {
-    protected static $args = [
-        'frameworkVersion' => [
-            'prompt' => 'Jekyll version: ',
-            'default' => '3'
-        ]
-    ];
+    public static function getArgs()
+    {
+        return [
+            new BasicInput('frameworkVersion', 'Jekyll version', '3')
+        ];
+    }
 }
