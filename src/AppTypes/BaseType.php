@@ -64,15 +64,6 @@ abstract class BaseType
                 continue;
             }
 
-            /*
-            if (isset($arg['depends'])) {
-                $depends = $arg['depends'];
-                if (!$this->config[$depends]) {
-                    continue;
-                }
-            }
-            */
-
             $arg->setDefault(
                 $this->defaultValue(
                     $arg->getDefault()
