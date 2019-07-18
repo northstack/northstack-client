@@ -16,6 +16,7 @@ use NorthStack\NorthStackClient\OrgAccountHelper;
 
 use NorthStack\NorthStackClient\AppTypes\StaticType;
 use NorthStack\NorthStackClient\AppTypes\WordPressType;
+use NorthStack\NorthStackClient\AppTypes\TypeCollection;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputOption;
@@ -74,18 +75,8 @@ class CreateCommand extends Command
             ->addOption('appSlug', null, InputOption::VALUE_REQUIRED, 'Name to use for the app\'s local directory and local reference')
         ;
 
-        foreach (array_merge(BaseType::getArgs(), StaticType::getArgs(), JekyllType::getArgs(), WordPressType::getArgs(), GatsbyType::getArgs()) as $optKey => $optArgs) {
-            if ('frameworkVersion' === $optKey) {
-                continue;
-            }
-
-            $this->addOption(
-                $optKey,
-                null,
-                InputOption::VALUE_OPTIONAL,
-                $optArgs['prompt'],
-                null
-            );
+        foreach (TypeCollection::getTypes() as $appType) {
+            $this->getDefinition()->addOptions($appType::getInputOptions());
         }
 
         $this->addOauthOptions();
