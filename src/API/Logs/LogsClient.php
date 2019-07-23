@@ -17,6 +17,7 @@ class LogsClient extends BaseApiClient
     protected $topic;
     protected $accessToken;
     protected $timeout;
+    protected $startDelta;
 
     /**
      * @deprecated see streamLog
@@ -66,12 +67,13 @@ class LogsClient extends BaseApiClient
     /**
      * @var $timeout in seconds, 0 means no timeout
      */
-    public function streamLog(string $accessToken, callable $sender, array $topic, int $timeout = 0, OutputInterface $output = null)
+    public function streamLog(string $accessToken, callable $sender, array $topic, string $startDelta = null, int $timeout = 0, OutputInterface $output = null)
     {
         $this->topic = $topic;
         $this->sender = $sender;
         $this->accessToken = $accessToken;
         $this->timeout = $timeout;
+        $this->startDelta = $startDelta;
         $output = function($msg) use($output) {
             if ($output !== null) {
                 $output->writeln($msg);
@@ -108,6 +110,7 @@ class LogsClient extends BaseApiClient
                 $conn->send(json_encode([
                     'accessToken' => $this->accessToken,
                     'action' => 'subscribe',
+                    'startDelta' => $this->startDelta,
                     'topic' => $this->topic,
                 ]));
             }, function(\Exception $e) use ($loop) {
