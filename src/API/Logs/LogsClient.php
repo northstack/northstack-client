@@ -87,21 +87,21 @@ class LogsClient extends BaseApiClient
         $connector = new \Ratchet\Client\Connector($loop, $reactConnector);
 
         $connector($uri)
-            ->then(function(Ratchet\Client\WebSocket $conn) use ($loop, $output) {
+            ->then(function(\Ratchet\Client\WebSocket $conn) use ($loop, $output) {
 
                 if ($this->timeout > 0) {
-                    $loop->addTimer($this->timeout, function() use($conn) {
+                    $loop->addTimer($this->timeout, function() use($conn, $output) {
                         $output("Reached timeout");
                         $conn->close();
                     });
                 }
 
-                $conn->on('message', function(\Ratchet\RFC6455\Messaging\MessageInterface $msg) use ($conn) {
+                $conn->on('message', function(\Ratchet\RFC6455\Messaging\MessageInterface $msg) {
                     $sender = $this->sender;
                     $sender($msg);
                 });
 
-                $conn->on('close', function($code = null, $reason = null) {
+                $conn->on('close', function($code = null, $reason = null) use ($output) {
                     $output("Connection closed ({$code} - {$reason})");
                 });
 
