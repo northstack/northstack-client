@@ -90,7 +90,7 @@ class LogsClient extends BaseApiClient
             ->then(function(Ratchet\Client\WebSocket $conn) use ($loop, $output) {
 
                 if ($this->timeout > 0) {
-                    $loop->addTimer(2, function() use($conn) {
+                    $loop->addTimer($this->timeout, function() use($conn) {
                         $output("Reached timeout");
                         $conn->close();
                     });
