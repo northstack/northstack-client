@@ -1,4 +1,5 @@
 <?php
+
 namespace NorthStack\NorthStackClient\Command;
 
 use NorthStack\NorthStackClient\API\AuthApi;
@@ -27,15 +28,14 @@ trait OauthCommandTrait
             ->addOption('authUsername', null, InputOption::VALUE_REQUIRED, 'Username')
             ->addOption('authPassword', null, InputOption::VALUE_REQUIRED, 'Password')
             ->addOption('authMfa', null, InputOption::VALUE_REQUIRED, 'MFA Code')
-            ->addOption('authScope', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Scopes', [])
-        ;
+            ->addOption('authScope', null, InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY, 'Scopes', []);
     }
 
     protected function initialize(InputInterface $input, OutputInterface $output)
     {
         $this->token = new OauthToken();
 
-        /** @var Command $this */
+        /** @noinspection PhpUndefinedClassInspection */
         parent::initialize($input, $output);
 
         $clientId = $input->getOption('authClientId');
@@ -63,16 +63,14 @@ trait OauthCommandTrait
 
     protected function currentUser(OrgsClient $orgsClient)
     {
-        if (empty($this->token->token))
-        {
+        if (empty($this->token->token)) {
             return null;
         }
 
         $parts = explode('.', $this->token->token);
-        [$type, $id] = explode(':',json_decode(base64_decode($parts[1]))->sub);
+        [$type, $id] = explode(':', json_decode(base64_decode($parts[1]))->sub);
 
-        if ($type === 'Pagely.Model.Orgs.OrgUser')
-        {
+        if ($type === 'Pagely.Model.Orgs.OrgUser') {
             $r = $orgsClient->getUser($this->token->token, $id);
             $user = json_decode($r->getBody()->getContents());
             $user->type = $type;
@@ -86,10 +84,10 @@ trait OauthCommandTrait
     {
         try {
             $user = $this->currentUser($orgsClient);
-        } catch (ClientException $e) {}
+        } catch (ClientException $e) {
+        }
 
-        if (!$user)
-        {
+        if (!isset($user)) {
             throw new \Exception("You must be logged in to perform this action");
         }
 
