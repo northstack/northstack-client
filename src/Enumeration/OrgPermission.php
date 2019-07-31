@@ -17,6 +17,8 @@ use Eloquent\Enumeration\AbstractEnumeration;
  * @method static self PERM_VIEW_LOGS
  * @method static self PERM_CANCEL
  * @method static self PERM_MANAGE_SAPPS
+ * @method static self PERM_SAPP_SECRETS
+ * @method static self PERM_STACK_MANAGE
  */
 class OrgPermission extends AbstractEnumeration
 {
@@ -30,4 +32,6 @@ class OrgPermission extends AbstractEnumeration
     const PERM_VIEW_LOGS = 128;
     const PERM_CANCEL = 256;
     const PERM_MANAGE_SAPPS = 512;
+    const PERM_SAPP_SECRETS = 1024;
+    const PERM_STACK_MANAGE = 2048;
 }

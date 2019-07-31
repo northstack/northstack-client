@@ -16,6 +16,8 @@ use Eloquent\Enumeration\AbstractEnumeration;
  * @method static self PERM_VIEW_LOGS
  * @method static self PERM_CANCEL
  * @method static self PERM_MANAGE_SAPPS
+ * @method static self PERM_SAPP_SECRETS
+ * @method static self PERM_STACK_MANAGE
  */
 class OrgPermissionName extends AbstractEnumeration
 {
@@ -29,4 +31,6 @@ class OrgPermissionName extends AbstractEnumeration
     const PERM_VIEW_LOGS = 'View Logs';
     const PERM_CANCEL = 'Cancel Organization Account';
     const PERM_MANAGE_SAPPS = 'Manage Apps';
+    const PERM_SAPP_SECRETS = 'Manage App Configs';
+    const PERM_STACK_MANAGE = 'Manage Stacks';
 }
