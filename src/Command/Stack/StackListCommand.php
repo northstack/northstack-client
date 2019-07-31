@@ -6,10 +6,9 @@ namespace NorthStack\NorthStackClient\Command\Stack;
 use NorthStack\NorthStackClient\API\Infra\StackClient;
 use NorthStack\NorthStackClient\API\Orgs\OrgsClient;
 use NorthStack\NorthStackClient\Command\Command;
+use NorthStack\NorthStackClient\Command\Helpers\OutputFormatterTrait;
 use NorthStack\NorthStackClient\Command\OauthCommandTrait;
 use NorthStack\NorthStackClient\OrgAccountHelper;
-use Symfony\Component\Console\Helper\Table;
-use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -17,6 +16,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 class StackListCommand extends Command
 {
     use OauthCommandTrait;
+    use OutputFormatterTrait;
 
     /**
      * @var StackClient
@@ -59,36 +59,11 @@ class StackListCommand extends Command
             $input->getOption('label')
         );
 
-        $body = json_decode($r->getBody()->getContents(), true);
-
-        $rows = [];
-
-        $count = 1;
-        $headers = ['<fg=magenta>ID</>', '<fg=magenta>Type</>', '<fg=magenta>Label</>'];
-        foreach ($body['data'] as $stack) {
-            $rows[] = [
-                "<fg=cyan>{$stack['id']}</>",
-                "<fg=cyan>{$stack['type']}</>",
-                "<fg=cyan>{$stack['label']}</>",
-            ];
-
-            if ($count % 12 === 0) {
-                $rows[] = new TableSeparator();
-                $rows[] = $headers;
-                $rows[] = new TableSeparator();
-            } elseif ($count === count($body->data)) {
-                $rows[] = $headers;
-            } else {
-                $rows[] = new TableSeparator();
-            }
-            $count++;
-        }
-
-        $table = new Table($output);
-        $table->setStyle('borderless');
-        $table->setHeaders($headers);
-        $table->setRows($rows);
-
-        $table->render();
+        $this->displayTable($output, json_decode($r->getBody()->getContents(), true), [
+            'ID' => 'id',
+            'Label' => 'label',
+            'Type' => 'type',
+            'Last Updated' => 'updated',
+        ]);
     }
 }
