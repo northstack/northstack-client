@@ -10,6 +10,23 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 trait OutputFormatterTrait
 {
+    protected function formatValue($value): string
+    {
+        if (null === $value) {
+            return '';
+        }
+
+        if (is_bool($value)) {
+            return $value ? 'TRUE' : 'FALSE';
+        }
+
+        if (is_array($value) || is_object($value)) {
+            return json_encode($value, JSON_PRETTY_PRINT);
+        }
+
+        return (string) $value;
+    }
+
     public function displayRecord(OutputInterface $output, array $data) {
         $table = new Table($output);
         $table->setStyle('borderless');
@@ -18,7 +35,7 @@ trait OutputFormatterTrait
             if (strpos($key, '@') === 0) {
                 continue;
             }
-            $table->addRow([ucfirst($key), $value]);
+            $table->addRow([ucfirst($key), $this->formatValue($value)]);
         }
         $table->render();
     }
@@ -31,7 +48,7 @@ trait OutputFormatterTrait
         }, array_keys($headerToPropertyMap));
 
         $cellMapper = function($value) {
-            return "<fg=cyan>{$value}</>";
+            return "<fg=cyan>{$this->formatValue($value)}</>";
         };
         $rowKeyFilter = function($key) use ($headerToPropertyMap) {
             return in_array($key, $headerToPropertyMap, true);
