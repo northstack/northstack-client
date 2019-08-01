@@ -16,21 +16,21 @@ class BaseLogFormat implements LogFormatInterface
 
     public function render($message)
     {
-        if ($message->type === 'log') {
-            $this->renderLog($message);
-        } else {
+        if (!empty($message->type) && !empty($message->message)) {
             $this->renderInfo($message);
+        } else {
+            $this->renderLog($message);
         }
     }
 
     protected function renderLog($msg)
     {
-        $this->io->writeln($msg->message);
+        $this->io->writeln(json_encode($message));
     }
 
     protected function renderInfo($msg)
     {
-        $this->io->writeln($msg->message);
+        $this->io->writeln("[$msg->type] $msg->message");
     }
 
     protected function renderTimestamp($ts)
