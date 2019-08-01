@@ -25,7 +25,7 @@ class BaseLogFormat implements LogFormatInterface
 
     protected function renderLog($msg)
     {
-        $this->io->writeln(json_encode($message));
+        $this->io->writeln(json_encode($msg));
     }
 
     protected function renderInfo($msg)
