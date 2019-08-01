@@ -9,9 +9,9 @@ class TemplateLogFormat extends BaseLogFormat
 
     protected $template;
 
-    protected function renderLog($data)
+    protected function renderLog($msg)
     {
-        $this->renderTemplate(json_decode($data->message));
+        $this->renderTemplate($msg);
     }
 
     protected function renderTemplate($data)

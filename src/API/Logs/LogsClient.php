@@ -24,38 +24,7 @@ class LogsClient extends BaseApiClient
      */
     public function streamTopic(string $accessToken, callable $sender, array $topic, OutputInterface $output = null)
     {
-        $this->sender = $sender;
-        $this->topic = $topic;
-        $this->accessToken = $accessToken;
-        $uri = str_replace('http', 'ws', $this->baseUrl);
-        $uri = rtrim($uri, '/');
-        $uri .= '/logs';
-
-        if ($output) {
-            $output->writeln('Connecting...');
-        }
-        Client\connect($uri)
-            ->then(
-                function (Client\WebSocket $conn) use ($output) {
-                    $conn->on('message', function ($message) {
-                        $sender = $this->sender;
-                        $sender($message);
-                    });
-
-                    if ($output) {
-                        $output->writeln('Authenticating...');
-                    }
-                    $conn->send(json_encode([
-                        'accessToken' => $this->accessToken,
-                        'action' => 'subscribe',
-                        'topic' => $this->topic,
-                    ]));
-                },
-                function ($e) {
-                    echo $e;
-                    throw $e;
-                }
-            );
+        $this->streamLog($accessToken, $sender, $topic, null, 0, $output);
     }
 
     public function getBuildLog(string $accessToken, string $sappId)

@@ -35,7 +35,14 @@ class LogsCommand extends Command
      */
     private $merger;
 
-    const LOG_TOPICS = ['access', 'error', 'build', 'event'];
+    const LOG_TOPICS = ['traffic', 'error', 'build', 'event', 'stats'];
+    private $groupFromTopic = [
+        'traffic' => 'gateway',
+        'error' => 'worker',
+        'build' => 'na',
+        'stats' => 'worker',
+        'event' => 'events',
+    ];
 
     public function __construct(
         LogsClient $api
@@ -52,8 +59,10 @@ class LogsCommand extends Command
             ->setDescription('NorthStack App Logs')
             ->addArgument('name', InputArgument::REQUIRED, 'App name')
             ->addArgument('environment', InputArgument::REQUIRED, 'Environment (prod, test, or dev)')
-            ->addArgument('topic', InputArgument::REQUIRED, 'Log type (access, error, build, event)')
+            ->addArgument('topic', InputArgument::REQUIRED, 'Log type (traffic, error, build, event)')
             ->addOption('topicOverride', 't', InputOption::VALUE_REQUIRED, 'Override Topic (You should know what you are doing if you are using this)')
+            ->addOption('lookback', 'l', InputOption::VALUE_REQUIRED, 'Lookback period', '-5s')
+            ->addOption('timeout', null, InputOption::VALUE_REQUIRED, 'Number of seconds to stream logs for, 0 for no timeout', 0)
             ->addOption('json', null, InputOption::VALUE_NONE, 'Output raw json', null);
         $this->addOauthOptions();
     }
@@ -77,6 +86,7 @@ class LogsCommand extends Command
             $topic = [
                 'sappId' => $sappId,
                 'topic' => $args['topic'],
+                'logGroup' => $this->groupFromTopic[$args['topic']],
             ];
         } else {
             $topic = [
@@ -96,10 +106,10 @@ class LogsCommand extends Command
             $this->showBuildLog($sappId, $formatter);
             exit;
         }
-        $this->api->streamTopic($this->token->token, function (Message $message) use ($formatter) {
+        $this->api->streamLog($this->token->token, function (Message $message) use ($formatter) {
             $data = json_decode((string)$message);
             $formatter->render($data);
-        }, $topic, $output);
+        }, $topic, $options['lookback'], $options['timeout'], $output);
     }
 
     protected function showBuildLog(string $sappId, LogFormatInterface $formatter)

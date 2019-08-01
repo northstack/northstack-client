@@ -11,8 +11,9 @@ class LogFormat
     private static $formats = [
         'json' => BaseLogFormat::class,
         'error' => PHPErrorLogFormat::class,
-        'access' => AccessLogFormat::class,
+        'traffic' => AccessLogFormat::class,
         'build' => PHPErrorLogFormat::class,
+        'stats' => BaseLogFormat::class,
     ];
 
     public static function getFormat($format)
