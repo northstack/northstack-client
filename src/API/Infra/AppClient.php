@@ -24,6 +24,17 @@ class AppClient extends BaseApiClient
             ]]);
     }
 
+    public function getApp(string $accessToken, string $appId, bool $includeConfigs = false)
+    {
+        $query = [];
+        if ($includeConfigs) {
+            $query['includeConfigs'] = '1';
+        }
+
+        return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
+            ->get("infra/apps/{$appId}", ['query' => $query]);
+    }
+
     public function listApps(string $accessToken, string $stackId, string $label = null)
     {
         $query = [];
@@ -32,5 +43,11 @@ class AppClient extends BaseApiClient
         }
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
             ->get("infra/stacks/{$stackId}/apps", ['query' => $query]);
+    }
+
+    public function listConfigs(string $accessToken, string $appId)
+    {
+        return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
+            ->get("infra/apps/{$appId}/configs");
     }
 }
