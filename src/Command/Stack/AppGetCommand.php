@@ -55,7 +55,7 @@ class AppGetCommand extends Command
         $this->setDescription('View App')
             ->addArgument('stack', InputArgument::REQUIRED, 'Stack label')
             ->addArgument('app', InputArgument::REQUIRED, 'App label')
-            ->addOption('configs', InputOption::VALUE_NONE, 'Include Configs')
+            ->addOption('configs', null, InputOption::VALUE_NONE, 'Include Configs')
             ->addOption('orgId', null, InputOption::VALUE_REQUIRED, 'Only needed if you have access to multiple organizations');
         $this->addOauthOptions();
     }
