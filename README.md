@@ -20,7 +20,7 @@ The native install method is preferred and more performant, so it's best if you'
 ## Install
 
 ```
-git clone git@github.com:northstack/northstack-client.git
+git clone https://github.com/northstack/northstack-client.git
 cd northstack-client
 ./bin/install.sh
 ```
