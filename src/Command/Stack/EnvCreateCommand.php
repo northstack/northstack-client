@@ -4,6 +4,7 @@
 namespace NorthStack\NorthStackClient\Command\Stack;
 
 use GuzzleHttp\Exception\ClientException;
+use NorthStack\NorthStackClient\API\Infra\ResourceClient;
 use NorthStack\NorthStackClient\API\Infra\StackClient;
 use NorthStack\NorthStackClient\API\Infra\StackEnvClient;
 use NorthStack\NorthStackClient\API\Orgs\OrgsClient;
@@ -33,14 +34,25 @@ class EnvCreateCommand extends Command
      * @var OrgsClient
      */
     private $orgsClient;
+    /**
+     * @var ResourceClient
+     */
+    private $resourceClient;
 
-    public function __construct(OrgsClient $orgsClient, StackClient $stackClient, StackEnvClient $envClient, OrgAccountHelper $orgAccountHelper)
+    public function __construct(
+        OrgsClient $orgsClient,
+        StackClient $stackClient,
+        StackEnvClient $envClient,
+        OrgAccountHelper $orgAccountHelper,
+        ResourceClient $resourceClient
+    )
     {
         parent::__construct("stack:env:add");
         $this->orgAccountHelper = $orgAccountHelper;
         $this->orgsClient = $orgsClient;
         $this->envClient = $envClient;
         $this->stackClient = $stackClient;
+        $this->resourceClient = $resourceClient;
     }
 
     public function configure()
@@ -50,7 +62,9 @@ class EnvCreateCommand extends Command
             ->addArgument('stack', InputArgument::REQUIRED, 'Stack label')
             ->addArgument('label', InputArgument::REQUIRED, 'Environment label (no whitespace, only letters & numbers)')
             ->addArgument('region', InputArgument::OPTIONAL, 'AWS Region for environment (defaults to us-east-1)', 'us-east-1')
-            ->addOption('orgId', null, InputOption::VALUE_REQUIRED, 'Only needed if you have access to multiple organizations');
+            ->addOption('orgId', null, InputOption::VALUE_REQUIRED, 'Only needed if you have access to multiple organizations')
+            ->addOption('resource', 'r', InputOption::VALUE_IS_ARRAY|InputOption::VALUE_REQUIRED, 'Resource secret values, in the format "LABEL=VALUE"')
+        ;
         $this->addOauthOptions();
     }
 
@@ -65,12 +79,57 @@ class EnvCreateCommand extends Command
             $orgId
         );
 
+        $resources = $this->resourceClient->listResources($this->token->token, $stackId);
+        $resources = json_decode($resources->getBody()->getContents())->data;
+
+        // currently only secret and domain values are needed
+        $resources = array_filter($resources, function (\stdClass $resource) {
+            return in_array($resource->type, ['SECRET', 'DOMAIN']);
+        });
+        $resourcesByLabel = [];
+        foreach ($resources as $resource) {
+            $resourcesByLabel[$resource->label] = $resource;
+        }
+
+        $resourceValues = [];
+        $failed = false;
+        foreach ($input->getOption('resource') as $resource) {
+            [$label, $value] = explode('=', $resource);
+            $label = trim($label);
+            $value = trim($value);
+            if (!$label || !$value) {
+                $failed = true;
+                $output->writeln("<error>Invalid resource string: {$resource} - must be formatted like 'LABEL=VALUE'</error>");
+                continue;
+            }
+
+            if (!array_key_exists($label, $resourcesByLabel)) {
+                $failed = true;
+                $output->writeln("<error>Unknown resource label: {$label}</error>");
+                continue;
+            }
+
+            $resourceValues[$label] = $value;
+        }
+
+        foreach ($resources as $resource) {
+            if (!array_key_exists($resource->label, $resourceValues)) {
+                $failed = true;
+                $output->writeln("<error>Missing resource value for label: {$resource->label}</error>");
+            }
+        }
+
+        if ($failed) {
+            return;
+        }
+
         try {
             $r = $this->envClient->createEnvironment(
                 $this->token->token,
                 $stackId,
                 $input->getArgument('region'),
-                $input->getArgument('label')
+                $input->getArgument('label'),
+                $resourceValues
             );
             $this->displayRecord($output, json_decode($r->getBody()->getContents(), true));
         } catch (ClientException $e) {

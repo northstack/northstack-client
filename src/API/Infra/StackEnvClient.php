@@ -14,13 +14,15 @@ class StackEnvClient extends BaseApiClient
         string $accessToken,
         string $stackId,
         string $region,
-        string $label
+        string $label,
+        array $resources
     )
     {
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
             ->post("infra/stacks/{$stackId}/environments", ['json' => [
                 'label' => $label,
                 'region' => $region,
+                'resources' => $resources,
             ]]);
     }
 
