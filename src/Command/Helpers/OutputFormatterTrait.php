@@ -43,6 +43,9 @@ trait OutputFormatterTrait
     public function displayTable(OutputInterface $output, array $data, array $headerToPropertyMap)
     {
         $count = 1;
+        if (array_key_exists('@count', $data)) {
+            $data = $data['data'];
+        }
         $headers = array_map(function ($header) {
             return "<fg=magenta>{$header}</>";
         }, array_keys($headerToPropertyMap));

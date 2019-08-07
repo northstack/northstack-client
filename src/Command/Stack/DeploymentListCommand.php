@@ -79,19 +79,33 @@ class DeploymentListCommand extends Command
             $input->getArgument('env'),
             $stackId
         );
-        $appId = $this->getAppIdForLabel(
+        $r = $this->appClient->listApps(
             $this->token->token,
-            $input->getArgument('app'),
             $stackId
         );
+        $apps = [];
+        foreach (json_decode($r->getBody()->getContents())->data as $app) {
+            $apps[$app->id] = $app;
+        }
 
         try {
-            $r = $this->deploymentClient->createDeployment(
+            $r = $this->deploymentClient->listDeployments(
                 $this->token->token,
-                $envId,
-                $appId
+                $envId
             );
-            $this->displayRecord($output, json_decode($r->getBody()->getContents(), true));
+            $data = array_map(
+                function ($row) use ($apps) {
+                    $row['appLabel'] = $apps[$row['appId']]->label;
+                    return $row;
+                },
+                json_decode($r->getBody()->getContents(), true)['data']
+            );
+            $this->displayTable($output, $data, [
+                'ID' => 'id',
+                'App' => 'appLabel',
+                'Type' => 'type',
+                'Status' => 'status',
+            ]);
         } catch (ClientException $e) {
             if ($e->getResponse()->getStatusCode() === 422) {
                 $this->displayValidationErrors($e->getResponse(), $output);

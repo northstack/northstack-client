@@ -13,12 +13,14 @@ class DeploymentClient extends BaseApiClient
     public function createDeployment(
         string $accessToken,
         string $envId,
-        string $appId
+        string $appId,
+        array $configs
     )
     {
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
             ->post("infra/stackenvs/{$envId}/deployments", ['json' => [
                 'appId' => $appId,
+                'configs' => $configs,
             ]]);
     }
 
