@@ -16,7 +16,7 @@ class BaseApiClient
     public function __construct(RequestChain $requestChain, $baseUrl = null, LoggerInterface $logger = null)
     {
         $this->requestChain = $requestChain;
-        $this->baseUrl = $baseUrl ?: getenv('MGMT_API_URL');
+        $this->baseUrl = $baseUrl ?: getenv('NS_API_URL');
         $this->logger = $logger;
         $this->setGuzzleResponseHandlers();
     }
