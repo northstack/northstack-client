@@ -61,6 +61,7 @@ class DeploymentCreateCommand extends Command
             ->addArgument('stack', InputArgument::REQUIRED, 'Stack label')
             ->addArgument('env', InputArgument::REQUIRED, 'Stack Environment label')
             ->addArgument('app', InputArgument::REQUIRED, 'App label')
+            ->addOption('config', 'c', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'Config values in the format "LABEL=VALUE"')
             ->addOption('orgId', null, InputOption::VALUE_REQUIRED, 'Only needed if you have access to multiple organizations');
         $this->addOauthOptions();
     }
@@ -85,12 +86,54 @@ class DeploymentCreateCommand extends Command
             $input->getArgument('app'),
             $stackId
         );
+        $app = json_decode(
+            $this->appClient->getApp($this->token->token, $appId, true)
+                ->getBody()->getContents()
+        );
+        $configsByLabel = [];
+        foreach ($app->configs as $config) {
+            $configsByLabel[$config->label] = $config;
+        }
+        $configValues = [];
+        $failed = false;
+        foreach ($input->getOption('config') as $config) {
+            if (!preg_match('/^([a-z0-9]+)=(.+)$/', $config, $matches)) {
+                $output->writeln("<error>Invalid config: {$config}</error>");
+                $failed = true;
+                continue;
+            }
+            [ , $label, $value] = $matches;
+
+            $value = trim($value);
+
+            if (!array_key_exists($label, $configsByLabel)) {
+                $output->writeln("<error>Unknown config label: {$label}</error>");
+                $failed = true;
+                continue;
+            }
+
+            $configValues[$label] = $value;
+        }
+
+        if (count($configValues) !== count($configsByLabel)) {
+            foreach ($configsByLabel as $label => $config) {
+                if (!array_key_exists($label, $configValues)) {
+                    $output->writeln("<error>Missing config: {$label}</error>");
+                    $failed = true;
+                }
+            }
+        }
+
+        if ($failed) {
+            return;
+        }
 
         try {
             $r = $this->deploymentClient->createDeployment(
                 $this->token->token,
                 $envId,
-                $appId
+                $appId,
+                $configValues
             );
             $this->displayRecord($output, json_decode($r->getBody()->getContents(), true));
         } catch (ClientException $e) {
