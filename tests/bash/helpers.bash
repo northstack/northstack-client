@@ -2,6 +2,12 @@
 
 CLEANUP=()
 
+_debug() {
+    local -r fmt=$1
+    shift
+    printf "${fmt}\n" "$@" >&3
+}
+
 _sudo() {
     sudo --non-interactive "$@" || {
         echo "Calling sudo failed" >&3
