@@ -278,6 +278,18 @@ afterInstall() {
     log info "NorthStack client successfully installed at $path/bin/northstack ✅"
 }
 
+checksumFile() {
+    local -r file=$1
+    if iHave md5sum; then
+        md5sum "$file" | awk '{print $1}'
+    elif iHave md5; then
+        md5 -r "$file" | awk '{print $1}'
+    else
+        log error "Cannot checksum $file - No md5/md5sum utility found!"
+        return 1
+    fi
+}
+
 updateBashProfile() {
     local bindir=$1
     local bashFile=$2
@@ -293,7 +305,7 @@ updateBashProfile() {
         return 1
     fi
 
-    local checksumPre; checksumPre=$(md5sum "$bashFile" | awk '{print $1}')
+    local checksumPre; checksumPre=$(checksumFile "$bashFile")
     local new; new=$(mktemp)
 
     local startLine
@@ -319,7 +331,7 @@ updateBashProfile() {
         echo '# NorthStack END' >> "$new"
     fi
 
-    local checksumPost; checksumPost=$(md5sum "$bashFile" | awk '{print $1}')
+    local checksumPost; checksumPost=$(checksumFile "$bashFile")
 
     if [[ $checksumPre != "$checksumPost" ]]; then
         log error "RC file ($bashFile) changed while we were updating it"
