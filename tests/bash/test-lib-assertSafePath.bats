@@ -13,6 +13,13 @@ load helpers
     assertSafePath "$TMPDIR/custom-tmp/foo/bar.txt"
 }
 
+@test "Paths with trailing slashes are normalized" {
+    old=$TMPDIR
+    export TMPDIR=/foo/
+    assertSafePath "/foo/bar/"
+    export TMPDIR="$old"
+}
+
 @test "Known paths in the install prefix are safe" {
     export DEBUG=1
     export INSTALL_PREFIX=$HOME/.local
