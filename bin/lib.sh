@@ -203,6 +203,7 @@ assertSafePath() {
 
     local dir
     for dir in "${safeDirs[@]}"; do
+        dir=${dir%/}
         if [[ $path == "$dir" || $path == $dir/* ]]; then
             debug "safe dir match $path =~ $dir"
             return 0
