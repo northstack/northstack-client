@@ -243,6 +243,29 @@ selectInstallMethod() {
     INSTALL_METHOD=none
 }
 
+createRcFile() {
+    local -r bindir=$1
+
+    local toCreate=()
+    if iHave zsh; then
+        toCreate+=("$HOME/.zsh")
+    fi
+
+    if iHave bash; then
+        toCreate+=("$HOME/.bashrc")
+        toCreate+=("$HOME/.bash_profile")
+    fi
+
+    if [[ ${#toCreate[@]} -gt 0 ]]; then
+        local list; list=$(printf "- %s\n" "${toCreate[@]}")
+        if ask "Can we create the following files:\n${list}"; then
+            for rc in "${toCreate[@]}"; do
+                updateBashProfile "$bindir" "$rc"
+            done
+        fi
+    fi
+}
+
 afterInstall() {
     local path=$1
     local bindir=${path%/}/bin
@@ -256,20 +279,32 @@ afterInstall() {
         if ask "Would you like us to update your .bashrc/.zshrc files?"; then
             local files=(
                 "$HOME/.bashrc"
+                "$HOME/.bash_profile"
                 "$HOME/.zshrc"
             )
+
+            local found=0
             local updated=0
             for rc in "${files[@]}"; do
+
+                if [[ ! -f "$rc" ]]; then
+                    continue
+                fi
+
+                found=$((found + 1))
+
                 if updateBashProfile "$bindir" "$rc"; then
                     updated=$((updated + 1))
                     log warn "Updated rc file: '$rc'" \
                         "You must launch a new shell or reload the rc file (\`source \"$rc\"\`) to see the changes in your \$PATH"
                 fi
             done
-            if (( updated == 0 )); then
-                log warn \
-                    "Could not find any rc files. You should create one with:" \
-                    "echo \"PATH=${bindir}:\$PATH\" >> \"$HOME/.bashrc\""
+
+            if (( found == 0 )); then
+                log warn "Could not find any rc files."
+                createRcFile "$bindir"
+            elif (( updated == 0 )); then
+                log warn "Failed to update rc files."
             fi
         fi
     fi
