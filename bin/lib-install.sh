@@ -252,6 +252,8 @@ afterInstall() {
             for rc in "${files[@]}"; do
                 if updateBashProfile "$bindir" "$rc"; then
                     updated=$((updated + 1))
+                    log warn "Updated rc file: '$rc'" \
+                        "You must launch a new shell or reload the rc file (\`source \"$rc\"\`) to see the changes in your \$PATH"
                 fi
             done
             if (( updated == 0 )); then
