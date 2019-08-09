@@ -437,7 +437,7 @@ show_spinner_pid() {
     fi
     local temp
     tput civis
-    while [[ -e /proc/$pid ]]; do
+    while ps a | awk '{print $1}' | grep -q "${pid}"; do
         temp="${spinstr#?}"
         printf "[%c]  " "${spinstr}"
         spinstr=${temp}${spinstr%"${temp}"}
