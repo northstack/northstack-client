@@ -209,12 +209,22 @@ validateOptions() {
 }
 
 dockerInstallOK() {
-    if ! checkDocker; then
+    if ! iHave docker; then
+        setError docker "No docker executable found. Is docker installed?"
         return 1
-    elif ! checkVersion docker "$MIN_DOCKER_VERSION"; then
+    fi
+
+    if ! docker info &> /dev/null; then
+        setError docker "Running \`docker info\` failed. Is the docker daemon running?"
         return 1
-    elif ! [[ $OSTYPE =~ linux || $OSTYPE =~ darwin ]]; then
-        setError OS "Docker installation is only supported on Linux & Mac"
+    fi
+
+    if ! checkVersion docker "$MIN_DOCKER_VERSION"; then
+        return 1
+    fi
+
+    if ! [[ $OSTYPE =~ linux || $OSTYPE =~ darwin ]]; then
+        setError docker "Docker installation is only supported on Linux & Mac"
         return 1
     fi
 }
