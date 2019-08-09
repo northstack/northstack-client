@@ -53,7 +53,7 @@ main() {
         set -- "$@" --volume /var/run/docker.sock:/var/run/docker.sock
     fi
 
-    set -- "$@" northstack "${args[@]}"
+    set -- "$@" northstack "${args[@]+${args[@]}}"
     debug "Running docker:" "$(quoteCmd "$@")"
     exec "$@"
 }
