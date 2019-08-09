@@ -304,8 +304,6 @@ afterInstall() {
                 for rc in "${found[@]}"; do
                     if updateBashProfile "$bindir" "$rc"; then
                         updated=$((updated + 1))
-                        log warn "Updated rc file: '$rc'" \
-                            "You must launch a new shell or reload the rc file (\`source \"$rc\"\`) to see the changes in your \$PATH"
                     fi
                 done
                 if (( updated == 0 )); then
@@ -382,6 +380,8 @@ updateBashProfile() {
     if ! diff "$bashFile" "$new"; then
         log info "Updating: $bashFile"
         cat "$new" > "$bashFile"
+        log warn "Updated rc file: '$bashFile'" \
+            "You must launch a new shell or reload the rc file (\`source \"$bashFile\"\`) to see the changes in your \$PATH"
     else
         debug "No changes detected--moving on"
     fi
