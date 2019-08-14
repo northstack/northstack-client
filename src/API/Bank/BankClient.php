@@ -19,4 +19,18 @@ class BankClient extends BaseApiClient
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
             ->get("bank/stats/{$orgId}/{$statType}", ['query' => $args]);
     }
+
+    public function dimensionsForOrg(
+        $accessToken,
+        $orgId,
+        $statType,
+        array $filters
+    )
+    {
+        $args = $filters;
+
+        return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
+            ->get("bank/stats/{$orgId}/{$statType}/dimensions", ['query' => $args]);
+    }
+
 }
