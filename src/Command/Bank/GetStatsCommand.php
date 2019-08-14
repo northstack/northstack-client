@@ -52,20 +52,15 @@ class GetStatsCommand extends Command
         $OPTION_ARRAY = InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED;
         parent::configure();
         $this
-            ->setDescription('Get Stats for an App')
-            ->addArgument('type', InputArgument::REQUIRED, 'Stats Type [traffic]')
+            ->setDescription('Get Stats for an Org')
+            ->addArgument('type', InputArgument::REQUIRED, 'Stats Type [traffic, workers]')
             ->addOption('from', null, InputOption::VALUE_REQUIRED, 'From date, any format recognizable by strtotime', '-1 hour')
             ->addOption('to', null, InputOption::VALUE_REQUIRED, 'To date, any format recognizable by strtotime', 'now')
             ->addOption('window', null, InputOption::VALUE_REQUIRED, 'Aggregate data into this interval (minutes)', '1')
-            ->addOption('field-set', null, InputOption::VALUE_REQUIRED, 'all, percentile, basic', 'basic')
             ->addOption('orgId', null, InputOption::VALUE_REQUIRED, 'Org ID')
             ->addOption('appId', null, $OPTION_ARRAY, 'App id')
-            ->addOption('httpCode', null, $OPTION_ARRAY, 'Http codes (200,404,etc)')
-            ->addOption('method', null, $OPTION_ARRAY, 'Http method, (GET, POST,etc)')
-            ->addOption('cacheStatus', null, $OPTION_ARRAY, 'Cache Status, (HIT, MISS, BYPASS)')
-            ->addOption('scheme', null, $OPTION_ARRAY, 'http scheme, (http, https)')
-            ->addOption('host', null, $OPTION_ARRAY, 'hostname, (example.com, www.example.com)')
-            ->addOption('contentType', null, $OPTION_ARRAY, 'Content Type, (assets,content)')
+            ->addOption('filter', null, InputOption::VALUE_REQUIRED, 'json hash of filters {"HttpCode":["200"]}')
+            ->addOption('field-filter', null, InputOption::VALUE_REQUIRED, 'regex to whitelist non time fields with')
         ;
         $this->addOauthOptions();
     }
@@ -80,26 +75,21 @@ class GetStatsCommand extends Command
         $args = $input->getArguments();
         $orgId = $input->getOption('orgId') ?: $this->orgAccountHelper->getDefaultOrg()['id'];
         $user = $this->requireLogin($this->orgs);
+        $fieldFilter = $input->getOption('field-filter');
 
         $filters = [
             'fromDate' => $input->getOption('from'),
             'toDate' => $input->getOption('to'),
         ];
 
-        $map = [
-            'appId' => 'sappIds',
-            'window' => 'window',
-            'scheme' => 'scheme',
-            'method' => 'method',
-            'host' => 'host',
-            'contentType' => 'type',
-            'httpCode' => 'httpCode',
-        ];
-
-        foreach($map as $option => $filter) {
-            $optionValue = $input->getOption($option);
-            if ($optionValue !== false && (!is_array($optionValue) || count($optionValue) > 1)) {
-                $filters[$filter] = $input->getOption($option);
+        if (!empty($input->getOption('filter'))) {
+            $filterOptions = json_decode($input->getOption('filter'));
+            if (json_last_error()) {
+                echo "Bad Filter: ".json_last_error_msg()."\n";
+                exit(1);
+            }
+            foreach($filterOptions as $k => $v) {
+                $filters[$k] = (array)$v;
             }
         }
 
@@ -110,31 +100,27 @@ class GetStatsCommand extends Command
             $filters
         );
         $stats = json_decode($r->getBody()->getContents(), true);
-
-        $skip = [];
-        switch($input->getOption('field-set')) {
-        case 'basic':
-            $skip = ['p05','p25','p50','p75','p95'];
-            break;
-        case 'percentile':
-            $skip = ['max','min','total','average','median'];
-            break;
-        }
+        echo json_encode($stats, JSON_PRETTY_PRINT);
+        exit;
 
         foreach($stats['data']['series'] as $series) {
             $table = new Table($output);
 
             $columns = $series['columns'];
-            foreach($skip as $i) {
-                $toDel = array_search($i,$columns);
-                if ($toDel !== false) {
-                    unset($columns[$toDel]);
+            if (!empty($fieldFilter)) {
+                foreach($columns as $k => $v) {
+                    if ($k == 0) {
+                        continue;
+                    }
+                    if (!preg_match($fieldFilter, $v)) {
+                        unset($columns[$k]);
+                    }
                 }
             }
             $table->setHeaders($columns);
 
             $rows = $series['values'];
-            if (count($skip) > 0) {
+            if (!empty($fieldFilter)) {
                 foreach($rows as $i => $row) {
                     foreach($row as $k => $v) {
                         if (!isset($columns[$k])) {
@@ -144,6 +130,7 @@ class GetStatsCommand extends Command
                     $rows[$i] = $row;
                 }
             }
+
             $table->setRows($rows);
             $title = [];
             foreach($series['tags'] as $k => $v) {
