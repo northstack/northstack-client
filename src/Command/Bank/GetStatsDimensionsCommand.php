@@ -16,7 +16,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\Console\Helper\Table;
 
-class GetStatsCommand extends Command
+class GetStatsDimensionsCommand extends Command
 {
     use OauthCommandTrait;
     /**
@@ -41,7 +41,7 @@ class GetStatsCommand extends Command
         OrgAccountHelper $orgAccountHelper
     )
     {
-        parent::__construct('stats:get');
+        parent::__construct('stats:dimensions');
         $this->api = $api;
         $this->orgs = $orgs;
         $this->orgAccountHelper = $orgAccountHelper;
@@ -52,15 +52,11 @@ class GetStatsCommand extends Command
         $OPTION_ARRAY = InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED;
         parent::configure();
         $this
-            ->setDescription('Get Stats for an Org')
+            ->setDescription('Get Stat Dimensions')
             ->addArgument('type', InputArgument::REQUIRED, 'Stats Type [traffic, workers]')
-            ->addOption('from', null, InputOption::VALUE_REQUIRED, 'From date, any format recognizable by strtotime', '-1 hour')
+            ->addOption('from', null, InputOption::VALUE_REQUIRED, 'From date, any format recognizable by strtotime', '-1 day')
             ->addOption('to', null, InputOption::VALUE_REQUIRED, 'To date, any format recognizable by strtotime', 'now')
-            ->addOption('window', null, InputOption::VALUE_REQUIRED, 'Aggregate data into this interval (minutes)', '1')
             ->addOption('orgId', null, InputOption::VALUE_REQUIRED, 'Org ID')
-            ->addOption('appId', null, $OPTION_ARRAY, 'App id')
-            ->addOption('filter', null, InputOption::VALUE_REQUIRED, 'json hash of filters {"HttpCode":["200"]}')
-            ->addOption('field-filter', null, InputOption::VALUE_REQUIRED, 'regex to whitelist non time fields with')
             ->addOption('output', null, InputOption::VALUE_REQUIRED, 'table|json', 'table')
         ;
         $this->addOauthOptions();
@@ -76,25 +72,13 @@ class GetStatsCommand extends Command
         $args = $input->getArguments();
         $orgId = $input->getOption('orgId') ?: $this->orgAccountHelper->getDefaultOrg()['id'];
         $user = $this->requireLogin($this->orgs);
-        $fieldFilter = $input->getOption('field-filter');
 
         $filters = [
             'fromDate' => $input->getOption('from'),
             'toDate' => $input->getOption('to'),
         ];
 
-        if (!empty($input->getOption('filter'))) {
-            $filterOptions = json_decode($input->getOption('filter'));
-            if (json_last_error()) {
-                echo "Bad Filter: ".json_last_error_msg()."\n";
-                exit(1);
-            }
-            foreach($filterOptions as $k => $v) {
-                $filters[$k] = (array)$v;
-            }
-        }
-
-        $r = $this->api->statsForOrg(
+        $r = $this->api->dimensionsForOrg(
             $this->token->token,
             $orgId,
             $args['type'],
@@ -106,41 +90,31 @@ class GetStatsCommand extends Command
             return;
         }
 
-        foreach($stats['data']['series'] as $series) {
-            $table = new Table($output);
-
-            $columns = $series['columns'];
-            if (!empty($fieldFilter)) {
-                foreach($columns as $k => $v) {
-                    if ($k == 0) {
-                        continue;
-                    }
-                    if (!preg_match($fieldFilter, $v)) {
-                        unset($columns[$k]);
-                    }
-                }
+        $makeRows = function($in) {
+            $out = [];
+            foreach($in as $val) {
+                $out[] = [$val];
             }
-            $table->setHeaders($columns);
+            return $out;
+        };
 
-            $rows = $series['values'];
-            if (!empty($fieldFilter)) {
-                foreach($rows as $i => $row) {
-                    foreach($row as $k => $v) {
-                        if (!isset($columns[$k])) {
-                            unset($row[$k]);
-                        }
-                    }
-                    $rows[$i] = $row;
-                }
-            }
+        $table = new Table($output);
+        $table->setRows($makeRows($stats['data']['columns']));
+        $table->setHeaders(["Fields"]);
+        $table->render();
 
-            $table->setRows($rows);
-            $title = [];
-            foreach($series['tags'] as $k => $v) {
-                $title[] = "$k = $v";
+        $makeRows = function($in) {
+            $out = [];
+            foreach($in as $k => $val) {
+                $out[] = [$k, implode("\n",$val)];
             }
-            $table->setHeaderTitle(implode(', ',$title));
-            $table->render();
-        }
+            return $out;
+        };
+
+        $table = new Table($output);
+        $table->setRows($makeRows($stats['data']['dimensions']));
+        $table->setHeaderTitle("Dimensions");
+        $table->setHeaders(["Tag", "Values"]);
+        $table->render();
     }
 }
