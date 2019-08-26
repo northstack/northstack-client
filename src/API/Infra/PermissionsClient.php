@@ -44,4 +44,37 @@ class PermissionsClient extends BaseApiClient
         return $this->guzzle($this->getBearerTokenMiddleware($token))
             ->get('infra/permissions/check', ['query' => $query]);
     }
+
+    public function removeUser(string $token, string $stackId, string $orgUserId)
+    {
+        return $this->guzzle($this->getBearerTokenMiddleware($token))
+            ->delete("infra/stacks/{$stackId}/users/{$orgUserId}");
+    }
+
+    public function setPermissions(string $token, string $targetType, $targetId, string $orgUserId, int $permissions)
+    {
+        $data = [
+            'orgUserId' => $orgUserId,
+            'permissions' => $permissions,
+        ];
+
+        switch ($targetType) {
+            case 'stack':
+                $uri = "infra/stacks/{$targetId}/permissions";
+                break;
+            case 'environment':
+                $uri = "infra/environments/{$targetId}/permissions";
+                break;
+            case 'app':
+                $uri = "infra/apps/{$targetId}/permissions";
+                break;
+            case 'deployment':
+                $uri = "infra/deployments/{$targetId}/permissions";
+                break;
+            default:
+                throw new \RuntimeException('Unknown target type: '.$targetType);
+        }
+        return $this->guzzle($this->getBearerTokenMiddleware($token))
+            ->put($uri, ['json' => $data]);
+    }
 }
