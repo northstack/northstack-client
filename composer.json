@@ -21,7 +21,7 @@
         "ext-json": "*",
         "rdlowrey/auryn": "^1.4",
         "guzzlehttp/guzzle": "^6.3",
-        "vlucas/phpdotenv": "^2.4",
+        "vlucas/phpdotenv": "^3.6",
         "monolog/monolog": "^1.21",
         "namshi/cuzzle": "^2.0",
         "ramsey/uuid": "^3.5",
