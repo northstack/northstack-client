@@ -43,7 +43,7 @@ class Helper
         if (file_exists(getenv('HOME').'/'.$config))
         {
             $config = getenv('HOME').'/'.$config;
-            $dotenv = new Dotenv(dirname($config), basename($config));
+            $dotenv = Dotenv::create(dirname($config), basename($config));
             $dotenv->load();
         }
 
@@ -89,7 +89,7 @@ class Helper
         try
         {
             $home = getenv('HOME');
-            $dotenv = new Dotenv($home, $staging ? '/.northstack-staging' : '/.northstack');
+            $dotenv = Dotenv::create($home, $staging ? '/.northstack-staging' : '/.northstack');
             $dotenv->load();
         }
         catch (InvalidPathException $e)
@@ -99,7 +99,7 @@ class Helper
 
         try
         {
-            $dotenv = new Dotenv($baseDir, $staging ? '/.env-staging' : '/.env');
+            $dotenv = Dotenv::create($baseDir, $staging ? '/.env-staging' : '/.env');
             $dotenv->load();
         }
         catch (InvalidPathException $e)
@@ -108,7 +108,7 @@ class Helper
         }
 
         // doesn't overwrite so defaults get loaded last
-        $dotenv = new Dotenv($baseDir, $staging ? '/.env.staging' : '/.env.defaults');
+        $dotenv = Dotenv::create($baseDir, $staging ? '/.env.staging' : '/.env.defaults');
         $dotenv->load();
     }
 }
