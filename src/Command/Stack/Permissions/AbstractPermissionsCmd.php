@@ -1,7 +1,7 @@
 <?php
 
 
-namespace NorthStack\NorthStackClient\Command\Stack;
+namespace NorthStack\NorthStackClient\Command\Stack\Permissions;
 
 use NorthStack\NorthStackClient\API\Infra\AppClient;
 use NorthStack\NorthStackClient\API\Infra\PermissionsClient;

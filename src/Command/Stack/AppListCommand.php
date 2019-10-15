@@ -74,11 +74,16 @@ class AppListCommand extends Command
                 $this->token->token,
                 $stackId
             );
-            $this->displayTable($output, json_decode($r->getBody()->getContents())->data, [
-                'ID' => 'id',
-                'Label' => 'label',
-                'Active' => 'active',
-            ]);
+            $apps = json_decode($r->getBody()->getContents(), true)['data'];
+            $this->displayTable(
+                $output,
+                $apps,
+                [
+                    'ID' => 'id',
+                    'Label' => 'label',
+                    'Active' => 'active',
+                ]
+            );
         } catch (ClientException $e) {
             if ($e->getResponse()->getStatusCode() === 422) {
                 $this->displayValidationErrors($e->getResponse(), $output);

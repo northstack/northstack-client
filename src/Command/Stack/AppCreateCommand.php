@@ -42,7 +42,7 @@ class AppCreateCommand extends Command
         OrgAccountHelper $orgAccountHelper
     )
     {
-        parent::__construct("stack:app:add");
+        parent::__construct("stack:app:create");
         $this->orgAccountHelper = $orgAccountHelper;
         $this->orgsClient = $orgsClient;
         $this->stackClient = $stackClient;
@@ -76,7 +76,7 @@ class AppCreateCommand extends Command
                 $this->token->token,
                 $stackId,
                 $input->getArgument('type'),
-                $input->getArgument('label')
+                $input->getArgument('app')
             );
             $this->displayRecord($output, json_decode($r->getBody()->getContents(), true));
         } catch (ClientException $e) {

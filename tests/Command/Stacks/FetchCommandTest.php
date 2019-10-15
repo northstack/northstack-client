@@ -1,22 +1,23 @@
 <?php
 
-namespace Test\Command\Sapp;
+namespace Test\Command\Stacks;
 
 use GuzzleHttp\Psr7\Response;
 use NorthStack\NorthStackClient\API\Sapp\SappClient;
 use Test\Command\NorthStackCommandTestCase;
 
-class CreateCommandTest extends NorthStackCommandTestCase
+class FetchCommandTest extends NorthStackCommandTestCase
 {
     public $skipAuthCheck = true;
     public $mockQuestionHelper = true;
+    public $testDir;
     public $mockApp;
-    public $mockAppSlug = 'testLocalAppCreate';
+    public $mockAppSlug = 'testLocalAppFetch';
     protected $sappClient;
 
     function getCommandName(): string
     {
-        return 'app:create';
+        return 'app:fetch';
     }
 
     function setUp(): void
@@ -32,28 +33,19 @@ class CreateCommandTest extends NorthStackCommandTestCase
     {
         $mockApp = file_get_contents(dirname(__FILE__, 3) . '/assets/testapp1-fetch-200-body.json');
         $this->sappClient->expects($this->once())
-            ->method('createApp')
-            ->willReturn(new Response(201, [], $mockApp));
+            ->method('getAppBySappId')
+            ->willReturn(new Response(200, [], $mockApp));
         $this->mockApp = json_decode($mockApp);
 
-        $wpArgs = [
-            '--wpTitle' => $this->mockApp->appName,
-            '--wpAdminUser' => $this->mockApp->sharedConfigBuild->framework_config->admin_user,
-            '--wpAdminPass' => false,
-            '--wpAdminEmail' => $this->mockApp->sharedConfigBuild->framework_config->admin_email,
-            '--wpIsMultisite' => $this->mockApp->sharedConfigBuild->framework_config->multisite,
-            '--wpMultisiteSubdomains' => $this->mockApp->sharedConfigBuild->framework_config->subdomains,
-            '--frameworkVersion' => $this->mockApp->sharedConfigBuild->framework_version,
+        $options = [
             '--appSlug' => $this->mockAppSlug,
         ];
         $this->commandTester->execute(array_merge([
             'command' => $this->command->getName(),
-            'name' => $this->mockApp->appName,
-            'stack' => $this->mockApp->appType,
-            'primaryDomain' => $this->mockApp->sapps[0]->primaryDomain,
-        ], $wpArgs, $this->getAuthOptionsAsUser()));
+            'appId' => $this->mockApp->appName,
+        ], $options, $this->getAuthOptionsAsUser(false)));
 
-        $this->assertStringContainsString('Woohoo!', $this->commandTester->getDisplay());
+        $this->assertStringContainsString('Success!', $this->commandTester->getDisplay());
         $this->assertDirectoryExists($this->testDir . '/' . $this->mockAppSlug);
         $this->assertFileIsReadable($this->testDir . '/' . $this->mockAppSlug . '/config/shared-build.json');
         $generatedSharedConfigBuild = json_decode(file_get_contents($this->testDir . '/' . $this->mockAppSlug . '/config/shared-build.json'));
@@ -76,8 +68,8 @@ class CreateCommandTest extends NorthStackCommandTestCase
             }
 
             rmdir($testAppDir);
-
-            $this->resetUserSettingsTestFile();
         }
+
+        $this->resetUserSettingsTestFile();
     }
 }

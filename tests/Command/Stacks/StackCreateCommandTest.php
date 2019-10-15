@@ -1,52 +1,48 @@
 <?php
 
-namespace Test\Command\Sapp;
+namespace Test\Command\Stacks;
 
 use GuzzleHttp\Psr7\Response;
-use NorthStack\NorthStackClient\API\Sapp\SappClient;
-use NorthStack\NorthStackClient\UserSettingsHelper;
+use NorthStack\NorthStackClient\API\Infra\StackClient;
 use Test\Command\NorthStackCommandTestCase;
 
-class FetchCommandTest extends NorthStackCommandTestCase
+class StackCreateCommandTest extends NorthStackCommandTestCase
 {
     public $skipAuthCheck = true;
     public $mockQuestionHelper = true;
-    public $testDir;
     public $mockApp;
-    public $mockAppSlug = 'testLocalAppFetch';
-    protected $sappClient;
+    public $mockAppSlug = 'testLocalAppCreate';
+    protected $stacksClient;
 
-    function getCommandName(): string
+    public function getCommandName(): string
     {
-        return 'app:fetch';
+        return 'stack:create';
     }
 
-    function setUp(): void
+    public function setUp(): void
     {
         $this->mockCurrentUser();
         $this->mockUserSettings();
-        $this->generateMocks([SappClient::class], true);
-        $this->sappClient = $this->getMockService(SappClient::class);
+        $this->generateMocks([StackClient::class], true);
+        $this->stacksClient = $this->getMockService(StackClient::class);
         parent::setUp();
     }
 
-    function testExecute()
+    public function testExecute()
     {
         $mockApp = file_get_contents(dirname(__FILE__, 3) . '/assets/testapp1-fetch-200-body.json');
-        $this->sappClient->expects($this->once())
-            ->method('getAppBySappId')
-            ->willReturn(new Response(200, [], $mockApp));
+        $this->stacksClient->expects($this->once())
+            ->method('createStack')
+            ->willReturn(new Response(201, [], $mockApp));
         $this->mockApp = json_decode($mockApp);
 
-        $options = [
-            '--appSlug' => $this->mockAppSlug,
-        ];
         $this->commandTester->execute(array_merge([
             'command' => $this->command->getName(),
-            'appId' => $this->mockApp->appName,
-        ], $options, $this->getAuthOptionsAsUser(false)));
+            'label' => $this->mockApp->appName,
+            'type' => $this->mockApp->appType,
+        ], $this->getAuthOptionsAsUser()));
 
-        $this->assertStringContainsString('Success!', $this->commandTester->getDisplay());
+        $this->assertStringContainsString('Woohoo!', $this->commandTester->getDisplay());
         $this->assertDirectoryExists($this->testDir . '/' . $this->mockAppSlug);
         $this->assertFileIsReadable($this->testDir . '/' . $this->mockAppSlug . '/config/shared-build.json');
         $generatedSharedConfigBuild = json_decode(file_get_contents($this->testDir . '/' . $this->mockAppSlug . '/config/shared-build.json'));
@@ -69,8 +65,8 @@ class FetchCommandTest extends NorthStackCommandTestCase
             }
 
             rmdir($testAppDir);
-        }
 
-        $this->resetUserSettingsTestFile();
+            $this->resetUserSettingsTestFile();
+        }
     }
 }

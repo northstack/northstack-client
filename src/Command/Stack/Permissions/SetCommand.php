@@ -5,7 +5,6 @@ namespace NorthStack\NorthStackClient\Command\Stack\Permissions;
 
 
 use GuzzleHttp\Exception\ClientException;
-use NorthStack\NorthStackClient\Command\Stack\AbstractPermissionsCmd;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -22,8 +21,8 @@ class SetCommand extends AbstractPermissionsCmd
             ->addArgument('orgUserId', InputArgument::REQUIRED, 'User ID')
             ->addArgument('targetType', InputArgument::REQUIRED, 'Target Type (stack, environment, app, deployment)')
             ->addArgument('label', InputArgument::REQUIRED, 'Label for target or ID for deployment')
-            ->addArgument('stackId', InputArgument::OPTIONAL, 'Stack ID (required for any target type except stack)')
             ->addArgument('permissions', InputArgument::IS_ARRAY + InputArgument::REQUIRED, 'Permission labels')
+            ->addOption('stackId', null, InputOption::VALUE_REQUIRED, 'Stack ID (required for any target type except stack)')
             ->addOption('orgId', null, InputOption::VALUE_REQUIRED, 'Only needed if you have access to multiple organizations')
         ;
         $this->addOauthOptions();

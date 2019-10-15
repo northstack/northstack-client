@@ -5,7 +5,6 @@ namespace NorthStack\NorthStackClient\Command\Stack\Permissions;
 
 
 use GuzzleHttp\Exception\ClientException;
-use NorthStack\NorthStackClient\Command\Stack\AbstractPermissionsCmd;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 

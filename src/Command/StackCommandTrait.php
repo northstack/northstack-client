@@ -37,8 +37,7 @@ trait StackCommandTrait
         );
 
         $data = json_decode($result->getBody()->getContents());
-
-        if ($data->{'@count'} === 1) {
+        if ($data->{"@count"} === 1) {
             return $data->data[0]->id;
         }
 
@@ -55,7 +54,7 @@ trait StackCommandTrait
 
         $data = json_decode($result->getBody()->getContents());
 
-        if ($data->{'@count'} === 1) {
+        if ($data->{"@count"} === 1) {
             return $data->data[0]->id;
         }
 
@@ -72,7 +71,7 @@ trait StackCommandTrait
 
         $data = json_decode($result->getBody()->getContents());
 
-        if ($data->{'@count'} === 1) {
+        if ($data->{"@count"} === 1) {
             return $data->data[0]->id;
         }
 
@@ -92,7 +91,7 @@ trait StackCommandTrait
 
         $data = json_decode($result->getBody()->getContents());
 
-        if ($data->{'@count'} === 1) {
+        if ($data->{"@count"} === 1) {
             return $data->data[0]->id;
         }
 
