@@ -31,7 +31,7 @@
         "giggsey/libphonenumber-for-php": "^8.9",
         "docker-php/docker-php": "^2.0",
         "alchemy/zippy": "dev-master",
-        "equip/data": "^2.4",
+        "pagely/equip-data": "^2.5",
         "symfony/console": "^4.3",
         "jane-php/open-api-runtime": "4.2.*"
     },
