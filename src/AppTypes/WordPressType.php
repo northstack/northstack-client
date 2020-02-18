@@ -2,46 +2,14 @@
 
 namespace NorthStack\NorthStackClient\AppTypes;
 
+use NorthStack\NorthStackClient\UserInput\BasicInput;
+use NorthStack\NorthStackClient\UserInput\ChoiceInput;
+use NorthStack\NorthStackClient\UserInput\PasswordInput;
+use NorthStack\NorthStackClient\UserInput\BoolInput;
+
 
 class WordPressType extends BaseType
 {
-    protected static $args = [
-        'wpTitle' => [
-            'prompt' => 'Enter the title of the site:',
-            'default' => '$appName',
-        ],
-        'wpAdminUser' => [
-            'prompt' => 'Enter the WP admin username:',
-            'default' => '$accountUsername',
-        ],
-        'wpAdminPass' => [
-            'prompt' => 'Enter the WP admin password:',
-            'default' => 'randomly generated',
-            'isRandom' => true,
-            'randomLen' => 16,
-            'passwordInput' => true
-        ],
-        'wpAdminEmail' => [
-            'prompt' => 'Enter the WP admin email address:',
-            'default' => '$accountEmail',
-        ],
-        'wpIsMultisite' => [
-            'prompt' => 'Is this a multi-site WP app?',
-            'type' => 'bool',
-            'default' => false
-        ],
-        'wpMultisiteSubdomains' => [
-            'prompt' => 'Multi-site mode: ',
-            'choices' => ['subdomain', 'subfolder'],
-            'depends' => 'wpIsMultisite',
-            'default' => 'subdomain'
-        ],
-        'frameworkVersion' => [
-            'prompt' => 'WordPress version: ',
-            'default' => '5.1'
-        ]
-    ];
-
     public function setArgsFromExistingApp($sapps)
     {
         $this->sapps = $sapps;
@@ -69,6 +37,48 @@ class WordPressType extends BaseType
         }
 
         return $config;
+    }
+
+    public static function getArgs()
+    {
+        return [
+            new BasicInput(
+                'wpTitle',
+                'The title for this WordPress app',
+                '$appName'
+            ),
+            new BasicInput(
+                'wpAdminUser',
+                'The WordPress admin username',
+                '$accountUsername'
+            ),
+            new PasswordInput(
+                'wpAdminPass',
+                'The WordPress admin password',
+                16
+            ),
+            new BasicInput(
+                'wpAdminEmail',
+                'The WordPress admin email address',
+                '$accountEmail'
+            ),
+            new BoolInput(
+                'wpIsMultisite',
+                'Is this a multi-site WordPress app?',
+                false
+            ),
+            (new ChoiceInput(
+                'wpMultisiteSubdomains',
+                'The WordPress multi-site mode',
+                'subdomain'
+            ))->setChoices(['subdomain', 'subfolder']),
+            new BasicInput(
+                'frameworkVersion',
+                'The WordPress version',
+                '5.1'
+            )
+        ];
+
     }
 
 }

@@ -36,67 +36,41 @@ abstract class BaseType
         $this->config = $userConfig;
     }
 
-    public static function getArgs()
+    abstract public static function getArgs();
+
+    public static function getInputOptions()
     {
-        return static::$args;
+        foreach (static::getArgs() as $arg)
+        {
+            if ($arg->getName() === 'frameworkVersion')
+            {
+                continue;
+            }
+            yield $arg->asInputOption();
+        }
     }
 
     public function promptForArgs()
     {
         $options = $this->input->getOptions();
+        foreach (static::getArgs() as $arg) {
+            $name = $arg->getName();
 
-        foreach (static::$args as $name => $arg) {
+            $input = $this->input->getOption($name);
             // skip the question if the user already set the value in an option
-            if (null !== $options[$name]) {
-                $this->config[$name] = $options[$name];
+            if (null !== $input && $input !== $arg->getDefault())
+            {
+                $this->config[$name] = $input;
                 continue;
             }
 
-            if (isset($arg['depends'])) {
-                $depends = $arg['depends'];
-                if (!$this->config[$depends]) {
-                    continue;
-                }
-            }
+            $arg->setDefault(
+                $this->defaultValue(
+                    $arg->getDefault()
+                )
+            );
 
-            $prompt = $arg['prompt'];
-            $default = $this->defaultValue($arg['default']);
-            if (isset($default)) {
-                $_default = ($default === false) ? 'false' : (string)$default;
-                $prompt .= " (Default: {$_default})";
-            }
-
-            $prompt .= " ";
-
-            $question = null;
-            if (isset($arg['type']) && $arg['type'] === 'bool') {
-                $question = new ConfirmationQuestion(
-                    $prompt,
-                    $default
-                );
-            } elseif (isset($arg['choices'])) {
-                $question = new ChoiceQuestion(
-                    $prompt,
-                    $arg['choices'],
-                    $default
-                );
-            } else {
-                $question = new Question($prompt, $default);
-            }
-
-            if (array_key_exists('passwordInput', $arg) && ($arg['passwordInput'] === true)) {
-                $question->setHidden(true);
-            }
-
-            $answer = $this->askQuestion($question);
-
-            if (
-                array_key_exists('isRandom', $arg) &&
-                ($arg['isRandom'] === true) &&
-                ($answer === $arg['default'])
-            ) {
-                $answer = bin2hex(random_bytes($arg['randomLen']));
-            }
+            $answer = $this->askQuestion($arg->asQuestion());
 
             $this->config[$name] = $answer;
         }

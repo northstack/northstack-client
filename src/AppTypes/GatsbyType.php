@@ -2,12 +2,14 @@
 
 namespace NorthStack\NorthStackClient\AppTypes;
 
+use NorthStack\NorthStackClient\UserInput\BasicInput;
+
 class GatsbyType extends BaseType
 {
-    protected static $args = [
-        'frameworkVersion' => [
-            'prompt' => 'Gatsby version: ',
-            'default' => '2.5.0'
-        ]
-    ];
+    public static function getArgs()
+    {
+        return [
+            new BasicInput('frameworkVersion', 'Gatsby version', '2.5.0')
+        ];
+    }
 }
