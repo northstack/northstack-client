@@ -59,7 +59,7 @@ class ReleaseAndDeployCommand extends AbstractDeployCmd
             'config' => $configs['config'],
         ];
         // Since gateway configs are optional...
-        if (isset($configs['gateway'])) {
+        if (!empty($configs['gateway'])) {
             $update['configGatewayCust'] = $configs['gateway'];
         }
 

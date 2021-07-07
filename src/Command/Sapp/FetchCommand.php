@@ -36,7 +36,7 @@ class FetchCommand extends Command
         $this
             ->setDescription('Fetch info about an App and download configs for local development')
             ->addArgument('appId', InputArgument::REQUIRED, 'Parent App ID')
-            ->addOption('appSlug', null, InputOption::VALUE_REQUIRED, 'Name to use for the app\'s local directory and local reference')
+            ->addOption('appSlug', null, InputOption::VALUE_OPTIONAL, 'Name to use for the app\'s local directory and local reference')
         ;
         $this->addOauthOptions();
     }
@@ -51,7 +51,7 @@ class FetchCommand extends Command
         $questionHelper = $this->getHelper('question');
         $appSlug = $input->getOption('appSlug');
         if (!$appSlug) {
-            $appSlug = $this->getLocalAppSlug($input->getArgument('name'));
+            $appSlug = $this->getLocalAppSlug($appSlug);
             $output->writeln('No app slug set. The local app\'s slug will be: ' . $appSlug);
         } else {
             $this->getLocalAppSlug($appSlug);
@@ -61,7 +61,7 @@ class FetchCommand extends Command
 
         $output->writeln('Fetching app...');
         try {
-        $r = $this->api->getAppBySappId($this->token->token, $input->getArgument('appId'));
+            $r = $this->api->getAppBySappId($this->token->token, $input->getArgument('appId'));
             $app = json_decode($r->getBody()->getContents());
         } catch (RequestException $e) {
             if (403 === $e->getCode() || 404 === $e->getCode()) {

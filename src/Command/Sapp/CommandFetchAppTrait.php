@@ -150,6 +150,9 @@ trait CommandFetchAppTrait
     {
         foreach ($this->app->sapps as $sapp) {
             foreach (self::$envFiles as $sappKey => $filename) {
+                if (!$sapp->{$sappKey}) {
+                    continue;
+                }
                 $this->writeConfigFile(
                     "config/{$sapp->environment}/{$filename}",
                     $sapp->{$sappKey}

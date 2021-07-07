@@ -69,7 +69,7 @@ class SappClient extends BaseApiClient
     )
     {
         return $this->guzzle($this->getBearerTokenMiddleware($accessToken))
-            ->get("sapps/app/{$sappId}");
+            ->get("sapps/apps/{$sappId}");
     }
 
     public function update(string $accessToken, string $sappId, $data)
